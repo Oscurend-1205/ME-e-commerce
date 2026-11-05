@@ -2,6 +2,8 @@
 
 Nov 5, 2026 · @Auril Aditya
 
+**Dokumen acuan resmi:** [`Tugas_UTS_Informatika.md`](Tugas_UTS_Informatika.md) — Tugas Pengganti UTS mata kuliah PAPB (2010MWP0507) dan Sistem Terdistribusi, S1 Informatika, ITSK RS dr. Soepraoen Kesdam V/BRW. PRD ini diselaraskan dengan seluruh aturan pada dokumen tersebut.
+
 ## 1. Ringkasan dan Tujuan
 
 Produk ini adalah aplikasi toko online pakaian dan aksesori dengan alur katalog, keranjang, dan checkout, dibangun dari REST API Laravel (MySQL) dan aplikasi Flutter. Ini menjadi Tugas Pengganti UTS berkelompok untuk mata kuliah PAPB (2010MWP0507) dan Sistem Terdistribusi, dengan tenggat sebelum Pertemuan 8 melalui LMS.
@@ -16,13 +18,13 @@ Produk ini adalah aplikasi toko online pakaian dan aksesori dengan alur katalog,
 - Lima jenis galat tampil berbeda di Flutter, dan empat keadaan layar dibedakan eksplisit.
 - Setiap anggota dapat menjelaskan seluruh kode pada uji petik Pertemuan 8.
 
-**Target nilai:** skor 4 pada Kriteria 1 sampai 8 (jalur A, backend sendiri). Bobot terbesar untuk PAPB ada di Kriteria 7 (20) dan Kriteria 3 (12), sedangkan untuk Sistem Terdistribusi ada di Kriteria 5 (20) dan Kriteria 4 (18).
+**Target nilai:** skor 4 pada Kriteria 1 sampai 8 dengan **Jalur A (backend sendiri)**. Pembobotan kedua mata kuliah berbeda meski dinilai dari pekerjaan yang sama: PAPB menekankan Kriteria 7 (20) dan Kriteria 3 (12), sedangkan Sistem Terdistribusi menekankan Kriteria 5 (20) dan Kriteria 4 (18). Rincian bobot ada pada Bagian 13.
 
 ## 2. Ruang Lingkup dan Batasan
 
-Tiga batasan dari lembar tugas berlaku untuk semua kelompok dan tidak perlu dilampaui.
+Tiga batasan sistem dari lembar tugas berlaku untuk semua kelompok. Batasan ini **boleh dilampaui**, tetapi materi yang menjadi dasarnya belum diberikan, sehingga melampauinya tidak menambah nilai dan berisiko saat uji petik. Kolom kanan di bawah ini adalah hal yang **belum disarankan**, bukan larangan mutlak.
 
-| Area | Termasuk (in scope) | Di luar lingkup (out of scope) |
+| Area | Yang diwajibkan tugas | Belum disarankan (boleh dilampaui) |
 | --- | --- | --- |
 | Pembayaran | Simulasi lewat perubahan status pesanan; metode tunai di tempat dan transfer manual | Midtrans, Xendit, Stripe |
 | Pengantaran | Tabel kurir/wilayah dan tarif di MySQL; ongkir dihitung server | RajaOngkir, JNE, SiCepat |
@@ -33,6 +35,15 @@ Tiga batasan dari lembar tugas berlaku untuk semua kelompok dan tidak perlu dila
 **Aturan arsitektur:** MySQL menyimpan data. Laravel melakukan validasi, hitung subtotal dan ongkir, kurangi stok, dan pindah status. Flutter menampilkan, mengirim permintaan, dan mengelola keadaan layar. Menghitung harga, total, ongkir, atau ketersediaan di Dart membuat Kriteria 5 kehilangan nilai.
 
 **Catatan lanjutan:** proyek yang sama dipakai sampai Pertemuan 14, jadi pengiriman token statis diletakkan di satu tempat saja di kelas LayananApi agar mudah diganti login penuh.
+
+### Jalur pengerjaan backend (tugas Bagian 5)
+
+| Jalur | Sumber data aplikasi Flutter | Akibat pada rubrik |
+| --- | --- | --- |
+| A. Backend sendiri | REST API Laravel kelompok sendiri di atas MySQL, dengan skema yang disesuaikan domain | Nilai penuh pada semua kriteria |
+| B. Tiruan di dalam aplikasi | Kelas MockLayananApi di dalam proyek Flutter yang mengembalikan Future.delayed berisi data tetap | Kriteria 4 dan 5 paling tinggi pada tingkat Kurang; Kriteria 2, 3, 6, dan 7 tetap dinilai penuh |
+
+**Kelompok 2 memilih Jalur A.** Jalur B hanya jalur cadangan bila backend mengalami kendala; kelompok pada jalur B tidak dapat memperoleh skor di atas 2 pada Kriteria 4 dan 5.
 
 ## 3. Pengguna dan Alur Utama
 
@@ -78,7 +89,7 @@ Inti pembeda domain ini adalah tabel **varian\_produk**: setiap kombinasi ukuran
 - Ongkos kirim adalah tarif kurir/wilayah yang dipilih, diambil dari tabel kurir oleh server.
 - Produk dihapus hanya bila tidak terpakai pada pesanan aktif; bila terpakai, DELETE membalas 409.
 
-## 5. Kebutuhan Backend Laravel: 14 Endpoint
+## 5. Kebutuhan Backend Laravel: 14 Endpoint Wajib (+1 tambahan)
 
 Semua 14 endpoint wajib ada. Jalur memakai nama dari lembar tugas (/api/produk dan seterusnya) agar seragam; bila diubah, perubahan ditulis di dokumentasi dan dipakai konsisten di Flutter.
 
@@ -99,7 +110,9 @@ Semua 14 endpoint wajib ada. Jalur memakai nama dari lembar tugas (/api/produk d
 | GET /api/pesanan/{id} | Rincian pesanan | 200, 404 | Harga saat pembelian dari detail\_pesanan |
 | PATCH /api/pesanan/{id}/status | Ubah status | 200, 404, 409, 422 | Hanya perpindahan sah; sisanya 409 |
 
-**Catatan penting:** lembar tugas menyebut POST /api/keranjang menerima produk\_id dan jumlah. Karena stok disimpan per varian, kelompok menambahkan varian\_id pada body. Penambahan ini harus ditulis di dokumentasi API dan README.
+**Catatan penting:** lembar tugas menyebut POST /api/keranjang menerima produk_id dan jumlah. Karena stok disimpan per varian, kelompok menambahkan varian_id pada body. Penambahan ini harus ditulis di dokumentasi API dan README.
+
+**Catatan tambahan:** selain 14 endpoint wajib di atas, kelompok menambahkan `GET /api/metode-pembayaran` untuk mengisi pemilih metode bayar simulasi di halaman checkout. Endpoint tambahan ini wajib ikut didokumentasikan, dipanggil dari Postman, dan dipakai konsisten di Flutter, agar tidak terhitung sebagai endpoint kode yang tidak terdokumentasi.
 
 **Perilaku backend:**
 
@@ -285,7 +298,7 @@ Setiap anggota memiliki minimal 5 commit atas namanya dengan pesan bermakna; jan
 
 **2. Dokumentasi endpoint API (PDF, 6 sampai 10 halaman)**
 
-Nama berkas: PAPB-UTS\_Kelompok02\_Pakaian.pdf. Isi tujuh bagian:
+Nama berkas: PAPB-UTS\_Kelompok-02\_Pakaian.pdf (pola tugas: PAPB-UTS_Kelompok-NN_Domain.pdf). Isi tujuh bagian:
 
 1. Diagram relasi antartabel termasuk varian\_produk.
 2. Tabel seluruh endpoint: metode, jalur, parameter, kode status.
@@ -358,7 +371,9 @@ Pembagian tugas hanya menentukan siapa yang mengerjakan lebih dulu. Pada uji pet
 - [ ] Daftar kosong tampil sebagai keadaan kosong, bukan galat
 - [ ] Tidak ada pemanggilan jaringan di build, tidak ada print sisa dan kode mati
 - [ ] .env asli tidak terunggah; hanya .env.example
+- [ ] Koleksi Postman diekspor dan dilampirkan (nilai tambah Kriteria 4)
 - [ ] README sembilan butir, video maksimal 5 menit, PDF bernama sesuai pola
+- [ ] Tautan video dibuka dari peramban lain untuk memastikan izinnya benar
 - [ ] Tiap anggota minimal 5 commit sendiri, dan sudah membaca kode anggota lain
 
 **Risiko dan penanganan**
@@ -374,3 +389,53 @@ Pembagian tugas hanya menentukan siapa yang mengerjakan lebih dulu. Pada uji pet
 | Backend bermasalah mendekati tenggat | Kriteria 4 dan 5 mentok di tingkat Kurang | Jalur B (MockLayananApi) hanya cadangan; prioritaskan backend sejak Tahap 1 |
 
 **Persiapan uji petik:** setiap anggota harus bisa menunjuk baris tempat stok varian dikurangi, menjelaskan apa yang terjadi bila proses mati tepat setelahnya (rollback transaksi), menjelaskan perbedaan 404, 409, dan 422 dengan contoh dari sistem sendiri, serta mengerjakan salah satu tugas modifikasi lima menit (misalnya menambah keterangan pada kartu produk, atau endpoint jumlah produk per kategori) tanpa bantuan.
+
+## 13. Rubrik dan Pembobotan Resmi
+
+Satu pekerjaan dinilai dengan sembilan kriteria yang sama, tetapi dua pembobotan berbeda, sehingga menghasilkan nilai PAPB dan nilai Sistem Terdistribusi yang terpisah. Kriteria 1 sampai 8 dinilai per kelompok, sedangkan Kriteria 9 dinilai per mahasiswa pada uji petik Pertemuan 8.
+
+```
+nilai kriteria = (skor / 4) x bobot kriteria
+nilai akhir    = jumlah nilai Kriteria 1 sampai 8 (kelompok)
+               + nilai Kriteria 9 (individu)
+```
+
+Skor 0 diberikan bila bagian yang dinilai tidak ada sama sekali. Tingkat Kurang (skor 1) berarti bagian itu ada tetapi belum bekerja sebagaimana mestinya.
+
+| Kriteria | Blok | PAPB | ST | Dinilai per |
+| --- | --- | --- | --- | --- |
+| 1. Penyesuaian domain bisnis dan skema basis data | A. Fungsionalitas dan domain | 8 | 10 | Kelompok |
+| 2. Katalog dan CRUD produk | A. Fungsionalitas dan domain | 10 | 5 | Kelompok |
+| 3. Keranjang dan checkout | A. Fungsionalitas dan domain | 12 | 8 | Kelompok |
+| 4. Kedisiplinan kontrak API dan dokumentasinya | B. Integrasi sistem terdistribusi | 8 | 18 | Kelompok |
+| 5. Konsistensi data dan transaksi | B. Integrasi sistem terdistribusi | 8 | 20 | Kelompok |
+| 6. Penanganan galat dan ketahanan jaringan | B. Integrasi sistem terdistribusi | 12 | 12 | Kelompok |
+| 7. Pengelolaan keadaan dan kualitas kode Flutter | C. Kualitas kode dan keadaan | 20 | 7 | Kelompok |
+| 8. Repositori, README, video, dan dokumentasi | D. Keluaran | 7 | 5 | Kelompok |
+| 9. Kesiapan uji petik | E. Pertanggungjawaban individu | 15 | 15 | Mahasiswa |
+| **Jumlah** |  | **100** | **100** |  |
+
+**Implikasi prioritas:** Kriteria 4 dan 5 menyumbang 38 dari 100 nilai Sistem Terdistribusi, sehingga transaksi atomik, kunci idempoten, penyalinan harga ke detail pesanan, dan keseragaman pembungkus respons adalah pekerjaan bernilai tertinggi di sana. Kriteria 7 menyumbang 20 dari 100 nilai PAPB, sehingga pemisahan empat keadaan layar dan pemusatan seluruh pemanggilan API di satu kelas layanan tidak boleh dikorbankan. Batas jalur tetap berlaku di atas rubrik ini: kelompok jalur B tidak dapat memperoleh skor di atas 2 pada Kriteria 4 dan 5.
+
+## 14. Aturan Penggunaan AI, Kejujuran Akademik, dan Kisi-kisi Uji Petik
+
+**Penggunaan AI.** Alat bantu AI boleh dipakai sebagai asisten pemrograman, dengan syarat:
+
+1. Bagian kode yang dibantu AI dituliskan pada README, cukup pada tingkat berkas atau fungsi.
+2. Setiap mahasiswa wajib dapat menjelaskan setiap baris kode yang dikumpulkan kelompoknya.
+3. Anggota yang tidak dapat menjelaskan kode yang di-commit-nya sendiri memperoleh nilai nol pada Kriteria 9 dan menurunkan nilai kelompok pada Kriteria 7 satu tingkat.
+4. Kode yang tidak dipahami siapa pun di dalam kelompok dinilai sama dengan tidak mengumpulkan bagian tersebut.
+
+Pemakaian pustaka publik dari pub.dev dan Packagist wajar dan tidak mengurangi nilai, sepanjang disebutkan di README dan alasan pemilihannya dapat dijelaskan.
+
+**Kejujuran akademik**
+
+| Perbuatan | Akibat |
+| --- | --- |
+| Menyalin repositori kelompok lain, seluruhnya atau sebagian besar | Nilai nol bagi kedua kelompok, kecuali terbukti satu pihak tidak mengetahuinya |
+| Memakai templat atau proyek jadi dari internet tanpa menyebutkan | Nilai nol pada Kriteria 1, 2, 3, dan 7 |
+| Memakai templat, tutorial, atau pustaka pihak ketiga dengan penyebutan di README | Diperbolehkan, dan tidak mengurangi nilai |
+| Memakai video demo kelompok lain atau video yang tidak merekam aplikasi sendiri | Nilai nol pada seluruh tugas |
+| Mencantumkan nama anggota yang tidak mengerjakan apa pun | Nilai nol pada Kriteria 9 bagi anggota tersebut |
+
+**Kisi-kisi uji petik.** Bank pertanyaan diumumkan sejak awal pada tugas Bagian 10 dan terbagi empat kategori: A keadaan layar dan kode Flutter, B kontrak API, C konsistensi dan transaksi, D domain dan rancangan. Setiap anggota menerima minimal dua pertanyaan, dan minimal satu di antaranya berasal dari kategori yang bukan bagian pekerjaannya. Selain tanya jawab, ada enam tugas modifikasi lima menit (menambah keterangan pada kartu produk, menyaring produk tersedia, menambah validasi checkout, membalik urutan riwayat pesanan, menambah endpoint jumlah produk per kategori, atau menambah tombol coba lagi). Teks lengkap bank pertanyaan dan tugas modifikasi ada pada [`Tugas_UTS_Informatika.md`](Tugas_UTS_Informatika.md) Bagian 10.
