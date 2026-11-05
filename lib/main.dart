@@ -7,16 +7,16 @@ import 'theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const AplikasiFashionStore());
+  runApp(const AplikasiME());
 }
 
-class AplikasiFashionStore extends StatelessWidget {
-  const AplikasiFashionStore({super.key});
+class AplikasiME extends StatelessWidget {
+  const AplikasiME({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Fashion Store',
+      title: 'ME',
       theme: TemaAplikasi.tema,
       debugShowCheckedModeBanner: false,
       home: const HalamanUtamaNavigasi(),

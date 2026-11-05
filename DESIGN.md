@@ -2,7 +2,7 @@
 
 ## 1. Informasi Proyek
 
--   **Nama proyek:** Fashion Store
+-   **Nama proyek:** ME
 -   **Jenis aplikasi:** Website e-commerce pakaian dan aksesori
 -   **Referensi desain:** [ZARA Indonesia](https://www.zara.com/id/)
 -   **Fokus desain:** Pengalaman belanja fashion yang modern, minimalis,

@@ -131,7 +131,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 onSubmitted: (_) => _kirimPencarian(),
               )
             : const Text(
-                'FASHION STORE',
+                'ME',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   letterSpacing: 2.0,
