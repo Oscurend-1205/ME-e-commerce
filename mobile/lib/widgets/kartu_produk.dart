@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/produk.dart';
 import '../theme.dart';
 import 'format_rupiah.dart';
+import 'foto_dummy.dart';
 
 class KartuProduk extends StatelessWidget {
   final Produk produk;
@@ -24,6 +25,8 @@ class KartuProduk extends StatelessWidget {
         ? produk.varian!.map((v) => v.ukuran).toSet().take(3).join(' ')
         : 'All Size';
 
+    final fotoUrl = FotoDummy.untukProduk(produk);
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -35,32 +38,38 @@ class KartuProduk extends StatelessWidget {
               children: [
                 Container(
                   width: double.infinity,
+                  height: double.infinity,
                   decoration: BoxDecoration(
                     color: TemaAplikasi.surfaceContainer,
                     borderRadius: BorderRadius.circular(2),
                   ),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          produk.kategori.toLowerCase() == 'aksesori'
-                              ? Icons.watch_outlined
-                              : Icons.checkroom_outlined,
-                          size: 40,
-                          color: TemaAplikasi.mutedGray,
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          produk.merek.toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 9,
-                            letterSpacing: 2.0,
-                            fontWeight: FontWeight.w600,
+                  clipBehavior: Clip.antiAlias,
+                  child: FotoDummy.bangunGambar(
+                    url: fotoUrl,
+                    fit: BoxFit.cover,
+                    fallbackWidget: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            produk.kategori.toLowerCase() == 'aksesori'
+                                ? Icons.watch_outlined
+                                : Icons.checkroom_outlined,
+                            size: 36,
                             color: TemaAplikasi.mutedGray,
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 6),
+                          Text(
+                            produk.merek.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 9,
+                              letterSpacing: 2.0,
+                              fontWeight: FontWeight.w600,
+                              color: TemaAplikasi.mutedGray,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -88,7 +97,18 @@ class KartuProduk extends StatelessWidget {
                 if (_habis)
                   Positioned.fill(
                     child: Container(
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: Colors.white.withValues(alpha: 0.65),
+                      child: const Center(
+                        child: Text(
+                          'STOK HABIS',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.5,
+                            color: TemaAplikasi.primary,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
               ],
@@ -100,11 +120,12 @@ class KartuProduk extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Titik Warna Produk Sesuai Varian
               Row(
                 children: [
                   Container(
-                    width: 6,
-                    height: 6,
+                    width: 8,
+                    height: 8,
                     decoration: const BoxDecoration(
                       color: TemaAplikasi.primary,
                       shape: BoxShape.circle,
@@ -112,10 +133,10 @@ class KartuProduk extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Container(
-                    width: 6,
-                    height: 6,
+                    width: 8,
+                    height: 8,
                     decoration: const BoxDecoration(
-                      color: TemaAplikasi.borderGray,
+                      color: Color(0xFFC8C6C5),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -126,8 +147,8 @@ class KartuProduk extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 10,
                   letterSpacing: 1.0,
-                  color: TemaAplikasi.secondary,
                   fontWeight: FontWeight.w500,
+                  color: TemaAplikasi.secondary,
                 ),
               ),
             ],
@@ -139,9 +160,8 @@ class KartuProduk extends StatelessWidget {
             produk.nama,
             style: const TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w500,
               color: TemaAplikasi.primary,
-              height: 1.25,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -153,7 +173,7 @@ class KartuProduk extends StatelessWidget {
             formatRupiah(produk.harga),
             style: const TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: TemaAplikasi.primary,
             ),
           ),

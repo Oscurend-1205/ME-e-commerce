@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../enums.dart';
-import '../models/keranjang.dart';
 import '../models/produk.dart';
 import '../services/layanan_api.dart';
 import '../theme.dart';
+import '../widgets/foto_dummy.dart';
 import '../widgets/kartu_produk.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_keranjang.dart';
@@ -30,11 +30,31 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
 
   // Story highlight pills (sesuai cek-beranda.html)
   final List<Map<String, dynamic>> _stories = [
-    {'label': 'Semua', 'icon': Icons.auto_awesome_mosaic_outlined, 'kat': null},
-    {'label': 'Pakaian', 'icon': Icons.checkroom_outlined, 'kat': 'Pakaian'},
-    {'label': 'Aksesori', 'icon': Icons.watch_outlined, 'kat': 'Aksesori'},
-    {'label': 'Atasan', 'icon': Icons.dry_cleaning_outlined, 'kat': 'Pakaian'},
-    {'label': 'Tas & Kulit', 'icon': Icons.shopping_bag_outlined, 'kat': 'Aksesori'},
+    {
+      'label': 'Baru Tiba',
+      'foto': FotoDummy.stories[0],
+      'kat': null,
+    },
+    {
+      'label': 'Wanita',
+      'foto': FotoDummy.stories[1],
+      'kat': 'Pakaian',
+    },
+    {
+      'label': 'Pria',
+      'foto': FotoDummy.stories[2],
+      'kat': 'Pakaian',
+    },
+    {
+      'label': 'Tas & Dompet',
+      'foto': FotoDummy.stories[3],
+      'kat': 'Aksesori',
+    },
+    {
+      'label': 'Aksesori',
+      'foto': FotoDummy.stories[4],
+      'kat': 'Aksesori',
+    },
   ];
 
   @override
@@ -89,14 +109,13 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
 
   Future<void> _muatJumlahKeranjang() async {
     final respon = await LayananApi.ambilKeranjang();
-    if (!mounted) return;
-
-    if (respon.berhasil && respon.data != null) {
-      final dataKeranjang = DataKeranjang.fromJson(respon.data as Map<String, dynamic>);
-      int totalItem = 0;
-      for (final item in dataKeranjang.items) {
-        totalItem += item.jumlah;
-      }
+    if (respon.berhasil && respon.data != null && mounted) {
+      final Map<String, dynamic> data = respon.data as Map<String, dynamic>;
+      final List items = data['items'] is List ? data['items'] as List : [];
+      final totalItem = items.fold<int>(0, (sum, item) {
+        final j = item['jumlah'];
+        return sum + (j is int ? j : int.tryParse(j.toString()) ?? 1);
+      });
       setState(() {
         _jumlahItemKeranjang = totalItem;
       });
@@ -126,11 +145,11 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
               // 1. Story Highlight Circles Row (cek-beranda.html)
               _bangunStoryHighlights(),
 
-              // 2. Full-bleed Hero Editorial Banner (cek-beranda.html)
+              // 2. Full-bleed Hero Editorial Banner dengan Foto "ME MINIMALISM"
               if (_kategoriTerpilih == null && !_tampilkanPencarian)
                 _bangunHeroBanner(),
 
-              // 3. Kategori Pilihan (Curated Categories 2x2 Grid)
+              // 3. Kategori Pilihan (Curated Categories 2x2 Grid dengan Foto)
               if (_kategoriTerpilih == null && !_tampilkanPencarian)
                 _bangunKategoriPilihan(),
 
@@ -183,7 +202,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 ),
               ),
 
-              // 5. Grid Produk / Status Keadaan
+              // 5. Grid Produk / Status Keadaan (Koleksi Terbaru)
               _bangunKontenProduk(),
               const SizedBox(height: 40),
             ],
@@ -329,15 +348,18 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                           width: isSelected ? 2 : 1,
                         ),
                       ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isSelected ? TemaAplikasi.primary : TemaAplikasi.surfaceContainer,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          story['icon'] as IconData,
-                          size: 24,
-                          color: isSelected ? TemaAplikasi.onPrimary : TemaAplikasi.primary,
+                      child: ClipOval(
+                        child: FotoDummy.bangunGambar(
+                          url: story['foto'] as String,
+                          fit: BoxFit.cover,
+                          fallbackWidget: Container(
+                            color: isSelected ? TemaAplikasi.primary : TemaAplikasi.surfaceContainer,
+                            child: Icon(
+                              Icons.checkroom_outlined,
+                              size: 24,
+                              color: isSelected ? TemaAplikasi.onPrimary : TemaAplikasi.primary,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -364,32 +386,39 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   Widget _bangunHeroBanner() {
     return Container(
       width: double.infinity,
-      height: 320,
+      height: 380,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: TemaAplikasi.primary,
         borderRadius: BorderRadius.circular(2),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF2B2B2B),
-            Color(0xFF111111),
-          ],
-        ),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Stack(
+        fit: StackFit.expand,
         children: [
-          // Pattern Aksen Tekstur
-          Positioned(
-            right: -20,
-            bottom: -20,
-            child: Icon(
-              Icons.checkroom_outlined,
-              size: 220,
-              color: Colors.white.withValues(alpha: 0.05),
+          // Foto Dummy Editorial ME MINIMALISM
+          FotoDummy.bangunGambar(
+            url: FotoDummy.heroBanner,
+            fit: BoxFit.cover,
+          ),
+
+          // Gradient Monokrom Mewah Sesuai cek-beranda.html
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Color(0x66000000),
+                  Color(0xEE000000),
+                ],
+                stops: [0.3, 0.6, 1.0],
+              ),
             ),
           ),
+
+          // Teks Editorial ME MINIMALISM
           Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -405,12 +434,12 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 const Text(
                   'ME MINIMALISM',
                   style: TextStyle(
                     color: TemaAplikasi.onPrimary,
-                    fontSize: 28,
+                    fontSize: 26,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.0,
                   ),
@@ -419,7 +448,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 const Text(
                   'Eksplorasi siluet bersih, material katun combed & linen, serta palet monokrom abadi.',
                   style: TextStyle(
-                    color: Color(0xFFDDDDDD),
+                    color: Color(0xFFEEEEEE),
                     fontSize: 12,
                     height: 1.4,
                   ),
@@ -487,19 +516,19 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
           ),
           const SizedBox(height: 12),
 
-          // 2x2 Grid Kategori Pilihan (cek-beranda.html)
+          // 2x2 Grid Kategori Pilihan dengan Foto Editorial (cek-beranda.html)
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            childAspectRatio: 1.4,
+            childAspectRatio: 0.85,
             children: [
-              _bangunKartuKategoriMini('01 // ESENSIAL', 'Atasan & Kaos', Icons.checkroom, 'Pakaian'),
-              _bangunKartuKategoriMini('02 // TAILORING', 'Kemeja & Celana', Icons.dry_cleaning, 'Pakaian'),
-              _bangunKartuKategoriMini('03 // SUITING', 'Outerwear & Jaket', Icons.layers, 'Pakaian'),
-              _bangunKartuKategoriMini('04 // AKSESORI', 'Tas & Dompet', Icons.watch, 'Aksesori'),
+              _bangunKartuKategoriFoto('01 // ESENSIAL', 'Atasan & Kemeja', FotoDummy.katAtasan, 'Pakaian'),
+              _bangunKartuKategoriFoto('02 // TAILORING', 'Bawahan & Celana', FotoDummy.katBawahan, 'Pakaian'),
+              _bangunKartuKategoriFoto('03 // SUITING', 'Outerwear & Jas', FotoDummy.katOuterwear, 'Pakaian'),
+              _bangunKartuKategoriFoto('04 // AKSESORI', 'Kulit & Tas', FotoDummy.katAksesori, 'Aksesori'),
             ],
           ),
         ],
@@ -507,41 +536,68 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     );
   }
 
-  Widget _bangunKartuKategoriMini(String kode, String judul, IconData ikon, String targetKat) {
+  Widget _bangunKartuKategoriFoto(String kode, String judul, String urlFoto, String targetKat) {
     return InkWell(
       onTap: () => _pilihKategori(targetKat),
       child: Container(
-        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: TemaAplikasi.surfaceWhite,
+          color: TemaAplikasi.surfaceContainer,
           borderRadius: BorderRadius.circular(2),
           border: Border.all(color: TemaAplikasi.borderGray),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  kode,
-                  style: const TextStyle(
-                    fontSize: 8,
-                    letterSpacing: 1.5,
-                    fontWeight: FontWeight.w600,
-                    color: TemaAplikasi.secondary,
-                  ),
-                ),
-                Icon(ikon, size: 16, color: TemaAplikasi.mutedGray),
-              ],
+            // Foto Kategori Editorial
+            FotoDummy.bangunGambar(
+              url: urlFoto,
+              fit: BoxFit.cover,
             ),
-            Text(
-              judul,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: TemaAplikasi.primary,
+
+            // Gradient Overlay
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Color(0x33000000),
+                    Color(0xD9000000),
+                  ],
+                  stops: [0.3, 0.6, 1.0],
+                ),
+              ),
+            ),
+
+            // Teks Kategori
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    kode,
+                    style: const TextStyle(
+                      fontSize: 9,
+                      letterSpacing: 1.5,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFFE5E2E1),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    judul,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: TemaAplikasi.onPrimary,
+                      height: 1.2,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -554,62 +610,60 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     switch (_keadaan) {
       case KeadaanMuat.memuat:
         return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 60),
+          padding: EdgeInsets.symmetric(vertical: 40),
           child: WidgetMemuat(),
         );
+
       case KeadaanMuat.kosong:
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: WidgetKosong(
-            ikon: Icons.inventory_2_outlined,
+            ikon: Icons.search_off_outlined,
             pesan: _cariController.text.isNotEmpty
                 ? 'Tidak ada produk yang cocok dengan "${_cariController.text}".'
                 : 'Belum ada produk untuk kategori ini.',
             saranAksi: 'Tampilkan Semua Produk',
             onAksi: () {
-              setState(() {
-                _kategoriTerpilih = null;
-                _cariController.clear();
-                _tampilkanPencarian = false;
-              });
-              _muatProduk();
+              _cariController.clear();
+              _pilihKategori(null);
             },
           ),
         );
+
       case KeadaanMuat.galat:
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40),
+          padding: const EdgeInsets.symmetric(vertical: 30),
           child: WidgetGalat(
             jenisGalat: _jenisGalat,
             pesan: _pesanGalat,
             onCobaLagi: _muatProduk,
           ),
         );
+
       case KeadaanMuat.berhasil:
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
+            itemCount: _daftarProduk.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 0.60,
               crossAxisSpacing: 12,
               mainAxisSpacing: 20,
+              childAspectRatio: 0.58, // Rasio 3:4 foto + info teks
             ),
-            itemCount: _daftarProduk.length,
             itemBuilder: (context, index) {
               final produk = _daftarProduk[index];
               return KartuProduk(
                 produk: produk,
-                onTap: () async {
-                  await Navigator.push(
+                onTap: () {
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => HalamanRincianProduk(produkId: produk.id),
                     ),
-                  );
-                  _muatData();
+                  ).then((_) => _muatJumlahKeranjang());
                 },
               );
             },

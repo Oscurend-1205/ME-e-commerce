@@ -4,6 +4,7 @@ import '../enums.dart';
 import '../models/produk.dart';
 import '../services/layanan_api.dart';
 import '../theme.dart';
+import '../widgets/foto_dummy.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/pemilih_varian.dart';
 import '../widgets/widget_keadaan.dart';
@@ -224,7 +225,7 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Hero Image 3:4 Aspect Ratio (Editorial ZARA style)
+              // Hero Image 3:4 Aspect Ratio (Editorial ZARA style dengan Foto Dummy)
               AspectRatio(
                 aspectRatio: 3 / 4,
                 child: Container(
@@ -234,30 +235,36 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                     borderRadius: BorderRadius.circular(2),
                     border: Border.all(color: TemaAplikasi.borderGray),
                   ),
+                  clipBehavior: Clip.antiAlias,
                   child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              produk.kategori.toLowerCase() == 'aksesori'
-                                  ? Icons.watch_outlined
-                                  : Icons.checkroom_outlined,
-                              size: 80,
-                              color: TemaAplikasi.mutedGray,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              produk.merek.toUpperCase(),
-                              style: const TextStyle(
-                                color: TemaAplikasi.secondary,
-                                letterSpacing: 3.0,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                      FotoDummy.bangunGambar(
+                        url: FotoDummy.untukProduk(produk),
+                        fit: BoxFit.cover,
+                        fallbackWidget: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                produk.kategori.toLowerCase() == 'aksesori'
+                                    ? Icons.watch_outlined
+                                    : Icons.checkroom_outlined,
+                                size: 80,
+                                color: TemaAplikasi.mutedGray,
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 12),
+                              Text(
+                                produk.merek.toUpperCase(),
+                                style: const TextStyle(
+                                  color: TemaAplikasi.secondary,
+                                  letterSpacing: 3.0,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       Positioned(
@@ -283,13 +290,17 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                       Positioned(
                         bottom: 14,
                         right: 14,
-                        child: Text(
-                          'ME STUDIO / 2026',
-                          style: TextStyle(
-                            fontSize: 10,
-                            letterSpacing: 2.0,
-                            fontWeight: FontWeight.w600,
-                            color: TemaAplikasi.mutedGray.withValues(alpha: 0.6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          color: Colors.black.withValues(alpha: 0.5),
+                          child: const Text(
+                            'ME STUDIO / 2026',
+                            style: TextStyle(
+                              fontSize: 10,
+                              letterSpacing: 2.0,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
