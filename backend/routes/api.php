@@ -40,3 +40,4 @@ Route::post('/checkout', [CheckoutController::class, 'store']);
 Route::get('/pesanan', [PesananController::class, 'index']);
 Route::get('/pesanan/{id}', [PesananController::class, 'show']);
 Route::patch('/pesanan/{id}/status', [PesananController::class, 'updateStatus']);
+

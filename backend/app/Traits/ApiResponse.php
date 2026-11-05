@@ -32,3 +32,4 @@ trait ApiResponse
         ], $statusHttp);
     }
 }
+

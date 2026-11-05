@@ -77,3 +77,4 @@ class Produk extends Model
         return $data;
     }
 }
+

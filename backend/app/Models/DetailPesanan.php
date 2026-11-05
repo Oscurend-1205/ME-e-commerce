@@ -44,3 +44,4 @@ class DetailPesanan extends Model
         return $this->belongsTo(VarianProduk::class, 'varian_id');
     }
 }
+

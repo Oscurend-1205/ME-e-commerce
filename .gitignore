@@ -1,11 +1,45 @@
-.dart_tool/
+# Log files
+*.log
+hs_err_pid*
+replay_pid*
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# IDE specific
 .idea/
 *.iml
-.DS_Store
-backend/vendor/
-backend/.env
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Flutter / Dart
+.dart_tool/
 mobile/.dart_tool/
 mobile/build/
 mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
+mobile/android/local.properties
+mobile/ios/Flutter/Generated.xcconfig
+mobile/ios/Flutter/flutter_export_environment.sh
+
+# Laravel / PHP
+backend/vendor/
+backend/.env
+backend/storage/*.key
+backend/public/storage
+backend/public/hot
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/testing/*
+backend/storage/framework/views/*
+backend/storage/logs/*
+backend/node_modules/
+backend/npm-debug.log
+backend/yarn-error.log
+
+# Database
+backend/database/*.sqlite
+backend/database/*.sqlite-journal
 

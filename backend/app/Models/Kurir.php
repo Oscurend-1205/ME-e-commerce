@@ -21,3 +21,4 @@ class Kurir extends Model
         'tarif' => 'integer',
     ];
 }
+

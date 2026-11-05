@@ -29,3 +29,4 @@ class MetodePembayaranController extends Controller
         return $this->sukses($data, 'Daftar metode pembayaran berhasil diambil', 200);
     }
 }
+

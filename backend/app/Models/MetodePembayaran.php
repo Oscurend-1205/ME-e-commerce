@@ -16,3 +16,4 @@ class MetodePembayaran extends Model
         'nama',
     ];
 }
+

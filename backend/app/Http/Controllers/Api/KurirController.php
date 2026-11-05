@@ -30,3 +30,4 @@ class KurirController extends Controller
         return $this->sukses($data, 'Daftar kurir berhasil diambil', 200);
     }
 }
+

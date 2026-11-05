@@ -244,3 +244,4 @@ class ProdukController extends Controller
         return $this->sukses(null, 'Produk berhasil dihapus', 200);
     }
 }
+
