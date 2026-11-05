@@ -13,6 +13,13 @@ class Konstan {
     return 'http://127.0.0.1:8000/api';
   }
 
+  /// URL dasar penyimpanan aset gambar di backend Laravel:
+  /// Contoh: http://127.0.0.1:8000/storage/produk
+  static String get storageUrl {
+    final base = baseUrl.replaceAll(RegExp(r'/api/?$'), '');
+    return '$base/storage/produk';
+  }
+
   static const int pelangganId = 1;
   static const Duration batasWaktu = Duration(seconds: 10);
 }

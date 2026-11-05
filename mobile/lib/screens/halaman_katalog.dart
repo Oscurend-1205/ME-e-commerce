@@ -29,7 +29,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   int _jumlahItemKeranjang = 0;
 
   // Story highlight pills (sesuai cek-beranda.html)
-  final List<Map<String, dynamic>> _stories = [
+  List<Map<String, dynamic>> get _stories => [
     {
       'label': 'Baru Tiba',
       'foto': FotoDummy.stories[0],
