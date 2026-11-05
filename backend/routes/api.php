@@ -41,3 +41,19 @@ Route::get('/pesanan', [PesananController::class, 'index']);
 Route::get('/pesanan/{id}', [PesananController::class, 'show']);
 Route::patch('/pesanan/{id}/status', [PesananController::class, 'updateStatus']);
 
+// 6. Endpoint Gambar Produk & Banner dari Storage (CORS-enabled untuk Flutter Web & Mobile)
+Route::get('/gambar/{filename}', function ($filename) {
+    $path = storage_path('app/public/produk/' . $filename);
+    if (!file_exists($path)) {
+        abort(404, 'Gambar tidak ditemukan');
+    }
+    $mime = mime_content_type($path) ?: 'image/jpeg';
+    return response()->file($path, [
+        'Content-Type' => $mime,
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+        'Cache-Control' => 'public, max-age=86400',
+    ]);
+});
+
+

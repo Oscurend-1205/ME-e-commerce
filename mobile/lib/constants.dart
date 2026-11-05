@@ -14,10 +14,10 @@ class Konstan {
   }
 
   /// URL dasar penyimpanan aset gambar di backend Laravel:
-  /// Contoh: http://127.0.0.1:8000/storage/produk
+  /// Menggunakan /api/gambar agar mendukung header CORS untuk Flutter Web (Chrome) & HP fisik
   static String get storageUrl {
-    final base = baseUrl.replaceAll(RegExp(r'/api/?$'), '');
-    return '$base/storage/produk';
+    final base = baseUrl.replaceAll(RegExp(r'/+$'), '');
+    return base.endsWith('/api') ? '$base/gambar' : '$base/api/gambar';
   }
 
   static const int pelangganId = 1;
