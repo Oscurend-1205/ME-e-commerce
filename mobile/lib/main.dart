@@ -49,8 +49,9 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
+          color: TemaAplikasi.surfaceWhite,
           border: Border(
-            top: BorderSide(color: Color(0xFFDDDDDD), width: 0.8),
+            top: BorderSide(color: TemaAplikasi.borderGray, width: 1.0),
           ),
         ),
         child: BottomNavigationBar(
@@ -60,34 +61,35 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
               _indeksAktif = index;
             });
           },
-          backgroundColor: Colors.white,
-          selectedItemColor: const Color(0xFF111111),
-          unselectedItemColor: const Color(0xFF777777),
+          backgroundColor: TemaAplikasi.surfaceWhite,
+          selectedItemColor: TemaAplikasi.primary,
+          unselectedItemColor: TemaAplikasi.mutedGray,
           selectedLabelStyle: const TextStyle(
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
+            letterSpacing: 1.5,
           ),
           unselectedLabelStyle: const TextStyle(
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: FontWeight.w500,
+            letterSpacing: 1.0,
           ),
           elevation: 0,
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.storefront_outlined),
-              activeIcon: Icon(Icons.storefront),
+              icon: Icon(Icons.storefront_outlined, size: 22),
+              activeIcon: Icon(Icons.storefront, size: 22),
               label: 'KATALOG',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.receipt_long_outlined),
-              activeIcon: Icon(Icons.receipt_long),
+              icon: Icon(Icons.receipt_long_outlined, size: 22),
+              activeIcon: Icon(Icons.receipt_long, size: 22),
               label: 'PESANAN',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.inventory_2_outlined),
-              activeIcon: Icon(Icons.inventory_2),
+              icon: Icon(Icons.inventory_2_outlined, size: 22),
+              activeIcon: Icon(Icons.inventory_2, size: 22),
               label: 'KELOLA',
             ),
           ],

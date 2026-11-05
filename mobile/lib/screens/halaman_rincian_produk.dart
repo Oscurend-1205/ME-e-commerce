@@ -3,16 +3,11 @@ import 'package:flutter/material.dart';
 import '../enums.dart';
 import '../models/produk.dart';
 import '../services/layanan_api.dart';
+import '../theme.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/pemilih_varian.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_keranjang.dart';
-
-const Color _hitam = Color(0xFF111111);
-const Color _putih = Color(0xFFFFFFFF);
-const Color _abuMuda = Color(0xFFF3F3F3);
-const Color _abuSedang = Color(0xFF777777);
-const Color _abuGaris = Color(0xFFDDDDDD);
 
 class HalamanRincianProduk extends StatefulWidget {
   final int produkId;
@@ -78,14 +73,22 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
   Future<void> _tambahKeKeranjang() async {
     if (_produk == null || _varianTerpilih == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan pilih varian ukuran dan warna terlebih dahulu.')),
+        const SnackBar(
+          content: Text('Silakan pilih varian ukuran dan warna terlebih dahulu.'),
+          backgroundColor: TemaAplikasi.primary,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
 
     if (_varianTerpilih!.stok <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Varian yang dipilih sedang habis.')),
+        const SnackBar(
+          content: Text('Varian yang dipilih sedang habis.'),
+          backgroundColor: TemaAplikasi.errorColor,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -112,7 +115,7 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
           content: Text('${_produk!.nama} (${_varianTerpilih!.ukuran}, ${_varianTerpilih!.warna}) masuk ke keranjang.'),
           action: SnackBarAction(
             label: 'LIHAT',
-            textColor: _putih,
+            textColor: TemaAplikasi.surfaceWhite,
             onPressed: () {
               Navigator.push(
                 context,
@@ -120,16 +123,15 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
               );
             },
           ),
-          backgroundColor: _hitam,
+          backgroundColor: TemaAplikasi.primary,
           behavior: SnackBarBehavior.floating,
         ),
       );
     } else {
-      // Menangani galat 409 (stok varian kurang), 422, dll tanpa pindah halaman
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(respon.message),
-          backgroundColor: Colors.red.shade800,
+          backgroundColor: TemaAplikasi.errorColor,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -155,6 +157,7 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
         SnackBar(
           content: Text('Jumlah maksimal sesuai stok varian ($maxStok).'),
           duration: const Duration(seconds: 1),
+          backgroundColor: TemaAplikasi.primary,
         ),
       );
     }
@@ -163,15 +166,20 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _putih,
+      backgroundColor: TemaAplikasi.surfaceWhite,
       appBar: AppBar(
+        backgroundColor: TemaAplikasi.surfaceWhite,
+        foregroundColor: TemaAplikasi.primary,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Text(
           _produk?.nama.toUpperCase() ?? 'RINCIAN PRODUK',
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
-            letterSpacing: 1.5,
+            letterSpacing: 2.0,
           ),
+          overflow: TextOverflow.ellipsis,
         ),
         actions: [
           IconButton(
@@ -216,33 +224,73 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Placeholder Gambar Besar (Editorial ZARA style)
-              Container(
-                width: double.infinity,
-                height: 380,
-                decoration: BoxDecoration(
-                  color: _abuMuda,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+              // Hero Image 3:4 Aspect Ratio (Editorial ZARA style)
+              AspectRatio(
+                aspectRatio: 3 / 4,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: TemaAplikasi.surfaceContainer,
+                    borderRadius: BorderRadius.circular(2),
+                    border: Border.all(color: TemaAplikasi.borderGray),
+                  ),
+                  child: Stack(
                     children: [
-                      Icon(
-                        produk.kategori.toLowerCase() == 'aksesori'
-                            ? Icons.watch_outlined
-                            : Icons.checkroom_outlined,
-                        size: 72,
-                        color: _abuSedang,
+                      Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              produk.kategori.toLowerCase() == 'aksesori'
+                                  ? Icons.watch_outlined
+                                  : Icons.checkroom_outlined,
+                              size: 80,
+                              color: TemaAplikasi.mutedGray,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              produk.merek.toUpperCase(),
+                              style: const TextStyle(
+                                color: TemaAplikasi.secondary,
+                                letterSpacing: 3.0,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        produk.merek.toUpperCase(),
-                        style: const TextStyle(
-                          color: _abuSedang,
-                          letterSpacing: 2.0,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                      Positioned(
+                        top: 14,
+                        left: 14,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: TemaAplikasi.primary,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          child: Text(
+                            produk.kategori.toUpperCase(),
+                            style: const TextStyle(
+                              color: TemaAplikasi.onPrimary,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 14,
+                        right: 14,
+                        child: Text(
+                          'ME STUDIO / 2026',
+                          style: TextStyle(
+                            fontSize: 10,
+                            letterSpacing: 2.0,
+                            fontWeight: FontWeight.w600,
+                            color: TemaAplikasi.mutedGray.withValues(alpha: 0.6),
+                          ),
                         ),
                       ),
                     ],
@@ -251,34 +299,36 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
               ),
               const SizedBox(height: 24),
 
-              // Kategori & Merek
+              // Merek & Kategori Baris Halus
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    produk.kategori.toUpperCase(),
+                    produk.merek.toUpperCase(),
                     style: const TextStyle(
-                      color: _abuSedang,
-                      letterSpacing: 1.5,
-                      fontSize: 12,
+                      color: TemaAplikasi.secondary,
+                      letterSpacing: 2.0,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: _abuGaris),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      produk.merek,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: _hitam,
+                  if (!produk.tersedia)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: TemaAplikasi.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: const Text(
+                        'TIDAK AKTIF',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.0,
+                          color: TemaAplikasi.secondary,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -288,12 +338,13 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                 produk.nama,
                 style: const TextStyle(
                   fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                  color: _hitam,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
+                  color: TemaAplikasi.primary,
+                  height: 1.25,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
               // Harga
               Text(
@@ -301,30 +352,34 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
-                  color: _hitam,
+                  letterSpacing: 0.5,
+                  color: TemaAplikasi.primary,
                 ),
               ),
+              const SizedBox(height: 20),
+
+              const Divider(color: TemaAplikasi.borderGray),
               const SizedBox(height: 16),
 
-              const Divider(color: _abuGaris),
-              const SizedBox(height: 16),
-
-              // Atribut Khas Domain: Bahan
+              // Atribut Khas Domain: Bahan & Spesifikasi
               Row(
                 children: [
                   const Text(
-                    'Bahan: ',
+                    'BAHAN',
                     style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: _hitam,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                      letterSpacing: 1.5,
+                      color: TemaAplikasi.primary,
                     ),
                   ),
+                  const SizedBox(width: 16),
                   Text(
                     produk.bahan.isNotEmpty ? produk.bahan : '-',
                     style: const TextStyle(
-                      fontSize: 14,
-                      color: _abuSedang,
+                      fontSize: 13,
+                      color: TemaAplikasi.secondary,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ],
@@ -334,27 +389,28 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
               // Deskripsi (nullable safe)
               if (produk.deskripsi != null && produk.deskripsi!.isNotEmpty) ...[
                 const Text(
-                  'Deskripsi',
+                  'DESKRIPSI',
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: _hitam,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.5,
+                    color: TemaAplikasi.primary,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text(
                   produk.deskripsi!,
                   style: const TextStyle(
-                    fontSize: 14,
-                    color: _abuSedang,
-                    height: 1.5,
+                    fontSize: 13,
+                    color: TemaAplikasi.secondary,
+                    height: 1.6,
                   ),
                 ),
                 const SizedBox(height: 20),
               ],
 
-              const Divider(color: _abuGaris),
-              const SizedBox(height: 16),
+              const Divider(color: TemaAplikasi.borderGray),
+              const SizedBox(height: 20),
 
               // Pemilih Varian (Ukuran & Warna)
               if (produk.varian != null && produk.varian!.isNotEmpty) ...[
@@ -368,53 +424,70 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                     });
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
               ],
 
               // Pengatur Kuantitas
               const Text(
-                'Jumlah',
+                'KUANTITAS',
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                  color: _hitam,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                  color: TemaAplikasi.primary,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: _abuGaris),
-                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: TemaAplikasi.borderGray),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                     child: Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.remove, size: 18),
+                          icon: const Icon(Icons.remove, size: 16),
                           onPressed: _kurangiJumlah,
+                          splashRadius: 20,
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             '$_jumlah',
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 15,
                               fontWeight: FontWeight.w600,
+                              color: TemaAplikasi.primary,
                             ),
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.add, size: 18),
+                          icon: const Icon(Icons.add, size: 16),
                           onPressed: _tambahJumlah,
+                          splashRadius: 20,
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 16),
+                  if (_varianTerpilih != null)
+                    Text(
+                      'Sisa stok: ${_varianTerpilih!.stok}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _varianTerpilih!.stok <= 3
+                            ? TemaAplikasi.errorColor
+                            : TemaAplikasi.secondary,
+                        fontWeight: _varianTerpilih!.stok <= 3
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                      ),
+                    ),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 40),
             ],
           ),
         );
@@ -427,30 +500,23 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
         _varianTerpilih!.stok > 0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: _putih,
-        border: const Border(top: BorderSide(color: _abuGaris)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      decoration: const BoxDecoration(
+        color: TemaAplikasi.surfaceWhite,
+        border: Border(top: BorderSide(color: TemaAplikasi.borderGray)),
       ),
       child: SafeArea(
         child: SizedBox(
           width: double.infinity,
-          height: 50,
+          height: 48,
           child: ElevatedButton(
             onPressed: (_sedangMenambahkan || !bisaBeli) ? null : _tambahKeKeranjang,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _hitam,
-              disabledBackgroundColor: _abuGaris,
-              foregroundColor: _putih,
+              backgroundColor: TemaAplikasi.primary,
+              disabledBackgroundColor: TemaAplikasi.surfaceContainerHigh,
+              foregroundColor: TemaAplikasi.onPrimary,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(2),
               ),
               elevation: 0,
             ),
@@ -459,7 +525,7 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                      color: _putih,
+                      color: TemaAplikasi.onPrimary,
                       strokeWidth: 2,
                     ),
                   )
@@ -468,10 +534,10 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                         ? 'VARIAN INI HABIS'
                         : 'TAMBAH KE KERANJANG',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 1.5,
-                      color: !bisaBeli ? _abuSedang : _putih,
+                      letterSpacing: 2.0,
+                      color: !bisaBeli ? TemaAplikasi.mutedGray : TemaAplikasi.onPrimary,
                     ),
                   ),
           ),
@@ -480,4 +546,3 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
     );
   }
 }
-

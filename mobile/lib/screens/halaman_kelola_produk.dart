@@ -3,16 +3,11 @@ import 'package:flutter/material.dart';
 import '../enums.dart';
 import '../models/produk.dart';
 import '../services/layanan_api.dart';
+import '../theme.dart';
 import '../widgets/dialog_konfirmasi.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_form_produk.dart';
-
-const Color _hitam = Color(0xFF111111);
-const Color _putih = Color(0xFFFFFFFF);
-const Color _abuMuda = Color(0xFFF3F3F3);
-const Color _abuSedang = Color(0xFF777777);
-const Color _abuGaris = Color(0xFFDDDDDD);
 
 class HalamanKelolaProduk extends StatefulWidget {
   const HalamanKelolaProduk({super.key});
@@ -68,7 +63,7 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
       judul: 'Hapus Produk',
       pesan: 'Apakah Anda yakin ingin menghapus "${produk.nama}"? Produk yang terkait dengan pesanan aktif tidak dapat dihapus.',
       teksKonfirmasi: 'Hapus',
-      warnaKonfirmasi: Colors.red.shade700,
+      warnaKonfirmasi: TemaAplikasi.errorColor,
     );
 
     if (!konfirmasi || !mounted) return;
@@ -89,7 +84,7 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Produk "${produk.nama}" berhasil dihapus.'),
-          backgroundColor: _hitam,
+          backgroundColor: TemaAplikasi.primary,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -99,7 +94,7 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(respon.message),
-          backgroundColor: Colors.red.shade800,
+          backgroundColor: TemaAplikasi.errorColor,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
         ),
@@ -110,15 +105,20 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _putih,
+      backgroundColor: TemaAplikasi.surfaceBright,
       appBar: AppBar(
-        title: const Text(
-          'KELOLA PRODUK (ADMIN)',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.5,
-          ),
+        backgroundColor: TemaAplikasi.surfaceWhite,
+        title: const Row(
+          children: [
+            Text(
+              'KELOLA PRODUK',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -141,7 +141,7 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
       body: Stack(
         children: [
           RefreshIndicator(
-            color: _hitam,
+            color: TemaAplikasi.primary,
             onRefresh: _muatDaftarProduk,
             child: _bangunKonten(),
           ),
@@ -149,14 +149,15 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
             Container(
               color: Colors.black.withValues(alpha: 0.2),
               child: const Center(
-                child: CircularProgressIndicator(color: _hitam),
+                child: CircularProgressIndicator(color: TemaAplikasi.primary),
               ),
             ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: _hitam,
-        foregroundColor: _putih,
+        backgroundColor: TemaAplikasi.primary,
+        foregroundColor: TemaAplikasi.onPrimary,
+        elevation: 2,
         onPressed: () async {
           final hasil = await Navigator.push(
             context,
@@ -202,13 +203,18 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
         );
       case KeadaanMuat.berhasil:
         return ListView.separated(
-          padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 80),
+          padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 90),
           itemCount: _daftarProduk.length,
-          separatorBuilder: (context, index) => const Divider(color: _abuGaris, height: 16),
+          separatorBuilder: (context, index) => const Divider(color: TemaAplikasi.borderGray, height: 16),
           itemBuilder: (context, index) {
             final produk = _daftarProduk[index];
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: TemaAplikasi.surfaceWhite,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: TemaAplikasi.borderGray),
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -217,15 +223,15 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: _abuMuda,
-                      borderRadius: BorderRadius.circular(6),
+                      color: TemaAplikasi.surfaceContainer,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                     child: Icon(
                       produk.kategori.toLowerCase() == 'aksesori'
                           ? Icons.watch_outlined
                           : Icons.checkroom_outlined,
-                      color: _abuSedang,
-                      size: 26,
+                      color: TemaAplikasi.mutedGray,
+                      size: 24,
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -239,23 +245,21 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: _abuMuda,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
+                              color: TemaAplikasi.surfaceContainer,
                               child: Text(
                                 produk.kategori.toUpperCase(),
                                 style: const TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 9,
                                   fontWeight: FontWeight.w600,
-                                  color: _abuSedang,
+                                  letterSpacing: 1.0,
+                                  color: TemaAplikasi.secondary,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 6),
                             Text(
                               produk.merek,
-                              style: const TextStyle(fontSize: 11, color: _abuSedang),
+                              style: const TextStyle(fontSize: 11, color: TemaAplikasi.secondary),
                             ),
                           ],
                         ),
@@ -263,9 +267,9 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
                         Text(
                           produk.nama,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: _hitam,
+                            color: TemaAplikasi.primary,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -274,24 +278,24 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: _hitam,
+                            color: TemaAplikasi.primary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
                             Text(
-                              'Total Stok: ${produk.stok}',
+                              'Stok Total: ${produk.stok}',
                               style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: produk.stok > 0 ? Colors.green.shade800 : Colors.red.shade800,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: produk.stok > 0 ? Colors.green.shade800 : TemaAplikasi.errorColor,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Text(
                               'Bahan: ${produk.bahan}',
-                              style: const TextStyle(fontSize: 12, color: _abuSedang),
+                              style: const TextStyle(fontSize: 11, color: TemaAplikasi.secondary),
                             ),
                           ],
                         ),
@@ -303,7 +307,7 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
                   Column(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.edit_outlined, size: 20, color: _hitam),
+                        icon: const Icon(Icons.edit_outlined, size: 18, color: TemaAplikasi.primary),
                         onPressed: () async {
                           final hasil = await Navigator.push(
                             context,
@@ -317,7 +321,7 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
                         },
                       ),
                       IconButton(
-                        icon: Icon(Icons.delete_outline, size: 20, color: Colors.red.shade700),
+                        icon: const Icon(Icons.delete_outline, size: 18, color: TemaAplikasi.errorColor),
                         onPressed: () => _hapusProduk(produk),
                       ),
                     ],
@@ -330,4 +334,3 @@ class _HalamanKelolaProdukState extends State<HalamanKelolaProduk> {
     }
   }
 }
-

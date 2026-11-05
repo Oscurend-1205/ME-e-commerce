@@ -3,15 +3,10 @@ import 'package:flutter/material.dart';
 import '../enums.dart';
 import '../models/pesanan.dart';
 import '../services/layanan_api.dart';
+import '../theme.dart';
 import '../widgets/dialog_konfirmasi.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/widget_keadaan.dart';
-
-const Color _hitam = Color(0xFF111111);
-const Color _putih = Color(0xFFFFFFFF);
-const Color _abuMuda = Color(0xFFF3F3F3);
-const Color _abuSedang = Color(0xFF777777);
-const Color _abuGaris = Color(0xFFDDDDDD);
 
 class HalamanRincianPesanan extends StatefulWidget {
   final int pesananId;
@@ -66,7 +61,7 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
         context,
         judul: 'Konfirmasi Perubahan Status',
         pesan: dialogPesan,
-        teksKonfirmasi: 'Lanjutkan',
+        teksKonfirmasi: 'LANJUTKAN',
       );
       if (!konfirmasi || !mounted) return;
     }
@@ -87,17 +82,16 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Status pesanan berhasil diperbarui menjadi "$statusBaru".'),
-          backgroundColor: _hitam,
+          backgroundColor: TemaAplikasi.primary,
           behavior: SnackBarBehavior.floating,
         ),
       );
       _muatRincianPesanan();
     } else {
-      // Menampilkan galat 409 jika perpindahan status tidak sah sesuai tabel PRD
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(respon.message),
-          backgroundColor: Colors.red.shade800,
+          backgroundColor: TemaAplikasi.errorColor,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -107,21 +101,21 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
   Color _warnaStatus(String status) {
     switch (status.toLowerCase()) {
       case 'menunggu_pembayaran':
-        return Colors.orange.shade800;
+        return const Color(0xFFC77700);
       case 'menunggu_konfirmasi':
-        return Colors.blue.shade700;
+        return const Color(0xFF1E6091);
       case 'dibayar':
-        return Colors.teal.shade700;
+        return const Color(0xFF184E77);
       case 'diproses':
-        return Colors.indigo.shade700;
+        return const Color(0xFF168AAD);
       case 'dikirim':
-        return Colors.purple.shade700;
+        return const Color(0xFF52B69A);
       case 'selesai':
-        return Colors.green.shade700;
+        return const Color(0xFF2D6A4F);
       case 'dibatalkan':
-        return Colors.red.shade700;
+        return TemaAplikasi.errorColor;
       default:
-        return _abuSedang;
+        return TemaAplikasi.secondary;
     }
   }
 
@@ -136,7 +130,7 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
       case 'diproses':
         return 'SEDANG DIPROSES';
       case 'dikirim':
-        return 'SEDANG DIKIRIM';
+        return 'DALAM PENGIRIMAN';
       case 'selesai':
         return 'SELESAI';
       case 'dibatalkan':
@@ -149,22 +143,22 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _putih,
+      backgroundColor: TemaAplikasi.surfaceWhite,
       appBar: AppBar(
-        title: Text(
-          _pesanan != null ? 'PESANAN #${_pesanan!.nomorPesanan}' : 'RINCIAN PESANAN',
-          style: const TextStyle(
-            fontSize: 14,
+        backgroundColor: TemaAplikasi.surfaceWhite,
+        foregroundColor: TemaAplikasi.primary,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: const Text(
+          'RINCIAN PESANAN',
+          style: TextStyle(
+            fontSize: 13,
             fontWeight: FontWeight.w700,
-            letterSpacing: 1.0,
+            letterSpacing: 2.0,
           ),
         ),
       ),
-      body: RefreshIndicator(
-        color: _hitam,
-        onRefresh: _muatRincianPesanan,
-        child: _bangunKonten(),
-      ),
+      body: _bangunKonten(),
     );
   }
 
@@ -175,7 +169,7 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
       case KeadaanMuat.kosong:
         return WidgetKosong(
           ikon: Icons.receipt_long_outlined,
-          pesan: 'Pesanan tidak ditemukan.',
+          pesan: 'Data pesanan tidak ditemukan.',
           saranAksi: 'Kembali',
           onAksi: () => Navigator.pop(context),
         );
@@ -187,18 +181,21 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
         );
       case KeadaanMuat.berhasil:
         final pesanan = _pesanan!;
+        final warna = _warnaStatus(pesanan.status);
+
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Kartu Status Pesanan
+              // Header Status Pesanan
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: _abuMuda,
-                  borderRadius: BorderRadius.circular(8),
+                  color: TemaAplikasi.surfaceBright,
+                  border: Border.all(color: TemaAplikasi.borderGray),
+                  borderRadius: BorderRadius.circular(2),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,25 +204,26 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          'STATUS PESANAN',
+                          'STATUS',
                           style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1.0,
-                            color: _abuSedang,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.5,
+                            color: TemaAplikasi.secondary,
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: _warnaStatus(pesanan.status),
-                            borderRadius: BorderRadius.circular(4),
+                            color: warna.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(2),
+                            border: Border.all(color: warna.withValues(alpha: 0.3)),
                           ),
                           child: Text(
                             _labelStatus(pesanan.status),
-                            style: const TextStyle(
-                              color: _putih,
-                              fontSize: 11,
+                            style: TextStyle(
+                              color: warna,
+                              fontSize: 10,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
                             ),
@@ -233,20 +231,21 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Text(
-                      'Nomor: ${pesanan.nomorPesanan}',
+                      pesanan.nomorPesanan,
                       style: const TextStyle(
-                        fontSize: 15,
+                        fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: _hitam,
+                        letterSpacing: 0.5,
+                        color: TemaAplikasi.primary,
                       ),
                     ),
                     if (pesanan.createdAt != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'Waktu Pemesanan: ${pesanan.createdAt}',
-                        style: const TextStyle(fontSize: 12, color: _abuSedang),
+                        'Waktu: ${pesanan.createdAt}',
+                        style: const TextStyle(fontSize: 11, color: TemaAplikasi.mutedGray),
                       ),
                     ],
                   ],
@@ -254,23 +253,23 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
               ),
               const SizedBox(height: 24),
 
-              // Informasi Pengiriman & Penerima
+              // Alamat & Info Pengiriman
               const Text(
-                'ALAMAT PENGIRIMAN',
+                'INFORMASI PENGIRIMAN',
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: 1.0,
-                  color: _hitam,
+                  letterSpacing: 1.5,
+                  color: TemaAplikasi.primary,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  border: Border.all(color: _abuGaris),
-                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: TemaAplikasi.borderGray),
+                  borderRadius: BorderRadius.circular(2),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,7 +279,7 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: _hitam,
+                        color: TemaAplikasi.primary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -288,62 +287,71 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
                       pesanan.alamat,
                       style: const TextStyle(
                         fontSize: 13,
-                        color: _abuSedang,
+                        color: TemaAplikasi.secondary,
                         height: 1.4,
                       ),
                     ),
-                    if (pesanan.namaKurir != null) ...[
-                      const Divider(height: 16, color: _abuGaris),
-                      Text(
-                        'Kurir: ${pesanan.namaKurir}',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                    if (pesanan.metodePembayaran != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        'Metode: ${pesanan.metodePembayaran}',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                      ),
-                    ],
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Divider(color: TemaAplikasi.borderGray),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Kurir: ${pesanan.namaKurir}',
+                          style: const TextStyle(fontSize: 12, color: TemaAplikasi.secondary),
+                        ),
+                        Text(
+                          'Metode: ${pesanan.metodePembayaran}',
+                          style: const TextStyle(fontSize: 12, color: TemaAplikasi.secondary),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
 
-              // Daftar Item yang Dibeli (Detail Pesanan Snapshot)
+              // Daftar Item yang Dibeli
               const Text(
                 'ITEM PESANAN',
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: 1.0,
-                  color: _hitam,
+                  letterSpacing: 1.5,
+                  color: TemaAplikasi.primary,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               if (pesanan.detail != null && pesanan.detail!.isNotEmpty)
                 ...pesanan.detail!.map((item) {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      border: Border.all(color: _abuGaris),
-                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: TemaAplikasi.borderGray),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
                           width: 50,
-                          height: 50,
+                          height: 64,
                           decoration: BoxDecoration(
-                            color: _abuMuda,
-                            borderRadius: BorderRadius.circular(4),
+                            color: TemaAplikasi.surfaceContainer,
+                            borderRadius: BorderRadius.circular(2),
                           ),
-                          child: const Icon(Icons.checkroom, color: _abuSedang, size: 24),
+                          child: const Center(
+                            child: Icon(
+                              Icons.checkroom_outlined,
+                              color: TemaAplikasi.mutedGray,
+                              size: 22,
+                            ),
+                          ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,18 +361,24 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
                                 style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: _hitam,
+                                  color: TemaAplikasi.primary,
                                 ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Ukuran: ${item.ukuran}  |  Warna: ${item.warna}',
-                                style: const TextStyle(fontSize: 11, color: _abuSedang),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '${item.jumlah} x ${formatRupiah(item.hargaSatuan)}',
-                                style: const TextStyle(fontSize: 12, color: _abuSedang),
+                                'Size: ${item.ukuran}  |  ${item.warna}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: TemaAplikasi.mutedGray,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                '${item.jumlah} × ${formatRupiah(item.hargaSatuan)}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: TemaAplikasi.secondary,
+                                ),
                               ),
                             ],
                           ),
@@ -374,7 +388,7 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: _hitam,
+                            color: TemaAplikasi.primary,
                           ),
                         ),
                       ],
@@ -384,42 +398,68 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
               else
                 const Text(
                   'Item pesanan tidak dimuat.',
-                  style: TextStyle(color: _abuSedang, fontSize: 13),
+                  style: TextStyle(color: TemaAplikasi.mutedGray, fontSize: 13),
                 ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
-              // Rincian Pembayaran dari Server
+              // Rincian Pembayaran
+              const Text(
+                'RINCIAN PEMBAYARAN',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                  color: TemaAplikasi.primary,
+                ),
+              ),
+              const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: _abuMuda,
-                  borderRadius: BorderRadius.circular(6),
+                  color: TemaAplikasi.surfaceBright,
+                  border: Border.all(color: TemaAplikasi.borderGray),
+                  borderRadius: BorderRadius.circular(2),
                 ),
                 child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Subtotal Produk', style: TextStyle(fontSize: 13, color: _abuSedang)),
-                        Text(formatRupiah(pesanan.subtotal), style: const TextStyle(fontWeight: FontWeight.w500)),
+                        const Text('Subtotal Produk', style: TextStyle(fontSize: 12, color: TemaAplikasi.secondary)),
+                        Text(formatRupiah(pesanan.subtotal), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Ongkos Kirim', style: TextStyle(fontSize: 13, color: _abuSedang)),
-                        Text(formatRupiah(pesanan.ongkir), style: const TextStyle(fontWeight: FontWeight.w500)),
+                        const Text('Ongkos Kirim', style: TextStyle(fontSize: 12, color: TemaAplikasi.secondary)),
+                        Text(formatRupiah(pesanan.ongkir), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                       ],
                     ),
-                    const Divider(height: 20, color: _abuGaris),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Divider(color: TemaAplikasi.borderGray),
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Total Pembayaran', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                        const Text(
+                          'TOTAL PEMBAYARAN',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.0,
+                            color: TemaAplikasi.primary,
+                          ),
+                        ),
                         Text(
                           formatRupiah(pesanan.total),
-                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: _hitam),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: TemaAplikasi.primary,
+                          ),
                         ),
                       ],
                     ),
@@ -428,7 +468,7 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
               ),
               const SizedBox(height: 32),
 
-              // Tombol Tindakan Berdasarkan Status (Simulasi Alur Sistem Terdistribusi)
+              // Tombol Tindakan Berdasarkan Status
               _bangunAksiStatus(pesanan),
               const SizedBox(height: 20),
             ],
@@ -439,7 +479,7 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
 
   Widget _bangunAksiStatus(Pesanan pesanan) {
     if (_sedangMemperbaruiStatus) {
-      return const Center(child: CircularProgressIndicator(color: _hitam));
+      return const Center(child: CircularProgressIndicator(color: TemaAplikasi.primary));
     }
 
     final status = pesanan.status.toLowerCase();
@@ -451,16 +491,16 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: () => _ubahStatus('menunggu_konfirmasi'),
+              onPressed: () => _ubahStatus('dibayar'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _hitam,
-                foregroundColor: _putih,
+                backgroundColor: TemaAplikasi.primary,
+                foregroundColor: TemaAplikasi.onPrimary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
               ),
               child: const Text(
                 'BAYAR SEKARANG (SIMULASI)',
-                style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.0),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 2.0),
               ),
             ),
           ),
@@ -471,41 +511,17 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
             child: OutlinedButton(
               onPressed: () => _ubahStatus(
                 'dibatalkan',
-                dialogPesan: 'Apakah Anda yakin ingin membatalkan pesanan ini? Stok varian akan dikembalikan.',
+                dialogPesan: 'Apakah Anda yakin ingin membatalkan pesanan ini? Stok varian akan otomatis dikembalikan.',
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red.shade700,
-                side: BorderSide(color: Colors.red.shade300),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                foregroundColor: TemaAplikasi.errorColor,
+                side: const BorderSide(color: TemaAplikasi.errorColor),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
               ),
-              child: const Text('BATALKAN PESANAN'),
-            ),
-          ),
-        ],
-      );
-    }
-
-    if (status == 'menunggu_konfirmasi') {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Aksi Simulasi Toko (Admin):',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _abuSedang),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: () => _ubahStatus('dibayar'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal.shade700,
-                foregroundColor: _putih,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+              child: const Text(
+                'BATALKAN PESANAN',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 2.0),
               ),
-              child: const Text('KONFIRMASI PEMBAYARAN (ADMIN)'),
             ),
           ),
         ],
@@ -513,57 +529,135 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
     }
 
     if (status == 'dibayar') {
-      return SizedBox(
-        width: double.infinity,
-        height: 48,
-        child: ElevatedButton(
-          onPressed: () => _ubahStatus('diproses'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.indigo.shade700,
-            foregroundColor: _putih,
-            elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'AKSI TOKO / ADMIN:',
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: TemaAplikasi.secondary),
           ),
-          child: const Text('PROSES PESANAN (ADMIN)'),
-        ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () => _ubahStatus('diproses'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: TemaAplikasi.primary,
+                foregroundColor: TemaAplikasi.onPrimary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                elevation: 0,
+              ),
+              child: const Text(
+                'PROSES PESANAN (KEMAS BARANG)',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.5),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: OutlinedButton(
+              onPressed: () => _ubahStatus(
+                'dibatalkan',
+                dialogPesan: 'Batalkan pesanan dan kembalikan stok?',
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: TemaAplikasi.errorColor,
+                side: const BorderSide(color: TemaAplikasi.errorColor),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+              ),
+              child: const Text(
+                'BATALKAN PESANAN',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.5),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
     if (status == 'diproses') {
-      return SizedBox(
-        width: double.infinity,
-        height: 48,
-        child: ElevatedButton(
-          onPressed: () => _ubahStatus('dikirim'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.purple.shade700,
-            foregroundColor: _putih,
-            elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'AKSI PENGIRIMAN:',
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: TemaAplikasi.secondary),
           ),
-          child: const Text('KIRIM PESANAN (ADMIN)'),
-        ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () => _ubahStatus('dikirim'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: TemaAplikasi.primary,
+                foregroundColor: TemaAplikasi.onPrimary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                elevation: 0,
+              ),
+              child: const Text(
+                'KIRIM PESANAN KE KURIR',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.5),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
     if (status == 'dikirim') {
-      return SizedBox(
-        width: double.infinity,
-        height: 48,
-        child: ElevatedButton(
-          onPressed: () => _ubahStatus('selesai'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green.shade700,
-            foregroundColor: _putih,
-            elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'KONFIRMASI PENERIMAAN:',
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: TemaAplikasi.secondary),
           ),
-          child: const Text('TERIMA & SELESAIKAN PESANAN'),
-        ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () => _ubahStatus('selesai'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: TemaAplikasi.primary,
+                foregroundColor: TemaAplikasi.onPrimary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                elevation: 0,
+              ),
+              child: const Text(
+                'PESANAN DITERIMA (SELESAI)',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.5),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
-    return const SizedBox.shrink();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: TemaAplikasi.surfaceBright,
+        border: Border.all(color: TemaAplikasi.borderGray),
+        borderRadius: BorderRadius.circular(2),
+      ),
+      child: Center(
+        child: Text(
+          status == 'selesai'
+              ? 'Pesanan telah selesai. Terima kasih telah berbelanja di ME!'
+              : 'Pesanan telah dibatalkan.',
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: TemaAplikasi.secondary,
+          ),
+        ),
+      ),
+    );
   }
 }
-

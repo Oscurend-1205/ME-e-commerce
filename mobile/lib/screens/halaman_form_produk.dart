@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/produk.dart';
 import '../services/layanan_api.dart';
-
-const Color _hitam = Color(0xFF111111);
-const Color _putih = Color(0xFFFFFFFF);
-const Color _abuMuda = Color(0xFFF3F3F3);
-const Color _abuSedang = Color(0xFF777777);
-const Color _abuGaris = Color(0xFFDDDDDD);
+import '../theme.dart';
 
 class ModelVarianInput {
   int? id;
@@ -67,7 +62,7 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
     final p = widget.produk;
     _namaController = TextEditingController(text: p?.nama ?? '');
     _hargaController = TextEditingController(text: p?.harga != null ? p!.harga.toString() : '');
-    _merekController = TextEditingController(text: p?.merek ?? '');
+    _merekController = TextEditingController(text: p?.merek ?? 'ME Studio');
     _bahanController = TextEditingController(text: p?.bahan ?? '');
     _deskripsiController = TextEditingController(text: p?.deskripsi ?? '');
     _tersedia = p?.tersedia ?? true;
@@ -78,7 +73,7 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
     if (_modeEdit) {
       _muatRincianVarian();
     } else {
-      // Varian default untuk produk baru
+      // Varian default untuk memudahkan input produk baru
       _tambahVarian(ukuran: 'M', warna: 'Hitam', stok: 10);
       _tambahVarian(ukuran: 'L', warna: 'Hitam', stok: 5);
     }
@@ -138,6 +133,40 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
     setState(() {
       final v = _daftarVarianInput.removeAt(index);
       v.dispose();
+    });
+  }
+
+  /// Preset contoh data cepat untuk memudahkan pengujian admin
+  void _isiContohProduk(String tipe) {
+    setState(() {
+      if (tipe == 'cardigan') {
+        _namaController.text = 'Cardigan Rajut Oversize Textured Knit';
+        _hargaController.text = '199000';
+        _kategoriTerpilih = 'Pakaian';
+        _merekController.text = 'ME Studio';
+        _bahanController.text = 'Wool Blend Knit 100%';
+        _deskripsiController.text = 'Cardigan rajut hangat bertekstur waffle halus dengan kancing tempurung kelapa alami.';
+        for (final v in _daftarVarianInput) {
+          v.dispose();
+        }
+        _daftarVarianInput.clear();
+        _daftarVarianInput.add(ModelVarianInput(ukuran: 'M', warna: 'Oatmeal', stok: 12));
+        _daftarVarianInput.add(ModelVarianInput(ukuran: 'L', warna: 'Oatmeal', stok: 8));
+        _daftarVarianInput.add(ModelVarianInput(ukuran: 'L', warna: 'Charcoal', stok: 6));
+      } else {
+        _namaController.text = 'Dompet Kartu Kulit Calfskin Leather Cardholder';
+        _hargaController.text = '89000';
+        _kategoriTerpilih = 'Aksesori';
+        _merekController.text = 'ME Leather';
+        _bahanController.text = 'Genuine Italian Calfskin';
+        _deskripsiController.text = 'Dompet kartu ramping minimalis dengan 6 slot kartu dan 1 kompartemen uang tunai lipat.';
+        for (final v in _daftarVarianInput) {
+          v.dispose();
+        }
+        _daftarVarianInput.clear();
+        _daftarVarianInput.add(ModelVarianInput(ukuran: 'All Size', warna: 'Hitam Matte', stok: 20));
+        _daftarVarianInput.add(ModelVarianInput(ukuran: 'All Size', warna: 'Tan Brown', stok: 15));
+      }
     });
   }
 
@@ -216,7 +245,7 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(_modeEdit ? 'Produk berhasil diperbarui.' : 'Produk baru berhasil ditambahkan.'),
-          backgroundColor: _hitam,
+          backgroundColor: TemaAplikasi.primary,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -229,14 +258,14 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(respon.message),
-            backgroundColor: Colors.red.shade800,
+            backgroundColor: TemaAplikasi.errorColor,
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(respon.message),
-            backgroundColor: Colors.red.shade800,
+            backgroundColor: TemaAplikasi.errorColor,
           ),
         );
       }
@@ -246,8 +275,9 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _putih,
+      backgroundColor: TemaAplikasi.surfaceBright,
       appBar: AppBar(
+        backgroundColor: TemaAplikasi.surfaceWhite,
         title: Text(
           _modeEdit ? 'UBAH PRODUK' : 'TAMBAH PRODUK BARU',
           style: const TextStyle(
@@ -258,7 +288,7 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
         ),
       ),
       body: _sedangMemuatVarian
-          ? const Center(child: CircularProgressIndicator(color: _hitam))
+          ? const Center(child: CircularProgressIndicator(color: TemaAplikasi.primary))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Form(
@@ -266,17 +296,48 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Informasi Dasar Produk
+                    // Tombol Preset Cepat (Untuk Memudahkan Uji Coba)
+                    if (!_modeEdit) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'PRESET CONTOH CEPAT',
+                            style: TextStyle(
+                              fontSize: 10,
+                              letterSpacing: 2.0,
+                              fontWeight: FontWeight.w600,
+                              color: TemaAplikasi.secondary,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              TextButton(
+                                onPressed: () => _isiContohProduk('cardigan'),
+                                child: const Text('+ Cardigan', style: TextStyle(fontSize: 11, color: TemaAplikasi.primary)),
+                              ),
+                              TextButton(
+                                onPressed: () => _isiContohProduk('dompet'),
+                                child: const Text('+ Dompet', style: TextStyle(fontSize: 11, color: TemaAplikasi.primary)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+
+                    // Header Informasi Produk
                     const Text(
                       'INFORMASI UTAMA PRODUK',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.0,
-                        color: _hitam,
+                        color: TemaAplikasi.primary,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
 
                     // Nama Produk
                     TextFormField(
@@ -285,7 +346,6 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
                         labelText: 'Nama Produk',
                         hintText: 'Contoh: Kemeja Linen Polos',
                         errorText: _galatValidasi422?['nama']?.toString(),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
                       ),
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama produk wajib diisi.' : null,
                     ),
@@ -297,9 +357,8 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Harga (Rupiah)',
-                        hintText: 'Contoh: 149000 (tanpa titik/desimal)',
+                        hintText: 'Contoh: 149000 (tanpa titik)',
                         errorText: _galatValidasi422?['harga']?.toString(),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
                       ),
                       validator: (v) {
                         if (v == null || v.trim().isEmpty) return 'Harga wajib diisi.';
@@ -314,9 +373,8 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
                     DropdownButtonFormField<String>(
                       initialValue: _kategoriTerpilih,
                       decoration: InputDecoration(
-                        labelText: 'Kategori',
+                        labelText: 'Kategori Produk',
                         errorText: _galatValidasi422?['kategori']?.toString(),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
                       ),
                       items: _pilihanKategori.map((k) {
                         return DropdownMenuItem(value: k, child: Text(k));
@@ -339,9 +397,8 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
                             controller: _merekController,
                             decoration: InputDecoration(
                               labelText: 'Merek',
-                              hintText: 'ZARA / Studio',
+                              hintText: 'ME Studio / ZARA',
                               errorText: _galatValidasi422?['merek']?.toString(),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
                             ),
                             validator: (v) => (v == null || v.trim().isEmpty) ? 'Merek wajib diisi.' : null,
                           ),
@@ -354,7 +411,6 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
                               labelText: 'Bahan',
                               hintText: 'Katun / Linen',
                               errorText: _galatValidasi422?['bahan']?.toString(),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
                             ),
                             validator: (v) => (v == null || v.trim().isEmpty) ? 'Bahan wajib diisi.' : null,
                           ),
@@ -369,27 +425,34 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
                       maxLines: 3,
                       decoration: InputDecoration(
                         labelText: 'Deskripsi Produk (Boleh Kosong)',
-                        hintText: 'Penjelasan rincian bahan, potongan pakaian, atau spesifikasi aksesori.',
+                        hintText: 'Penjelasan rincian bahan, potongan pakaian, atau spesifikasi.',
                         errorText: _galatValidasi422?['deskripsi']?.toString(),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
                       ),
                     ),
                     const SizedBox(height: 14),
 
                     // Status Ketersediaan (Tersedia)
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Produk Aktif / Tersedia Dijual', style: TextStyle(fontSize: 14)),
-                      value: _tersedia,
-                      activeTrackColor: _hitam,
-                      onChanged: (v) => setState(() => _tersedia = v),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: TemaAplikasi.surfaceWhite,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: TemaAplikasi.borderGray),
+                      ),
+                      child: SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Produk Tersedia / Aktif Dijual', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                        value: _tersedia,
+                        activeTrackColor: TemaAplikasi.primary,
+                        onChanged: (v) => setState(() => _tersedia = v),
+                      ),
                     ),
                     const SizedBox(height: 24),
 
-                    const Divider(color: _abuGaris),
+                    const Divider(),
                     const SizedBox(height: 16),
 
-                    // Manajemen Varian Produk (Domain Pembeda Kelompok 2: Stok Per Varian!)
+                    // Manajemen Varian Produk (Stok Per Varian)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -399,23 +462,26 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
                             Text(
                               'VARIAN PRODUK (UKURAN × WARNA)',
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 1.0,
-                                color: _hitam,
+                                color: TemaAplikasi.primary,
                               ),
                             ),
                             SizedBox(height: 2),
                             Text(
-                              'Stok diatur per kombinasi varian',
-                              style: TextStyle(fontSize: 11, color: _abuSedang),
+                              'Stok diatur per kombinasi varian spesifik',
+                              style: TextStyle(fontSize: 10, color: TemaAplikasi.secondary),
                             ),
                           ],
                         ),
-                        TextButton.icon(
+                        OutlinedButton.icon(
                           onPressed: () => _tambahVarian(),
-                          icon: const Icon(Icons.add, size: 18, color: _hitam),
-                          label: const Text('Tambah Varian', style: TextStyle(color: _hitam, fontSize: 12)),
+                          icon: const Icon(Icons.add, size: 14),
+                          label: const Text('TAMBAH'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          ),
                         ),
                       ],
                     ),
@@ -427,12 +493,12 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
                       final vInput = entry.value;
 
                       return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
+                        margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: _abuMuda,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: _abuGaris),
+                          color: TemaAplikasi.surfaceWhite,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: TemaAplikasi.borderGray),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -445,10 +511,7 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
                                 decoration: const InputDecoration(
                                   labelText: 'Ukuran',
                                   hintText: 'S/M/All Size',
-                                  filled: true,
-                                  fillColor: _putih,
                                   isDense: true,
-                                  border: OutlineInputBorder(),
                                 ),
                                 validator: (v) => (v == null || v.trim().isEmpty) ? 'Wajib' : null,
                               ),
@@ -463,10 +526,7 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
                                 decoration: const InputDecoration(
                                   labelText: 'Warna',
                                   hintText: 'Hitam/Putih',
-                                  filled: true,
-                                  fillColor: _putih,
                                   isDense: true,
-                                  border: OutlineInputBorder(),
                                 ),
                                 validator: (v) => (v == null || v.trim().isEmpty) ? 'Wajib' : null,
                               ),
@@ -482,10 +542,7 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
                                 decoration: const InputDecoration(
                                   labelText: 'Stok',
                                   hintText: '0',
-                                  filled: true,
-                                  fillColor: _putih,
                                   isDense: true,
-                                  border: OutlineInputBorder(),
                                 ),
                                 validator: (v) {
                                   if (v == null || v.trim().isEmpty) return 'Wajib';
@@ -498,7 +555,7 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
 
                             // Hapus Baris Varian
                             IconButton(
-                              icon: const Icon(Icons.close, size: 18, color: _abuSedang),
+                              icon: const Icon(Icons.close, size: 16, color: TemaAplikasi.secondary),
                               onPressed: () => _hapusVarian(index),
                             ),
                           ],
@@ -513,31 +570,29 @@ class _HalamanFormProdukState extends State<HalamanFormProduk> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: const BoxDecoration(
-          color: _putih,
-          border: Border(top: BorderSide(color: _abuGaris)),
+          color: TemaAplikasi.surfaceWhite,
+          border: Border(top: BorderSide(color: TemaAplikasi.borderGray)),
         ),
         child: SafeArea(
           child: SizedBox(
             width: double.infinity,
-            height: 50,
+            height: 48,
             child: ElevatedButton(
               onPressed: _sedangMenyimpan ? null : _simpanProduk,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _hitam,
-                foregroundColor: _putih,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                backgroundColor: TemaAplikasi.primary,
+                foregroundColor: TemaAplikasi.onPrimary,
               ),
               child: _sedangMenyimpan
                   ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(color: _putih, strokeWidth: 2),
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(color: TemaAplikasi.onPrimary, strokeWidth: 2),
                     )
                   : Text(
-                      _modeEdit ? 'SIMPAN PERUBAHAN' : 'TAMBAHKAN PRODUK',
+                      _modeEdit ? 'SIMPAN PERUBAHAN' : 'TAMBAHKAN PRODUK KE KATALOG',
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.5,
                       ),

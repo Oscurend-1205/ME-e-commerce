@@ -23,8 +23,8 @@ class ApiResponse<T> {
       status: json['status'] ?? '',
       code: json['code']?.toString() ?? '',
       message: json['message'] ?? '',
-      data: json['data'] != null && fromJsonT != null
-          ? fromJsonT(json['data'])
+      data: json['data'] != null
+          ? (fromJsonT != null ? fromJsonT(json['data']) : json['data'] as T?)
           : null,
       errors: json['errors'] != null
           ? Map<String, dynamic>.from(json['errors'])

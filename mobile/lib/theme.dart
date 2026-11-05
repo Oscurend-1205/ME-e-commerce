@@ -1,208 +1,100 @@
 import 'package:flutter/material.dart';
 
+/// Tema Aplikasi ME — Terinspirasi dari editorial minimalis fashion ZARA & cek-beranda.html
 class TemaAplikasi {
-  // === Palet Warna ===
-  static const Color _hitam = Color(0xFF111111);
-  static const Color _putih = Color(0xFFFFFFFF);
-  static const Color _abuMuda = Color(0xFFF3F3F3);
-  static const Color _abuSedang = Color(0xFF777777);
-  static const Color _abuGaris = Color(0xFFDDDDDD);
+  // Palet Warna dari cek-beranda.html & DESIGN.md
+  static const Color primary = Color(0xFF000000);
+  static const Color surfaceBright = Color(0xFFF9F9F9);
+  static const Color surfaceWhite = Color(0xFFFFFFFF);
+  static const Color surfaceContainer = Color(0xFFEEEEEE);
+  static const Color surfaceContainerHigh = Color(0xFFE8E8E8);
+  static const Color borderGray = Color(0xFFE5E5E5);
+  static const Color secondary = Color(0xFF5E5E5E);
+  static const Color mutedGray = Color(0xFF767676);
+  static const Color onPrimary = Color(0xFFFFFFFF);
+  static const Color errorColor = Color(0xFFBA1A1A);
 
   static ThemeData get tema {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      scaffoldBackgroundColor: _putih,
-      primaryColor: _hitam,
+      scaffoldBackgroundColor: surfaceBright,
+      primaryColor: primary,
       colorScheme: const ColorScheme.light(
-        primary: _hitam,
-        onPrimary: _putih,
-        secondary: _hitam,
-        onSecondary: _putih,
-        surface: _abuMuda,
-        onSurface: _hitam,
-        error: Color(0xFFB00020),
-        onError: _putih,
-        outline: _abuGaris,
+        primary: primary,
+        onPrimary: onPrimary,
+        surface: surfaceBright,
+        onSurface: primary,
+        error: errorColor,
       ),
-      dividerColor: _abuGaris,
-      dividerTheme: const DividerThemeData(
-        color: _abuGaris,
-        thickness: 1,
-        space: 0,
-      ),
-
-      // === AppBar ===
       appBarTheme: const AppBarTheme(
-        backgroundColor: _putih,
-        foregroundColor: _hitam,
+        backgroundColor: surfaceWhite,
+        foregroundColor: primary,
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         titleTextStyle: TextStyle(
-          color: _hitam,
+          color: primary,
           fontSize: 18,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1.2,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 2.0,
         ),
-        iconTheme: IconThemeData(color: _hitam),
       ),
-
-      // === ElevatedButton ===
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: _hitam,
-          foregroundColor: _putih,
+          backgroundColor: primary,
+          foregroundColor: onPrimary,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(2)),
           ),
           textStyle: const TextStyle(
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: FontWeight.w600,
-            letterSpacing: 0.8,
+            letterSpacing: 1.5,
           ),
-          minimumSize: const Size(double.infinity, 50),
         ),
       ),
-
-      // === OutlinedButton ===
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: _hitam,
-          side: const BorderSide(color: _hitam, width: 1),
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+          foregroundColor: primary,
+          side: const BorderSide(color: primary, width: 1),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(2)),
           ),
           textStyle: const TextStyle(
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: FontWeight.w600,
-            letterSpacing: 0.8,
+            letterSpacing: 1.5,
           ),
         ),
       ),
-
-      // === TextButton ===
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: _hitam,
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-
-      // === Card ===
-      cardTheme: CardThemeData(
-        color: _abuMuda,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        margin: EdgeInsets.zero,
-      ),
-
-      // === Input Decoration ===
       inputDecorationTheme: InputDecorationTheme(
-        filled: false,
+        filled: true,
+        fillColor: surfaceWhite,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _abuGaris),
+          borderRadius: BorderRadius.circular(4),
+          borderSide: const BorderSide(color: borderGray),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _abuGaris),
+          borderRadius: BorderRadius.circular(4),
+          borderSide: const BorderSide(color: borderGray),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _hitam, width: 1.5),
+          borderRadius: BorderRadius.circular(4),
+          borderSide: const BorderSide(color: primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFB00020)),
+          borderRadius: BorderRadius.circular(4),
+          borderSide: const BorderSide(color: errorColor),
         ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFB00020), width: 1.5),
-        ),
-        hintStyle: const TextStyle(color: _abuSedang, fontSize: 14),
-        labelStyle: const TextStyle(color: _abuSedang, fontSize: 14),
+        labelStyle: const TextStyle(color: secondary, fontSize: 13),
+        hintStyle: const TextStyle(color: mutedGray, fontSize: 13),
       ),
-
-      // === Chip ===
-      chipTheme: ChipThemeData(
-        backgroundColor: _putih,
-        selectedColor: _hitam,
-        disabledColor: _abuMuda,
-        labelStyle: const TextStyle(color: _hitam, fontSize: 13),
-        secondaryLabelStyle: const TextStyle(color: _putih, fontSize: 13),
-        side: const BorderSide(color: _abuGaris),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        showCheckmark: false,
-      ),
-
-      // === Bottom Navigation Bar ===
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: _putih,
-        selectedItemColor: _hitam,
-        unselectedItemColor: _abuSedang,
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
-        selectedLabelStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: TextStyle(fontSize: 11),
-      ),
-
-      // === SnackBar ===
-      snackBarTheme: SnackBarThemeData(
-        backgroundColor: const Color(0xFF1A1A1A),
-        contentTextStyle: const TextStyle(color: _putih, fontSize: 14),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-
-      // === Icon ===
-      iconTheme: const IconThemeData(
-        color: _hitam,
-        size: 24,
-      ),
-
-      // === Typography ===
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(color: _hitam, fontWeight: FontWeight.w300, letterSpacing: -1.5),
-        displayMedium: TextStyle(color: _hitam, fontWeight: FontWeight.w300, letterSpacing: -0.5),
-        displaySmall: TextStyle(color: _hitam, fontWeight: FontWeight.w400),
-        headlineLarge: TextStyle(color: _hitam, fontWeight: FontWeight.w400, letterSpacing: 0.25),
-        headlineMedium: TextStyle(color: _hitam, fontWeight: FontWeight.w400),
-        headlineSmall: TextStyle(color: _hitam, fontWeight: FontWeight.w400),
-        titleLarge: TextStyle(color: _hitam, fontWeight: FontWeight.w600, letterSpacing: 0.15),
-        titleMedium: TextStyle(color: _hitam, fontWeight: FontWeight.w500, letterSpacing: 0.15),
-        titleSmall: TextStyle(color: _hitam, fontWeight: FontWeight.w500, letterSpacing: 0.1),
-        bodyLarge: TextStyle(color: _hitam, fontWeight: FontWeight.w400, letterSpacing: 0.5),
-        bodyMedium: TextStyle(color: _hitam, fontWeight: FontWeight.w400, letterSpacing: 0.25),
-        bodySmall: TextStyle(color: _abuSedang, fontWeight: FontWeight.w400, letterSpacing: 0.4),
-        labelLarge: TextStyle(color: _hitam, fontWeight: FontWeight.w600, letterSpacing: 1.0),
-        labelMedium: TextStyle(color: _hitam, fontWeight: FontWeight.w500, letterSpacing: 0.5),
-        labelSmall: TextStyle(color: _abuSedang, fontWeight: FontWeight.w500, letterSpacing: 0.5),
-      ),
-
-      // === ListTile ===
-      listTileTheme: const ListTileThemeData(
-        contentPadding: EdgeInsets.symmetric(horizontal: 16),
-        dense: false,
-      ),
-
-      // === ProgressIndicator ===
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: _hitam,
+      dividerTheme: const DividerThemeData(
+        color: borderGray,
+        thickness: 0.8,
+        space: 1,
       ),
     );
   }

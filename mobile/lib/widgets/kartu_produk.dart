@@ -1,95 +1,152 @@
 import 'package:flutter/material.dart';
 import '../models/produk.dart';
+import '../theme.dart';
 import 'format_rupiah.dart';
 
-// === Warna Tema ===
-const Color _hitam = Color(0xFF111111);
-const Color _putih = Color(0xFFFFFFFF);
-const Color _abuMuda = Color(0xFFF3F3F3);
-const Color _abuSedang = Color(0xFF777777);
-
-/// Kartu produk untuk grid katalog
-/// Menampilkan gambar placeholder, nama, harga, dan badge "Habis" jika stok 0
 class KartuProduk extends StatelessWidget {
   final Produk produk;
   final VoidCallback onTap;
+  final VoidCallback? onTambahKeranjang;
 
   const KartuProduk({
     super.key,
     required this.produk,
     required this.onTap,
+    this.onTambahKeranjang,
   });
 
   bool get _habis => produk.stok == 0 || !produk.tersedia;
 
   @override
   Widget build(BuildContext context) {
+    // Ambil daftar ukuran unik dari varian jika ada
+    final ukuranList = produk.varian != null && produk.varian!.isNotEmpty
+        ? produk.varian!.map((v) => v.ukuran).toSet().take(3).join(' ')
+        : 'All Size';
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Gambar produk / placeholder
+          // Gambar Produk (Aspek Rasio 3:4 Khas Fashion Editorial)
           Expanded(
             child: Stack(
               children: [
-                // Placeholder gambar
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: _abuMuda,
-                    borderRadius: BorderRadius.circular(8),
+                    color: TemaAplikasi.surfaceContainer,
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.checkroom,
-                      size: 48,
-                      color: _abuSedang,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          produk.kategori.toLowerCase() == 'aksesori'
+                              ? Icons.watch_outlined
+                              : Icons.checkroom_outlined,
+                          size: 40,
+                          color: TemaAplikasi.mutedGray,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          produk.merek.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 9,
+                            letterSpacing: 2.0,
+                            fontWeight: FontWeight.w600,
+                            color: TemaAplikasi.mutedGray,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
 
-                // Badge "Habis" jika stok kosong
+                // Label Status (Habis / New Arrival)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    color: _habis ? TemaAplikasi.secondary : TemaAplikasi.primary,
+                    child: Text(
+                      _habis ? 'HABIS' : 'NEW',
+                      style: const TextStyle(
+                        color: TemaAplikasi.onPrimary,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Overlay Gelap jika produk Habis
                 if (_habis)
                   Positioned.fill(
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: _hitam.withValues(alpha: 0.55),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'HABIS',
-                          style: TextStyle(
-                            color: _putih,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 2.0,
-                          ),
-                        ),
-                      ),
+                      color: Colors.white.withValues(alpha: 0.5),
                     ),
                   ),
               ],
             ),
           ),
+          const SizedBox(height: 8),
 
-          const SizedBox(height: 10),
+          // Metadata Variasi: Indikator Warna & Ukuran
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: TemaAplikasi.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: TemaAplikasi.borderGray,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                ukuranList,
+                style: const TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.0,
+                  color: TemaAplikasi.secondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
 
-          // Nama produk
+          // Nama Produk
           Text(
             produk.nama,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w400,
-              color: _hitam,
-              letterSpacing: 0.2,
+              color: TemaAplikasi.primary,
+              height: 1.25,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
 
           // Harga
           Text(
@@ -97,8 +154,7 @@ class KartuProduk extends StatelessWidget {
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: _hitam,
-              letterSpacing: 0.3,
+              color: TemaAplikasi.primary,
             ),
           ),
         ],

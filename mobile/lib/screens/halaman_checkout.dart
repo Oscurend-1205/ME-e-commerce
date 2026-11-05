@@ -5,15 +5,10 @@ import '../enums.dart';
 import '../models/kurir.dart';
 import '../models/metode_pembayaran.dart';
 import '../services/layanan_api.dart';
+import '../theme.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_rincian_pesanan.dart';
-
-const Color _hitam = Color(0xFF111111);
-const Color _putih = Color(0xFFFFFFFF);
-const Color _abuMuda = Color(0xFFF3F3F3);
-const Color _abuSedang = Color(0xFF777777);
-const Color _abuGaris = Color(0xFFDDDDDD);
 
 class HalamanCheckout extends StatefulWidget {
   final int subtotalAwal;
@@ -46,7 +41,6 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
   @override
   void initState() {
     super.initState();
-    // Generate UUID idempoten pertama kali untuk sesi checkout ini
     _kunciIdempotenSaatIni = const Uuid().v4();
     _muatDataReferensi();
   }
@@ -81,7 +75,6 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
             .toList();
       }
 
-      // Fallback metode pembayaran jika endpoint belum terisi data seed
       if (metodeList.isEmpty) {
         metodeList = [
           MetodePembayaran(id: 1, kode: 'transfer_manual', nama: 'Transfer Bank Manual'),
@@ -105,33 +98,33 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
     }
   }
 
-  Future<void> _lakukanCheckout() async {
-    // Validasi form lokal
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+  Future<void> _kirimPesanan() async {
+    setState(() {
+      _galatValidasi422 = null;
+    });
+
+    if (!_formKey.currentState!.validate()) return;
 
     if (_kurirTerpilih == null || _metodeTerpilih == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan pilih kurir dan metode pembayaran.')),
+        const SnackBar(
+          content: Text('Pilih kurir dan metode pembayaran terlebih dahulu.'),
+          backgroundColor: TemaAplikasi.primary,
+        ),
       );
       return;
     }
 
     setState(() {
       _sedangMemproses = true;
-      _galatValidasi422 = null;
     });
 
-    // Pastikan kunci idempoten ada (gunakan yang lama jika pengulangan koneksi gagal)
-    _kunciIdempotenSaatIni ??= const Uuid().v4();
-
     final respon = await LayananApi.checkout(
+      kunciIdempoten: _kunciIdempotenSaatIni!,
       nama: _namaController.text.trim(),
       alamat: _alamatController.text.trim(),
       kurirId: _kurirTerpilih!.id,
       metodePembayaranId: _metodeTerpilih!.id,
-      kunciIdempoten: _kunciIdempotenSaatIni!,
     );
 
     if (!mounted) return;
@@ -141,51 +134,73 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
     });
 
     if (respon.berhasil && respon.data != null) {
-      // 201 Created -> Pesanan berhasil dibuat secara atomik
-      final dataPesanan = respon.data as Map<String, dynamic>;
-      final int pesananId = dataPesanan['id'] ?? 0;
+      final pesananMap = respon.data as Map<String, dynamic>;
+      final int pesananId = pesananMap['id'] is int
+          ? pesananMap['id'] as int
+          : int.tryParse(pesananMap['id'].toString()) ?? 0;
 
-      // Navigasi ke HalamanRincianPesanan dan bersihkan tumpukan halaman
-      Navigator.pushAndRemoveUntil(
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pesanan Anda berhasil dibuat.'),
+          backgroundColor: TemaAplikasi.primary,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => HalamanRincianPesanan(pesananId: pesananId),
         ),
-        (route) => route.isFirst,
       );
     } else {
-      final code = respon.code;
-      if (code == '422') {
-        // Validasi gagal di server: tampilkan pesan per kolom
+      // 409 Conflict: Stok Habis saat Checkout Atomic
+      if (respon.code == '409') {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: TemaAplikasi.surfaceWhite,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+            title: const Text(
+              'Stok Tidak Mencukupi',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+                color: TemaAplikasi.primary,
+              ),
+            ),
+            content: Text(
+              respon.message,
+              style: const TextStyle(color: TemaAplikasi.secondary, height: 1.5),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.pop(context); // Kembali ke keranjang untuk menyesuaikan
+                },
+                child: const Text('KEMBALI KE KERANJANG', style: TextStyle(color: TemaAplikasi.primary, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+        );
+      } else if (respon.code == '422') {
         setState(() {
           _galatValidasi422 = respon.errors;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(respon.message),
-            backgroundColor: Colors.red.shade800,
-          ),
-        );
-      } else if (code == '409') {
-        // Bentrok stok varian habis -> tetap di layar dan tampilkan pesan server
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(respon.message),
-            backgroundColor: Colors.orange.shade900,
-            duration: const Duration(seconds: 4),
+            backgroundColor: TemaAplikasi.errorColor,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       } else {
-        // Galat jaringan, batas waktu, atau server 500
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(respon.message),
-            backgroundColor: Colors.red.shade800,
-            action: SnackBarAction(
-              label: 'COBA LAGI',
-              textColor: _putih,
-              onPressed: _lakukanCheckout,
-            ),
+            backgroundColor: TemaAplikasi.errorColor,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -195,292 +210,371 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _putih,
+      backgroundColor: TemaAplikasi.surfaceWhite,
       appBar: AppBar(
+        backgroundColor: TemaAplikasi.surfaceWhite,
+        foregroundColor: TemaAplikasi.primary,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: const Text(
-          'CHECKOUT',
+          'CHECKOUT PESANAN',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
-            letterSpacing: 1.5,
+            letterSpacing: 2.0,
           ),
         ),
       ),
-      body: _bangunKonten(),
+      body: _keadaan == KeadaanMuat.memuat
+          ? const WidgetMemuat()
+          : _keadaan == KeadaanMuat.galat
+              ? WidgetGalat(
+                  jenisGalat: _jenisGalat,
+                  pesan: _pesanGalat,
+                  onCobaLagi: _muatDataReferensi,
+                )
+              : _bangunFormulir(),
       bottomNavigationBar: _keadaan == KeadaanMuat.berhasil ? _bangunBilahBawah() : null,
     );
   }
 
-  Widget _bangunKonten() {
-    switch (_keadaan) {
-      case KeadaanMuat.memuat:
-        return const WidgetMemuat();
-      case KeadaanMuat.kosong:
-      case KeadaanMuat.galat:
-        return WidgetGalat(
-          jenisGalat: _jenisGalat,
-          pesan: _pesanGalat,
-          onCobaLagi: _muatDataReferensi,
-        );
-      case KeadaanMuat.berhasil:
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Info Idempoten (Sistem Terdistribusi Kriteria 5)
-                Container(
-                  padding: const EdgeInsets.all(12),
+  Widget _bangunFormulir() {
+    final ongkir = _kurirTerpilih?.tarif ?? 0;
+    final totalPerkiraan = widget.subtotalAwal + ongkir;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Safe Idempotency Header Pill
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: TemaAplikasi.surfaceBright,
+                border: Border.all(color: TemaAplikasi.borderGray),
+                borderRadius: BorderRadius.circular(2),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.shield_outlined, size: 16, color: TemaAplikasi.secondary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Idempotensi aktif: Transaksi atomik & aman ganda.',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: TemaAplikasi.secondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Bagian Penerima
+            const Text(
+              'INFORMASI PENERIMA',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
+                color: TemaAplikasi.primary,
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            TextFormField(
+              controller: _namaController,
+              decoration: InputDecoration(
+                labelText: 'Nama Lengkap Penerima',
+                hintText: 'Misal: Budi Santoso',
+                errorText: _galatValidasi422?['nama_penerima'] is List
+                    ? (_galatValidasi422!['nama_penerima'] as List).first.toString()
+                    : null,
+              ),
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama penerima wajib diisi' : null,
+            ),
+            const SizedBox(height: 14),
+
+            TextFormField(
+              controller: _alamatController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: 'Alamat Pengiriman Lengkap',
+                hintText: 'Jalan, nomor rumah, RT/RW, kecamatan, kota',
+                errorText: _galatValidasi422?['alamat_pengiriman'] is List
+                    ? (_galatValidasi422!['alamat_pengiriman'] as List).first.toString()
+                    : null,
+              ),
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Alamat pengiriman wajib diisi' : null,
+            ),
+            const SizedBox(height: 28),
+
+            // Pilihan Kurir
+            const Text(
+              'PILIH JASA PENGIRIMAN',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
+                color: TemaAplikasi.primary,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            ..._daftarKurir.map((kurir) {
+              final terpilih = _kurirTerpilih?.id == kurir.id;
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    _kurirTerpilih = kurir;
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: _abuMuda,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: _abuGaris),
+                    color: terpilih ? TemaAplikasi.surfaceBright : TemaAplikasi.surfaceWhite,
+                    border: Border.all(
+                      color: terpilih ? TemaAplikasi.primary : TemaAplikasi.borderGray,
+                      width: terpilih ? 1.5 : 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.shield_outlined, size: 18, color: _abuSedang),
-                      const SizedBox(width: 10),
+                      Icon(
+                        terpilih ? Icons.radio_button_checked : Icons.radio_button_off,
+                        color: terpilih ? TemaAplikasi.primary : TemaAplikasi.mutedGray,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          'Kunci Idempoten: ${_kunciIdempotenSaatIni?.substring(0, 8)}... (Aman dari pesanan ganda)',
-                          style: const TextStyle(fontSize: 11, color: _abuSedang),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              kurir.nama,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: TemaAplikasi.primary,
+                              ),
+                            ),
+                            Text(
+                              kurir.wilayah.isNotEmpty ? 'Wilayah: ${kurir.wilayah}' : 'Standar',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: TemaAplikasi.mutedGray,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        formatRupiah(kurir.tarif),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: TemaAplikasi.primary,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+              );
+            }),
+            const SizedBox(height: 24),
 
-                // Bagian Penerima
-                const Text(
-                  'INFORMASI PENERIMA',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
-                    color: _hitam,
-                  ),
-                ),
-                const SizedBox(height: 16),
+            // Pilihan Metode Pembayaran
+            const Text(
+              'METODE PEMBAYARAN',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
+                color: TemaAplikasi.primary,
+              ),
+            ),
+            const SizedBox(height: 12),
 
-                // Nama Penerima
-                TextFormField(
-                  controller: _namaController,
-                  decoration: InputDecoration(
-                    labelText: 'Nama Lengkap Penerima',
-                    hintText: 'Contoh: Auril Aditya',
-                    errorText: _galatValidasi422?['nama']?.toString(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Nama penerima wajib diisi.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Alamat Pengiriman
-                TextFormField(
-                  controller: _alamatController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    labelText: 'Alamat Pengiriman Lengkap',
-                    hintText: 'Nama jalan, nomor rumah, RT/RW, kelurahan, kecamatan',
-                    errorText: _galatValidasi422?['alamat']?.toString(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Alamat pengiriman wajib diisi.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 28),
-
-                // Bagian Kurir & Pengiriman
-                const Text(
-                  'PILIHAN PENGANTARAN',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
-                    color: _hitam,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                DropdownButtonFormField<Kurir>(
-                  initialValue: _kurirTerpilih,
-                  decoration: InputDecoration(
-                    labelText: 'Kurir & Wilayah',
-                    errorText: _galatValidasi422?['kurir_id']?.toString(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
-                  ),
-                  items: _daftarKurir.map((kurir) {
-                    return DropdownMenuItem<Kurir>(
-                      value: kurir,
-                      child: Text(
-                        '${kurir.nama} - ${kurir.wilayah} (${formatRupiah(kurir.tarif)})',
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (kurir) {
-                    setState(() {
-                      _kurirTerpilih = kurir;
-                    });
-                  },
-                  validator: (value) => value == null ? 'Silakan pilih kurir.' : null,
-                ),
-                const SizedBox(height: 28),
-
-                // Bagian Pembayaran
-                const Text(
-                  'METODE PEMBAYARAN',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
-                    color: _hitam,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                DropdownButtonFormField<MetodePembayaran>(
-                  initialValue: _metodeTerpilih,
-                  decoration: InputDecoration(
-                    labelText: 'Metode Pembayaran',
-                    errorText: _galatValidasi422?['metode_pembayaran_id']?.toString(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
-                  ),
-                  items: _daftarMetode.map((metode) {
-                    return DropdownMenuItem<MetodePembayaran>(
-                      value: metode,
-                      child: Text(
-                        metode.nama,
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (metode) {
-                    setState(() {
-                      _metodeTerpilih = metode;
-                    });
-                  },
-                  validator: (value) => value == null ? 'Silakan pilih metode pembayaran.' : null,
-                ),
-                const SizedBox(height: 32),
-
-                // Ringkasan Biaya (Preview Informasi - Server Tetap Sumber Kebenaran)
-                Container(
-                  padding: const EdgeInsets.all(16),
+            ..._daftarMetode.map((metode) {
+              final terpilih = _metodeTerpilih?.id == metode.id;
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    _metodeTerpilih = metode;
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: _abuMuda,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: _abuGaris),
+                    color: terpilih ? TemaAplikasi.surfaceBright : TemaAplikasi.surfaceWhite,
+                    border: Border.all(
+                      color: terpilih ? TemaAplikasi.primary : TemaAplikasi.borderGray,
+                      width: terpilih ? 1.5 : 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    children: [
+                      Icon(
+                        terpilih ? Icons.radio_button_checked : Icons.radio_button_off,
+                        color: terpilih ? TemaAplikasi.primary : TemaAplikasi.mutedGray,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          metode.nama,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: TemaAplikasi.primary,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        metode.kode.contains('transfer')
+                            ? Icons.account_balance_outlined
+                            : Icons.payments_outlined,
+                        size: 18,
+                        color: TemaAplikasi.secondary,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+            const SizedBox(height: 28),
+
+            // Rincian Perhitungan
+            const Text(
+              'RINGKASAN PEMBAYARAN',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
+                color: TemaAplikasi.primary,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: TemaAplikasi.surfaceBright,
+                border: Border.all(color: TemaAplikasi.borderGray),
+                borderRadius: BorderRadius.circular(2),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'RINGKASAN ESTIMASI BIAYA',
+                        'Subtotal Belanja',
+                        style: TextStyle(fontSize: 12, color: TemaAplikasi.secondary),
+                      ),
+                      Text(
+                        formatRupiah(widget.subtotalAwal),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Ongkos Kirim',
+                        style: TextStyle(fontSize: 12, color: TemaAplikasi.secondary),
+                      ),
+                      Text(
+                        formatRupiah(ongkir),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Divider(color: TemaAplikasi.borderGray),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'TOTAL AKHIR',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                          color: _hitam,
+                          letterSpacing: 1.0,
+                          color: TemaAplikasi.primary,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Subtotal Produk', style: TextStyle(color: _abuSedang, fontSize: 13)),
-                          Text(formatRupiah(widget.subtotalAwal), style: const TextStyle(fontWeight: FontWeight.w500)),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Ongkos Kirim', style: TextStyle(color: _abuSedang, fontSize: 13)),
-                          Text(
-                            _kurirTerpilih != null ? formatRupiah(_kurirTerpilih!.tarif) : 'Pilih kurir',
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                        ],
-                      ),
-                      const Divider(height: 20, color: _abuGaris),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Estimasi Total', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                          Text(
-                            formatRupiah(widget.subtotalAwal + (_kurirTerpilih?.tarif ?? 0)),
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        '* Ongkir dan total resmi dihitung mutlak oleh server saat checkout.',
-                        style: TextStyle(fontSize: 10, color: _abuSedang, fontStyle: FontStyle.italic),
+                      Text(
+                        formatRupiah(totalPerkiraan),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: TemaAplikasi.primary,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 24),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-    }
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _bangunBilahBawah() {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: _putih,
-        border: const Border(top: BorderSide(color: _abuGaris)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      decoration: const BoxDecoration(
+        color: TemaAplikasi.surfaceWhite,
+        border: Border(top: BorderSide(color: TemaAplikasi.borderGray)),
       ),
       child: SafeArea(
         child: SizedBox(
           width: double.infinity,
-          height: 50,
+          height: 48,
           child: ElevatedButton(
-            onPressed: _sedangMemproses ? null : _lakukanCheckout,
+            onPressed: _sedangMemproses ? null : _kirimPesanan,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _hitam,
-              disabledBackgroundColor: _abuSedang,
-              foregroundColor: _putih,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+              backgroundColor: TemaAplikasi.primary,
+              foregroundColor: TemaAplikasi.onPrimary,
+              disabledBackgroundColor: TemaAplikasi.surfaceContainerHigh,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(2),
+              ),
               elevation: 0,
             ),
             child: _sedangMemproses
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(color: _putih, strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      color: TemaAplikasi.onPrimary,
+                      strokeWidth: 2,
+                    ),
                   )
                 : const Text(
-                    'KONFIRMASI PESANAN',
+                    'BUAT PESANAN SEKARANG',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 1.5,
+                      letterSpacing: 2.0,
                     ),
                   ),
           ),
@@ -489,4 +583,3 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
     );
   }
 }
-

@@ -3,16 +3,11 @@ import 'package:flutter/material.dart';
 import '../enums.dart';
 import '../models/keranjang.dart';
 import '../services/layanan_api.dart';
+import '../theme.dart';
 import '../widgets/dialog_konfirmasi.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_checkout.dart';
-
-const Color _hitam = Color(0xFF111111);
-const Color _putih = Color(0xFFFFFFFF);
-const Color _abuMuda = Color(0xFFF3F3F3);
-const Color _abuSedang = Color(0xFF777777);
-const Color _abuGaris = Color(0xFFDDDDDD);
 
 class HalamanKeranjang extends StatefulWidget {
   const HalamanKeranjang({super.key});
@@ -81,7 +76,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(respon.message),
-          backgroundColor: Colors.red.shade800,
+          backgroundColor: TemaAplikasi.errorColor,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -93,8 +88,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
       context,
       judul: 'Hapus Item',
       pesan: 'Apakah Anda yakin ingin menghapus "${item.namaProduk}" (${item.ukuran}, ${item.warna}) dari keranjang?',
-      teksKonfirmasi: 'Hapus',
-      warnaKonfirmasi: Colors.red.shade700,
+      teksKonfirmasi: 'HAPUS',
+      warnaKonfirmasi: TemaAplikasi.errorColor,
     );
 
     if (!konfirmasi || !mounted) return;
@@ -115,7 +110,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Item berhasil dihapus dari keranjang.'),
-          backgroundColor: _hitam,
+          backgroundColor: TemaAplikasi.primary,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -124,7 +119,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(respon.message),
-          backgroundColor: Colors.red.shade800,
+          backgroundColor: TemaAplikasi.errorColor,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -134,21 +129,25 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _putih,
+      backgroundColor: TemaAplikasi.surfaceWhite,
       appBar: AppBar(
+        backgroundColor: TemaAplikasi.surfaceWhite,
+        foregroundColor: TemaAplikasi.primary,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: const Text(
           'KERANJANG BELANJA',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
-            letterSpacing: 1.5,
+            letterSpacing: 2.0,
           ),
         ),
       ),
       body: Stack(
         children: [
           RefreshIndicator(
-            color: _hitam,
+            color: TemaAplikasi.primary,
             onRefresh: _muatKeranjang,
             child: _bangunKonten(),
           ),
@@ -156,7 +155,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
             Container(
               color: Colors.black.withValues(alpha: 0.15),
               child: const Center(
-                child: CircularProgressIndicator(color: _hitam),
+                child: CircularProgressIndicator(color: TemaAplikasi.primary),
               ),
             ),
         ],
@@ -176,8 +175,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
       case KeadaanMuat.kosong:
         return WidgetKosong(
           ikon: Icons.shopping_bag_outlined,
-          pesan: 'Keranjang masih kosong, ayo lihat katalog.',
-          saranAksi: 'Mulai Belanja',
+          pesan: 'Keranjang belanja Anda masih kosong.',
+          saranAksi: 'Lihat Katalog ME',
           onAksi: () => Navigator.pop(context),
         );
       case KeadaanMuat.galat:
@@ -189,27 +188,35 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
       case KeadaanMuat.berhasil:
         final items = _dataKeranjang!.items;
         return ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           itemCount: items.length,
-          separatorBuilder: (context, index) => const Divider(color: _abuGaris, height: 24),
+          separatorBuilder: (context, index) => const Divider(
+            color: TemaAplikasi.borderGray,
+            height: 32,
+          ),
           itemBuilder: (context, index) {
             final item = items[index];
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Placeholder Gambar Item
+                // Placeholder Gambar Item (Editorial 3:4)
                 Container(
                   width: 76,
-                  height: 96,
+                  height: 100,
                   decoration: BoxDecoration(
-                    color: _abuMuda,
-                    borderRadius: BorderRadius.circular(6),
+                    color: TemaAplikasi.surfaceContainer,
+                    borderRadius: BorderRadius.circular(2),
+                    border: Border.all(color: TemaAplikasi.borderGray),
                   ),
                   child: const Center(
-                    child: Icon(Icons.checkroom, color: _abuSedang, size: 28),
+                    child: Icon(
+                      Icons.checkroom_outlined,
+                      color: TemaAplikasi.mutedGray,
+                      size: 26,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 16),
 
                 // Detail Item
                 Expanded(
@@ -226,52 +233,87 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: _hitam,
+                                color: TemaAplikasi.primary,
+                                height: 1.25,
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close, size: 18, color: _abuSedang),
+                            icon: const Icon(
+                              Icons.close,
+                              size: 16,
+                              color: TemaAplikasi.secondary,
+                            ),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                             onPressed: () => _hapusItem(item),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-
-                      // Ukuran dan Warna (Wajib Tampil Sesuai Domain!)
-                      Text(
-                        'Ukuran: ${item.ukuran}  |  Warna: ${item.warna}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: _abuSedang,
-                        ),
-                      ),
                       const SizedBox(height: 6),
+
+                      // Ukuran dan Warna (Domain Fashion Wajib Tampil)
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: TemaAplikasi.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            child: Text(
+                              'SIZE: ${item.ukuran}',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.5,
+                                color: TemaAplikasi.secondary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: TemaAplikasi.borderGray),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            child: Text(
+                              item.warna.toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                                color: TemaAplikasi.secondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
 
                       // Harga Satuan
                       Text(
                         formatRupiah(item.hargaSatuan),
                         style: const TextStyle(
-                          fontSize: 13,
-                          color: _hitam,
+                          fontSize: 12,
+                          color: TemaAplikasi.secondary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
 
                       // Baris Kuantitas dan Subtotal Item (Dihitung Server)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Pengatur Kuantitas
+                          // Pengatur Kuantitas Sleek
                           Container(
                             decoration: BoxDecoration(
-                              border: Border.all(color: _abuGaris),
-                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: TemaAplikasi.borderGray),
+                              borderRadius: BorderRadius.circular(2),
                             ),
                             child: Row(
                               children: [
@@ -283,8 +325,10 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                     child: Icon(
                                       Icons.remove,
-                                      size: 14,
-                                      color: item.jumlah > 1 ? _hitam : _abuSedang,
+                                      size: 13,
+                                      color: item.jumlah > 1
+                                          ? TemaAplikasi.primary
+                                          : TemaAplikasi.mutedGray,
                                     ),
                                   ),
                                 ),
@@ -295,6 +339,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                                     style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
+                                      color: TemaAplikasi.primary,
                                     ),
                                   ),
                                 ),
@@ -302,7 +347,11 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                                   onTap: () => _ubahJumlah(item, item.jumlah + 1),
                                   child: const Padding(
                                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    child: Icon(Icons.add, size: 14, color: _hitam),
+                                    child: Icon(
+                                      Icons.add,
+                                      size: 13,
+                                      color: TemaAplikasi.primary,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -315,7 +364,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
-                              color: _hitam,
+                              color: TemaAplikasi.primary,
                             ),
                           ),
                         ],
@@ -332,77 +381,80 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
 
   Widget _bangunBilahBawah() {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: _putih,
-        border: const Border(top: BorderSide(color: _abuGaris)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: const BoxDecoration(
+        color: TemaAplikasi.surfaceWhite,
+        border: Border(top: BorderSide(color: TemaAplikasi.borderGray)),
       ),
       child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Subtotal dari Server (Sumber Kebenaran)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'SUBTOTAL',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.0,
-                    color: _abuSedang,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'TOTAL SUBTOAL',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.5,
+                        color: TemaAplikasi.secondary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${_dataKeranjang!.items.fold<int>(0, (sum, i) => sum + i.jumlah)} item terpilih',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: TemaAplikasi.mutedGray,
+                      ),
+                    ),
+                  ],
                 ),
                 Text(
                   formatRupiah(_dataKeranjang!.subtotal),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: _hitam,
+                    letterSpacing: 0.5,
+                    color: TemaAplikasi.primary,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-
-            // Tombol Lanjut ke Checkout
+            const SizedBox(height: 14),
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 48,
               child: ElevatedButton(
-                onPressed: () async {
-                  await Navigator.push(
+                onPressed: () {
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => HalamanCheckout(
                         subtotalAwal: _dataKeranjang!.subtotal,
                       ),
                     ),
-                  );
-                  _muatKeranjang();
+                  ).then((_) => _muatKeranjang());
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _hitam,
-                  foregroundColor: _putih,
-                  elevation: 0,
+                  backgroundColor: TemaAplikasi.primary,
+                  foregroundColor: TemaAplikasi.onPrimary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(2),
                   ),
+                  elevation: 0,
                 ),
                 child: const Text(
                   'LANJUT KE CHECKOUT',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 1.5,
+                    letterSpacing: 2.0,
                   ),
                 ),
               ),
@@ -413,4 +465,3 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     );
   }
 }
-

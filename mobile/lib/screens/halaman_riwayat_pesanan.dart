@@ -3,14 +3,10 @@ import 'package:flutter/material.dart';
 import '../enums.dart';
 import '../models/pesanan.dart';
 import '../services/layanan_api.dart';
+import '../theme.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_rincian_pesanan.dart';
-
-const Color _hitam = Color(0xFF111111);
-const Color _putih = Color(0xFFFFFFFF);
-const Color _abuSedang = Color(0xFF777777);
-const Color _abuGaris = Color(0xFFDDDDDD);
 
 class HalamanRiwayatPesanan extends StatefulWidget {
   const HalamanRiwayatPesanan({super.key});
@@ -62,21 +58,21 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
   Color _warnaStatus(String status) {
     switch (status.toLowerCase()) {
       case 'menunggu_pembayaran':
-        return Colors.orange.shade800;
+        return const Color(0xFFC77700);
       case 'menunggu_konfirmasi':
-        return Colors.blue.shade700;
+        return const Color(0xFF1E6091);
       case 'dibayar':
-        return Colors.teal.shade700;
+        return const Color(0xFF184E77);
       case 'diproses':
-        return Colors.indigo.shade700;
+        return const Color(0xFF168AAD);
       case 'dikirim':
-        return Colors.purple.shade700;
+        return const Color(0xFF52B69A);
       case 'selesai':
-        return Colors.green.shade700;
+        return const Color(0xFF2D6A4F);
       case 'dibatalkan':
-        return Colors.red.shade700;
+        return TemaAplikasi.errorColor;
       default:
-        return _abuSedang;
+        return TemaAplikasi.secondary;
     }
   }
 
@@ -89,9 +85,9 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
       case 'dibayar':
         return 'SUDAH DIBAYAR';
       case 'diproses':
-        return 'DIPROSES';
+        return 'SEDANG DIPROSES';
       case 'dikirim':
-        return 'DIKIRIM';
+        return 'DALAM PENGIRIMAN';
       case 'selesai':
         return 'SELESAI';
       case 'dibatalkan':
@@ -104,19 +100,23 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _putih,
+      backgroundColor: TemaAplikasi.surfaceBright,
       appBar: AppBar(
+        backgroundColor: TemaAplikasi.surfaceWhite,
+        foregroundColor: TemaAplikasi.primary,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: const Text(
           'RIWAYAT PESANAN',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
-            letterSpacing: 1.5,
+            letterSpacing: 2.0,
           ),
         ),
       ),
       body: RefreshIndicator(
-        color: _hitam,
+        color: TemaAplikasi.primary,
         onRefresh: _muatRiwayat,
         child: _bangunKonten(),
       ),
@@ -130,8 +130,8 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
       case KeadaanMuat.kosong:
         return WidgetKosong(
           ikon: Icons.receipt_long_outlined,
-          pesan: 'Anda belum memiliki riwayat pesanan.',
-          saranAksi: 'Segarkan Halaman',
+          pesan: 'Belum ada riwayat pesanan yang dibuat.',
+          saranAksi: 'Mulai Belanja',
           onAksi: _muatRiwayat,
         );
       case KeadaanMuat.galat:
@@ -142,113 +142,135 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
         );
       case KeadaanMuat.berhasil:
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           itemCount: _daftarPesanan.length,
           itemBuilder: (context, index) {
-            final pesanan = _daftarPesanan[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              color: _putih,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(color: _abuGaris),
+            final p = _daftarPesanan[index];
+            final warnaStatus = _warnaStatus(p.status);
+            final labelStatus = _labelStatus(p.status);
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              decoration: BoxDecoration(
+                color: TemaAplikasi.surfaceWhite,
+                border: Border.all(color: TemaAplikasi.borderGray),
+                borderRadius: BorderRadius.circular(2),
               ),
               child: InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: () async {
-                  await Navigator.push(
+                onTap: () {
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => HalamanRincianPesanan(pesananId: pesanan.id),
+                      builder: (context) => HalamanRincianPesanan(pesananId: p.id),
                     ),
-                  );
-                  _muatRiwayat();
+                  ).then((_) => _muatRiwayat());
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Baris Atas: Nomor Pesanan & Status
+                      // Header: No Pesanan & Status
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            '#${pesanan.nomorPesanan}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: _hitam,
+                          Expanded(
+                            child: Text(
+                              p.nomorPesanan,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.5,
+                                color: TemaAplikasi.primary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: _warnaStatus(pesanan.status),
-                              borderRadius: BorderRadius.circular(4),
+                              color: warnaStatus.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(2),
+                              border: Border.all(color: warnaStatus.withValues(alpha: 0.3)),
                             ),
                             child: Text(
-                              _labelStatus(pesanan.status),
-                              style: const TextStyle(
-                                color: _putih,
-                                fontSize: 10,
+                              labelStatus,
+                              style: TextStyle(
+                                fontSize: 9,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.5,
+                                color: warnaStatus,
                               ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
+                      const Divider(color: TemaAplikasi.borderGray, height: 1),
+                      const SizedBox(height: 12),
 
-                      // Penerima
-                      Text(
-                        'Penerima: ${pesanan.namaPenerima}',
-                        style: const TextStyle(fontSize: 13, color: _abuSedang),
+                      // Penerima & Kurir
+                      Row(
+                        children: [
+                          const Icon(Icons.person_outline, size: 14, color: TemaAplikasi.secondary),
+                          const SizedBox(width: 6),
+                          Text(
+                            p.namaPenerima,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: TemaAplikasi.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const Spacer(),
+                          const Icon(Icons.local_shipping_outlined, size: 14, color: TemaAplikasi.secondary),
+                          const SizedBox(width: 6),
+                          Text(
+                            p.namaKurir ?? 'Standar',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: TemaAplikasi.secondary,
+                            ),
+                          ),
+                        ],
                       ),
-                      if (pesanan.createdAt != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          pesanan.createdAt!,
-                          style: const TextStyle(fontSize: 11, color: _abuSedang),
-                        ),
-                      ],
-                      const Divider(height: 20, color: _abuGaris),
+                      const SizedBox(height: 12),
 
-                      // Baris Bawah: Total & Arahkan
+                      // Item Ringkasan (jika ada detail)
+                      if (p.detail != null && p.detail!.isNotEmpty) ...[
+                        Text(
+                          '${p.detail!.first.namaProduk} (${p.detail!.first.ukuran}, ${p.detail!.first.warna}) × ${p.detail!.first.jumlah}${p.detail!.length > 1 ? ' dan ${p.detail!.length - 1} produk lainnya' : ''}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: TemaAplikasi.secondary,
+                            height: 1.4,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+
+                      // Baris Bawah: Total Pembayaran
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Total Belanja',
-                                style: TextStyle(fontSize: 11, color: _abuSedang),
-                              ),
-                              Text(
-                                formatRupiah(pesanan.total),
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: _hitam,
-                                ),
-                              ),
-                            ],
+                          const Text(
+                            'TOTAL PESANAN',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.0,
+                              color: TemaAplikasi.secondary,
+                            ),
                           ),
-                          const Row(
-                            children: [
-                              Text(
-                                'Rincian',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: _hitam,
-                                ),
-                              ),
-                              Icon(Icons.chevron_right, size: 18, color: _hitam),
-                            ],
+                          Text(
+                            formatRupiah(p.total),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: TemaAplikasi.primary,
+                            ),
                           ),
                         ],
                       ),

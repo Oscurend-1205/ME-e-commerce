@@ -1,21 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/produk.dart';
-
-// === Warna Tema ===
-const Color _hitam = Color(0xFF111111);
-const Color _putih = Color(0xFFFFFFFF);
-const Color _abuMuda = Color(0xFFF3F3F3);
-const Color _abuSedang = Color(0xFF777777);
-const Color _abuGaris = Color(0xFFDDDDDD);
+import '../theme.dart';
 
 /// Widget pemilih varian produk (ukuran + warna) dengan dua langkah penyaringan
-///
-/// Alur:
-/// 1. Tampilkan semua ukuran unik sebagai ChoiceChip
-/// 2. Tampilkan semua warna unik sebagai ChoiceChip
-/// 3. Saat ukuran dipilih, filter warna hanya yang tersedia untuk ukuran itu
-/// 4. Saat ukuran DAN warna dipilih, cari Varian yang cocok dan panggil onPilih
-/// 5. Chip yang semua variannya stok 0 akan dinonaktifkan
+/// Sesuai estetika minimalis ZARA / cek-beranda.html
 class PemilihVarian extends StatefulWidget {
   final List<Varian> daftarVarian;
   final Varian? varianTerpilih;
@@ -56,7 +44,6 @@ class _PemilihVarianState extends State<PemilihVarian> {
     }
   }
 
-  /// Daftar ukuran unik dari semua varian
   List<String> get _daftarUkuran {
     final ukuranSet = <String>{};
     for (final v in widget.daftarVarian) {
@@ -65,7 +52,6 @@ class _PemilihVarianState extends State<PemilihVarian> {
     return ukuranSet.toList();
   }
 
-  /// Daftar warna unik, difilter berdasarkan ukuran yang dipilih
   List<String> get _daftarWarna {
     final warnaSet = <String>{};
     final sumber = _ukuranTerpilih != null
@@ -77,15 +63,12 @@ class _PemilihVarianState extends State<PemilihVarian> {
     return warnaSet.toList();
   }
 
-  /// Cek apakah semua varian untuk ukuran tertentu memiliki stok 0
   bool _ukuranHabis(String ukuran) {
     return widget.daftarVarian
         .where((v) => v.ukuran == ukuran)
         .every((v) => v.stok == 0);
   }
 
-  /// Cek apakah semua varian untuk warna tertentu memiliki stok 0
-  /// Jika ukuran sudah dipilih, hanya cek varian dengan ukuran tersebut
   bool _warnaHabis(String warna) {
     final sumber = _ukuranTerpilih != null
         ? widget.daftarVarian
@@ -95,7 +78,6 @@ class _PemilihVarianState extends State<PemilihVarian> {
     return sumber.every((v) => v.stok == 0);
   }
 
-  /// Cari varian yang cocok berdasarkan ukuran dan warna yang dipilih
   Varian? get _varianCocok {
     if (_ukuranTerpilih == null || _warnaTerpilih == null) return null;
     try {
@@ -110,7 +92,6 @@ class _PemilihVarianState extends State<PemilihVarian> {
   void _pilihUkuran(String ukuran) {
     setState(() {
       _ukuranTerpilih = ukuran;
-      // Cek apakah warna yang sedang dipilih masih tersedia untuk ukuran baru
       if (_warnaTerpilih != null) {
         final masihAda = widget.daftarVarian.any(
           (v) => v.ukuran == ukuran && v.warna == _warnaTerpilih,
@@ -144,17 +125,17 @@ class _PemilihVarianState extends State<PemilihVarian> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // === Pemilih Ukuran ===
+        // Pemilih Ukuran
         const Text(
-          'UKURAN',
+          'PILIH UKURAN',
           style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: _abuSedang,
-            letterSpacing: 1.5,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: TemaAplikasi.secondary,
+            letterSpacing: 2.0,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -165,51 +146,48 @@ class _PemilihVarianState extends State<PemilihVarian> {
             return ChoiceChip(
               label: Text(ukuran),
               selected: dipilih,
-              onSelected: habis
-                  ? null
-                  : (_) => _pilihUkuran(ukuran),
-              backgroundColor: _putih,
-              selectedColor: _hitam,
-              disabledColor: _abuMuda,
+              onSelected: habis ? null : (_) => _pilihUkuran(ukuran),
+              backgroundColor: TemaAplikasi.surfaceWhite,
+              selectedColor: TemaAplikasi.primary,
+              disabledColor: TemaAplikasi.surfaceContainer,
               labelStyle: TextStyle(
                 color: habis
-                    ? _abuSedang.withValues(alpha: 0.5)
+                    ? TemaAplikasi.mutedGray
                     : dipilih
-                        ? _putih
-                        : _hitam,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.3,
+                        ? TemaAplikasi.onPrimary
+                        : TemaAplikasi.primary,
+                fontSize: 12,
+                fontWeight: dipilih ? FontWeight.w700 : FontWeight.w500,
               ),
               side: BorderSide(
                 color: habis
-                    ? _abuGaris.withValues(alpha: 0.5)
+                    ? TemaAplikasi.borderGray
                     : dipilih
-                        ? _hitam
-                        : _abuGaris,
+                        ? TemaAplikasi.primary
+                        : TemaAplikasi.borderGray,
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(2),
               ),
               showCheckmark: false,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             );
           }).toList(),
         ),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
 
-        // === Pemilih Warna ===
+        // Pemilih Warna
         const Text(
-          'WARNA',
+          'PILIH WARNA',
           style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: _abuSedang,
-            letterSpacing: 1.5,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: TemaAplikasi.secondary,
+            letterSpacing: 2.0,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -220,60 +198,75 @@ class _PemilihVarianState extends State<PemilihVarian> {
             return ChoiceChip(
               label: Text(warna),
               selected: dipilih,
-              onSelected: habis
-                  ? null
-                  : (_) => _pilihWarna(warna),
-              backgroundColor: _putih,
-              selectedColor: _hitam,
-              disabledColor: _abuMuda,
+              onSelected: habis ? null : (_) => _pilihWarna(warna),
+              backgroundColor: TemaAplikasi.surfaceWhite,
+              selectedColor: TemaAplikasi.primary,
+              disabledColor: TemaAplikasi.surfaceContainer,
               labelStyle: TextStyle(
                 color: habis
-                    ? _abuSedang.withValues(alpha: 0.5)
+                    ? TemaAplikasi.mutedGray
                     : dipilih
-                        ? _putih
-                        : _hitam,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.3,
+                        ? TemaAplikasi.onPrimary
+                        : TemaAplikasi.primary,
+                fontSize: 12,
+                fontWeight: dipilih ? FontWeight.w700 : FontWeight.w500,
               ),
               side: BorderSide(
                 color: habis
-                    ? _abuGaris.withValues(alpha: 0.5)
+                    ? TemaAplikasi.borderGray
                     : dipilih
-                        ? _hitam
-                        : _abuGaris,
+                        ? TemaAplikasi.primary
+                        : TemaAplikasi.borderGray,
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(2),
               ),
               showCheckmark: false,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             );
           }).toList(),
         ),
 
-        // === Info Stok ===
-        if (varianCocok != null) ...[
-          const SizedBox(height: 16),
+        const SizedBox(height: 16),
+
+        // Informasi Stok Varian Terpilih
+        if (varianCocok != null)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: _abuMuda,
-              borderRadius: BorderRadius.circular(6),
+              color: varianCocok.stok > 0
+                  ? TemaAplikasi.surfaceContainer
+                  : TemaAplikasi.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(2),
             ),
-            child: Text(
-              varianCocok.stok > 0
-                  ? 'Stok: ${varianCocok.stok}'
-                  : 'Stok habis',
-              style: TextStyle(
-                fontSize: 13,
-                color: varianCocok.stok > 0 ? _hitam : const Color(0xFFB00020),
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.2,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  varianCocok.stok > 0
+                      ? Icons.check_circle_outline
+                      : Icons.error_outline,
+                  size: 14,
+                  color: varianCocok.stok > 0
+                      ? Colors.green.shade800
+                      : TemaAplikasi.errorColor,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  varianCocok.stok > 0
+                      ? 'Stok varian ini tersedia: ${varianCocok.stok} unit'
+                      : 'Stok varian ini habis',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: varianCocok.stok > 0
+                        ? Colors.green.shade900
+                        : TemaAplikasi.errorColor,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
       ],
     );
   }
