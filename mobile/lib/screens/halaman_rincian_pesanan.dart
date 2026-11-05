@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../enums.dart';
+import '../constants.dart';
 import '../models/pesanan.dart';
 import '../services/layanan_api.dart';
 import '../theme.dart';
 import '../widgets/dialog_konfirmasi.dart';
 import '../widgets/format_rupiah.dart';
+import '../widgets/foto_dummy.dart';
 import '../widgets/widget_keadaan.dart';
 
 class HalamanRincianPesanan extends StatefulWidget {
@@ -343,12 +345,12 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
                             color: TemaAplikasi.surfaceContainer,
                             borderRadius: BorderRadius.circular(2),
                           ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.checkroom_outlined,
-                              color: TemaAplikasi.mutedGray,
-                              size: 22,
-                            ),
+                          clipBehavior: Clip.antiAlias,
+                          child: FotoDummy.bangunGambar(
+                            url: item.gambar != null && item.gambar!.isNotEmpty
+                                ? '${Konstan.storageUrl}/${item.gambar}'
+                                : '${Konstan.storageUrl}/${item.id}.jpg',
+                            fit: BoxFit.cover,
                           ),
                         ),
                         const SizedBox(width: 14),

@@ -38,17 +38,9 @@ class FotoDummy {
         '${Konstan.storageUrl}/produk-aksesori-2.jpg',
       ];
 
-  /// Mendapatkan foto produk dari backend storage berdasarkan ID atau Kategori
+  /// Mendapatkan foto produk resmi langsung dari database dan backend storage (1.jpg, 2.jpg, dst)
   static String untukProduk(Produk produk) {
-    if (produk.kategori.toLowerCase() == 'aksesori') {
-      final list = daftarProdukAksesori;
-      final index = produk.id % list.length;
-      return list[index];
-    } else {
-      final list = daftarProdukPakaian;
-      final index = produk.id % list.length;
-      return list[index];
-    }
+    return produk.fotoUrl;
   }
 
   /// Widget Gambar Jaringan dengan Placeholder Anggun & Fallback

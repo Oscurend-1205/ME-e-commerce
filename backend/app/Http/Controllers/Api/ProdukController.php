@@ -109,6 +109,7 @@ class ProdukController extends Controller
                 'deskripsi' => $request->input('deskripsi'),
                 'bahan' => $request->input('bahan'),
                 'merek' => $request->input('merek'),
+                'gambar' => $request->input('gambar'),
             ]);
 
             foreach ($request->input('varian') as $v) {
@@ -172,6 +173,7 @@ class ProdukController extends Controller
             if ($request->has('deskripsi')) $produk->deskripsi = $request->input('deskripsi');
             if ($request->has('bahan')) $produk->bahan = $request->input('bahan');
             if ($request->has('merek')) $produk->merek = $request->input('merek');
+            if ($request->has('gambar')) $produk->gambar = $request->input('gambar');
             $produk->save();
 
             // Pembaruan varian jika dikirim

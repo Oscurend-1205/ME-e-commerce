@@ -57,6 +57,7 @@ class DetailPesanan {
   final int hargaSatuan;
   final int jumlah;
   final int subtotal;
+  final String? gambar;
 
   DetailPesanan({
     required this.id,
@@ -66,6 +67,7 @@ class DetailPesanan {
     required this.hargaSatuan,
     required this.jumlah,
     required this.subtotal,
+    this.gambar,
   });
 
   factory DetailPesanan.fromJson(Map<String, dynamic> json) {
@@ -77,6 +79,7 @@ class DetailPesanan {
       hargaSatuan: json['harga_satuan'] ?? 0,
       jumlah: json['jumlah'] ?? 0,
       subtotal: json['subtotal'] ?? 0,
+      gambar: json['gambar'],
     );
   }
 }

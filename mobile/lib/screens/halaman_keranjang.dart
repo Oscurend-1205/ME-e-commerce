@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../enums.dart';
+import '../constants.dart';
 import '../models/keranjang.dart';
 import '../services/layanan_api.dart';
 import '../theme.dart';
 import '../widgets/dialog_konfirmasi.dart';
 import '../widgets/format_rupiah.dart';
+import '../widgets/foto_dummy.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_checkout.dart';
 
@@ -199,7 +201,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Placeholder Gambar Item (Editorial 3:4)
+                // Gambar Item dari Backend Storage (Editorial 3:4)
                 Container(
                   width: 76,
                   height: 100,
@@ -208,12 +210,12 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                     borderRadius: BorderRadius.circular(2),
                     border: Border.all(color: TemaAplikasi.borderGray),
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.checkroom_outlined,
-                      color: TemaAplikasi.mutedGray,
-                      size: 26,
-                    ),
+                  clipBehavior: Clip.antiAlias,
+                  child: FotoDummy.bangunGambar(
+                    url: item.gambar != null && item.gambar!.isNotEmpty
+                        ? '${Konstan.storageUrl}/${item.gambar}'
+                        : '${Konstan.storageUrl}/${item.produkId}.jpg',
+                    fit: BoxFit.cover,
                   ),
                 ),
                 const SizedBox(width: 16),

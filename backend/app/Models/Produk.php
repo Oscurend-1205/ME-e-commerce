@@ -19,6 +19,7 @@ class Produk extends Model
         'deskripsi',
         'bahan',
         'merek',
+        'gambar',
     ];
 
     protected $casts = [
@@ -41,6 +42,11 @@ class Produk extends Model
         return (int) $this->varian()->sum('stok');
     }
 
+    public function getGambarUrlAttribute(): ?string
+    {
+        return $this->gambar ? url('/api/gambar/' . $this->gambar) : null;
+    }
+
     /**
      * Format data sesuai kontrak 7 kunci inti + 2 kolom domain
      */
@@ -56,6 +62,8 @@ class Produk extends Model
             'deskripsi' => $this->deskripsi,
             'bahan' => $this->bahan,
             'merek' => $this->merek,
+            'gambar' => $this->gambar,
+            'gambar_url' => $this->gambar_url,
         ];
     }
 

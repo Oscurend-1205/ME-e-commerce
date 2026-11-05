@@ -52,6 +52,7 @@ class Keranjang extends Model
             'harga_satuan' => $hargaSatuan,
             'jumlah' => (int) $this->jumlah,
             'subtotal_item' => $subtotal,
+            'gambar' => $this->produk ? $this->produk->gambar : ($this->produk_id ? "{$this->produk_id}.jpg" : null),
         ];
     }
 }

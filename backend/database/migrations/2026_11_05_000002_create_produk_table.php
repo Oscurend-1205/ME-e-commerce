@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('deskripsi')->nullable();
             $table->string('bahan');
             $table->string('merek');
+            $table->string('gambar')->nullable();
             $table->timestamps();
         });
     }

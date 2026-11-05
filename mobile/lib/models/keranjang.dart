@@ -8,6 +8,7 @@ class ItemKeranjang {
   final int hargaSatuan;
   final int jumlah;
   final int subtotalItem;
+  final String? gambar;
 
   ItemKeranjang({
     required this.id,
@@ -19,6 +20,7 @@ class ItemKeranjang {
     required this.hargaSatuan,
     required this.jumlah,
     required this.subtotalItem,
+    this.gambar,
   });
 
   factory ItemKeranjang.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class ItemKeranjang {
       hargaSatuan: json['harga_satuan'] ?? 0,
       jumlah: json['jumlah'] ?? 0,
       subtotalItem: json['subtotal_item'] ?? 0,
+      gambar: json['gambar'],
     );
   }
 }

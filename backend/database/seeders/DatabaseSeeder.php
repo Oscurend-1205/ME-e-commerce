@@ -75,6 +75,7 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Kaos potongan oversize berbahan 100% katun combed 24s yang sejuk, tebal, dan menyerap keringat dengan baik.',
             'bahan' => 'Katun Combed 24s',
             'merek' => 'ME Basics',
+            'gambar' => '1.jpg',
         ]);
         VarianProduk::create(['produk_id' => $p1->id, 'ukuran' => 'S', 'warna' => 'Hitam', 'stok' => 8, 'sku' => 'MEB-1-S-BLK']);
         // Ini varian kunci pengujian: stok 0 untuk M Hitam!
@@ -92,6 +93,7 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Kemeja flanel motif kotak-kotak klasik dengan siluet modern, cocok untuk gaya kasual maupun semi-formal.',
             'bahan' => 'Wool-blend Flanel',
             'merek' => 'ME Studio',
+            'gambar' => '2.jpg',
         ]);
         VarianProduk::create(['produk_id' => $p2->id, 'ukuran' => 'M', 'warna' => 'Merah Navy', 'stok' => 10, 'sku' => 'MES-2-M-RED']);
         VarianProduk::create(['produk_id' => $p2->id, 'ukuran' => 'L', 'warna' => 'Merah Navy', 'stok' => 8, 'sku' => 'MES-2-L-RED']);
@@ -106,6 +108,7 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Hoodie tebal 380 gsm berbahan fleece lembut dengan saku kangguru dan tali serut tahan lama.',
             'bahan' => 'Heavyweight Cotton Fleece',
             'merek' => 'ME Originals',
+            'gambar' => '3.jpg',
         ]);
         VarianProduk::create(['produk_id' => $p3->id, 'ukuran' => 'M', 'warna' => 'Abu-abu Misty', 'stok' => 14, 'sku' => 'MEO-3-M-GRY']);
         VarianProduk::create(['produk_id' => $p3->id, 'ukuran' => 'L', 'warna' => 'Abu-abu Misty', 'stok' => 10, 'sku' => 'MEO-3-L-GRY']);
@@ -120,6 +123,7 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => null, // Nullable test case!
             'bahan' => 'Non-stretch 13oz Denim',
             'merek' => 'ME Denim Co.',
+            'gambar' => '4.jpg',
         ]);
         VarianProduk::create(['produk_id' => $p4->id, 'ukuran' => 'M', 'warna' => 'Light Blue Wash', 'stok' => 7, 'sku' => 'MED-4-M-BLU']);
         VarianProduk::create(['produk_id' => $p4->id, 'ukuran' => 'L', 'warna' => 'Light Blue Wash', 'stok' => 9, 'sku' => 'MED-4-L-BLU']);
@@ -133,6 +137,7 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Celana panjang chino potongan straight dengan stretch ringan untuk kenyamanan mobilitas harian.',
             'bahan' => 'Twill Cotton Stretch',
             'merek' => 'ME Basics',
+            'gambar' => '5.jpg',
         ]);
         VarianProduk::create(['produk_id' => $p5->id, 'ukuran' => '30', 'warna' => 'Khaki', 'stok' => 10, 'sku' => 'MEB-5-30-KHK']);
         VarianProduk::create(['produk_id' => $p5->id, 'ukuran' => '32', 'warna' => 'Khaki', 'stok' => 12, 'sku' => 'MEB-5-32-KHK']);
@@ -147,8 +152,8 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Rok lipit midi anggun dengan pinggang elastis dan bahan jatuh berkilau lembut.',
             'bahan' => 'Silk Chiffon Pleat',
             'merek' => 'ME Studio',
+            'gambar' => '6.jpg',
         ]);
-        // Semua varian stok 0 -> produk terhitung habis!
         VarianProduk::create(['produk_id' => $p6->id, 'ukuran' => 'All Size', 'warna' => 'Dusty Pink', 'stok' => 0, 'sku' => 'MES-6-AS-PNK']);
         VarianProduk::create(['produk_id' => $p6->id, 'ukuran' => 'All Size', 'warna' => 'Mocca', 'stok' => 0, 'sku' => 'MES-6-AS-MCC']);
 
@@ -161,6 +166,7 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Gaun santai lengan pendek dengan kancing depan penuh dan saku tersembunyi samping.',
             'bahan' => 'Pure French Linen',
             'merek' => 'ME Minimalist',
+            'gambar' => '7.jpg',
         ]);
         VarianProduk::create(['produk_id' => $p7->id, 'ukuran' => 'M', 'warna' => 'Sage Green', 'stok' => 15, 'sku' => 'MEM-7-M-SGE']);
         VarianProduk::create(['produk_id' => $p7->id, 'ukuran' => 'L', 'warna' => 'Sage Green', 'stok' => 10, 'sku' => 'MEM-7-L-SGE']);
@@ -175,6 +181,7 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Topi baseball 6-panel dengan pengait besi belakang yang dapat disesuaikan.',
             'bahan' => 'Cotton Drill 100%',
             'merek' => 'ME Accessories',
+            'gambar' => '8.jpg',
         ]);
         VarianProduk::create(['produk_id' => $p8->id, 'ukuran' => 'All Size', 'warna' => 'Hitam', 'stok' => 25, 'sku' => 'MEA-8-AS-BLK']);
         VarianProduk::create(['produk_id' => $p8->id, 'ukuran' => 'All Size', 'warna' => 'Krem', 'stok' => 18, 'sku' => 'MEA-8-AS-CRM']);
@@ -188,6 +195,7 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Tas selempang praktis anti-air berkapasitas lega untuk membawa ponsel, dompet, dan barang esensial.',
             'bahan' => 'Water-repellent Canvas',
             'merek' => 'ME Accessories',
+            'gambar' => '9.jpg',
         ]);
         VarianProduk::create(['produk_id' => $p9->id, 'ukuran' => 'All Size', 'warna' => 'Hitam', 'stok' => 12, 'sku' => 'MEA-9-AS-BLK']);
         VarianProduk::create(['produk_id' => $p9->id, 'ukuran' => 'All Size', 'warna' => 'Army', 'stok' => 14, 'sku' => 'MEA-9-AS-ARM']);
@@ -201,6 +209,7 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Ikat pinggang formal elegan dengan gesper perak brushed dan jahitan rapi tepi.',
             'bahan' => 'Genuine Cowhide Leather',
             'merek' => 'ME Leatherworks',
+            'gambar' => '10.jpg',
         ]);
         VarianProduk::create(['produk_id' => $p10->id, 'ukuran' => 'All Size', 'warna' => 'Cokelat Gelap', 'stok' => 20, 'sku' => 'MEL-10-AS-BRN']);
         VarianProduk::create(['produk_id' => $p10->id, 'ukuran' => 'All Size', 'warna' => 'Hitam', 'stok' => 22, 'sku' => 'MEL-10-AS-BLK']);
@@ -214,6 +223,7 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Paket hemat kaus kaki crew bertumit ganda dengan karet nyaman tidak mudah melorot.',
             'bahan' => 'Combed Cotton + Spandex',
             'merek' => 'ME Basics',
+            'gambar' => '11.jpg',
         ]);
         VarianProduk::create(['produk_id' => $p11->id, 'ukuran' => 'All Size', 'warna' => 'Monokrom Mix', 'stok' => 30, 'sku' => 'MEB-11-AS-MNK']);
 
@@ -226,6 +236,7 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Syal rajut panjang bermotif waffle knit halus untuk menjaga kehangatan leher.',
             'bahan' => 'Soft Acrylic Wool',
             'merek' => 'ME Studio',
+            'gambar' => '12.jpg',
         ]);
         VarianProduk::create(['produk_id' => $p12->id, 'ukuran' => 'All Size', 'warna' => 'Abu Terang', 'stok' => 15, 'sku' => 'MES-12-AS-LGR']);
         VarianProduk::create(['produk_id' => $p12->id, 'ukuran' => 'All Size', 'warna' => 'Burgundy', 'stok' => 11, 'sku' => 'MES-12-AS-BGD']);

@@ -1,3 +1,5 @@
+import '../constants.dart';
+
 class Produk {
   final int id;
   final String nama;
@@ -8,6 +10,8 @@ class Produk {
   final String? deskripsi;
   final String bahan;
   final String merek;
+  final String? gambar;
+  final String? gambarUrl;
   final List<Varian>? varian;
 
   Produk({
@@ -20,8 +24,25 @@ class Produk {
     this.deskripsi,
     required this.bahan,
     required this.merek,
+    this.gambar,
+    this.gambarUrl,
     this.varian,
   });
+
+  /// URL resolusi gambar produk dari backend storage
+  String get fotoUrl {
+    if (gambar != null && gambar!.trim().isNotEmpty) {
+      final g = gambar!.trim();
+      if (g.startsWith('http://') || g.startsWith('https://')) {
+        return g;
+      }
+      return '${Konstan.storageUrl}/$g';
+    }
+    if (gambarUrl != null && gambarUrl!.trim().isNotEmpty) {
+      return gambarUrl!.trim();
+    }
+    return '${Konstan.storageUrl}/$id.jpg';
+  }
 
   factory Produk.fromJson(Map<String, dynamic> json) {
     return Produk(
@@ -34,6 +55,8 @@ class Produk {
       deskripsi: json['deskripsi'],
       bahan: json['bahan'] ?? '',
       merek: json['merek'] ?? '',
+      gambar: json['gambar'],
+      gambarUrl: json['gambar_url'],
       varian: json['varian'] != null
           ? (json['varian'] as List)
               .map((v) => Varian.fromJson(v))
@@ -53,6 +76,8 @@ class Produk {
       'deskripsi': deskripsi,
       'bahan': bahan,
       'merek': merek,
+      'gambar': gambar,
+      'gambar_url': gambarUrl,
       'varian': varian?.map((v) => v.toJson()).toList(),
     };
   }

@@ -74,6 +74,7 @@ class Pesanan extends Model
                     'harga_satuan' => (int) $d->harga_satuan,
                     'jumlah' => (int) $d->jumlah,
                     'subtotal' => (int) $d->subtotal,
+                    'gambar' => $d->produk ? $d->produk->gambar : ($d->produk_id ? "{$d->produk_id}.jpg" : null),
                 ];
             })->values()->all(),
         ];
