@@ -24,6 +24,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   List<Produk> _daftarProduk = [];
 
   String? _kategoriTerpilih;
+  String _storyTerpilih = 'Baru Tiba';
   final TextEditingController _cariController = TextEditingController();
   bool _tampilkanPencarian = false;
   int _jumlahItemKeranjang = 0;
@@ -125,6 +126,23 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   void _pilihKategori(String? kategori) {
     setState(() {
       _kategoriTerpilih = (kategori == null || kategori == 'Semua') ? null : kategori;
+      if (_kategoriTerpilih == null) {
+        _storyTerpilih = 'Baru Tiba';
+      } else if (_kategoriTerpilih == 'Pakaian') {
+        _storyTerpilih = 'Wanita';
+      } else if (_kategoriTerpilih == 'Aksesori') {
+        _storyTerpilih = 'Aksesori';
+      }
+    });
+    _muatProduk();
+  }
+
+  void _pilihStory(Map<String, dynamic> story) {
+    final label = story['label'] as String;
+    final kat = story['kat'] as String?;
+    setState(() {
+      _storyTerpilih = label;
+      _kategoriTerpilih = (kat == null || kat == 'Semua') ? null : kat;
     });
     _muatProduk();
   }
@@ -327,13 +345,12 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: _stories.map((story) {
-            final isSelected = (_kategoriTerpilih == null && story['kat'] == null) ||
-                _kategoriTerpilih == story['kat'];
+            final isSelected = _storyTerpilih == story['label'];
 
             return Padding(
               padding: const EdgeInsets.only(right: 16),
               child: InkWell(
-                onTap: () => _pilihKategori(story['kat']),
+                onTap: () => _pilihStory(story),
                 borderRadius: BorderRadius.circular(30),
                 child: Column(
                   children: [
