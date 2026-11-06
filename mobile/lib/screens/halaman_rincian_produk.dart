@@ -64,7 +64,9 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
       });
     } else {
       setState(() {
-        _keadaan = respon.code == '404' ? KeadaanMuat.kosong : KeadaanMuat.galat;
+        _keadaan = respon.code == '404'
+            ? KeadaanMuat.kosong
+            : KeadaanMuat.galat;
         _jenisGalat = tentukanJenisGalat(respon.code);
         _pesanGalat = respon.message;
       });
@@ -75,7 +77,9 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
     if (_produk == null || _varianTerpilih == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Silakan pilih varian ukuran dan warna terlebih dahulu.'),
+          content: Text(
+            'Silakan pilih varian ukuran dan warna terlebih dahulu.',
+          ),
           backgroundColor: TemaAplikasi.primary,
           behavior: SnackBarBehavior.floating,
         ),
@@ -114,15 +118,20 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${_produk!.nama} (${_varianTerpilih!.ukuran}, ${_varianTerpilih!.warna}) masuk ke keranjang.'),
-          duration: const Duration(milliseconds: 1500),
+content: Text(
+  '${_produk!.nama} (${_varianTerpilih!.ukuran}, ${_varianTerpilih!.warna}) masuk ke keranjang.',
+),
+duration: const Duration(milliseconds: 1500),
+
           action: SnackBarAction(
             label: 'LIHAT',
             textColor: TemaAplikasi.surfaceWhite,
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const HalamanKeranjang()),
+                MaterialPageRoute(
+                  builder: (context) => const HalamanKeranjang(),
+                ),
               );
             },
           ),
@@ -192,7 +201,9 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const HalamanKeranjang()),
+                MaterialPageRoute(
+                  builder: (context) => const HalamanKeranjang(),
+                ),
               );
             },
           ),
@@ -275,7 +286,10 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                         top: 14,
                         left: 14,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: TemaAplikasi.primary,
                             borderRadius: BorderRadius.circular(2),
@@ -295,7 +309,10 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                         bottom: 14,
                         right: 14,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           color: Colors.black.withValues(alpha: 0.5),
                           child: const Text(
                             'ME STUDIO / 2026',
@@ -329,7 +346,10 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                   ),
                   if (!produk.tersedia)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: TemaAplikasi.surfaceContainerHigh,
                         borderRadius: BorderRadius.circular(2),
@@ -510,7 +530,8 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
   }
 
   Widget _bangunBilahBawah() {
-    final bool bisaBeli = _produk!.tersedia &&
+    final bool bisaBeli =
+        _produk!.tersedia &&
         _varianTerpilih != null &&
         _varianTerpilih!.stok > 0;
 
@@ -525,7 +546,9 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
           width: double.infinity,
           height: 48,
           child: ElevatedButton(
-            onPressed: (_sedangMenambahkan || !bisaBeli) ? null : _tambahKeKeranjang,
+            onPressed: (_sedangMenambahkan || !bisaBeli)
+                ? null
+                : _tambahKeKeranjang,
             style: ElevatedButton.styleFrom(
               backgroundColor: TemaAplikasi.primary,
               disabledBackgroundColor: TemaAplikasi.surfaceContainerHigh,
@@ -545,14 +568,14 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                     ),
                   )
                 : Text(
-                    !bisaBeli
-                        ? 'VARIAN INI HABIS'
-                        : 'TAMBAH KE KERANJANG',
+                    !bisaBeli ? 'VARIAN INI HABIS' : 'TAMBAH KE KERANJANG',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 2.0,
-                      color: !bisaBeli ? TemaAplikasi.mutedGray : TemaAplikasi.onPrimary,
+                      color: !bisaBeli
+                          ? TemaAplikasi.mutedGray
+                          : TemaAplikasi.onPrimary,
                     ),
                   ),
           ),
