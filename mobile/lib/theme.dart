@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Tema Aplikasi ME — Terinspirasi dari editorial minimalis fashion ZARA & cek-beranda.html
 class TemaAplikasi {
@@ -19,6 +20,7 @@ class TemaAplikasi {
       useMaterial3: true,
       scaffoldBackgroundColor: surfaceBright,
       primaryColor: primary,
+      textTheme: GoogleFonts.playfairDisplayTextTheme(),
       colorScheme: const ColorScheme.light(
         primary: primary,
         onPrimary: onPrimary,
@@ -26,13 +28,13 @@ class TemaAplikasi {
         onSurface: primary,
         error: errorColor,
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: surfaceWhite,
         foregroundColor: primary,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: TextStyle(
+        titleTextStyle: GoogleFonts.playfairDisplay(
           color: primary,
           fontSize: 18,
           fontWeight: FontWeight.w700,
