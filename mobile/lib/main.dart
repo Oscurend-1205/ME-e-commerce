@@ -36,6 +36,7 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
 
   final List<Widget> _daftarHalaman = const [
     HalamanKatalog(),
+    HalamanKatalog(modeJelajah: true),
     HalamanRiwayatPesanan(),
     HalamanKelolaProduk(),
   ];
@@ -51,48 +52,132 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
         decoration: const BoxDecoration(
           color: TemaAplikasi.surfaceWhite,
           border: Border(
-            top: BorderSide(color: TemaAplikasi.borderGray, width: 1.0),
+            top: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
           ),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _indeksAktif,
-          onTap: (index) {
-            setState(() {
-              _indeksAktif = index;
-            });
-          },
-          backgroundColor: TemaAplikasi.surfaceWhite,
-          selectedItemColor: TemaAplikasi.primary,
-          unselectedItemColor: TemaAplikasi.mutedGray,
-          selectedLabelStyle: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.5,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 1.0,
-          ),
-          elevation: 0,
-          type: BottomNavigationBarType.fixed,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.storefront_outlined, size: 22),
-              activeIcon: Icon(Icons.storefront, size: 22),
-              label: 'KATALOG',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.receipt_long_outlined, size: 22),
-              activeIcon: Icon(Icons.receipt_long, size: 22),
-              label: 'PESANAN',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.inventory_2_outlined, size: 22),
-              activeIcon: Icon(Icons.inventory_2, size: 22),
-              label: 'KELOLA',
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 8,
+              offset: Offset(0, -1),
             ),
           ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 64,
+            child: Row(
+              children: [
+                _bangunItemTab(
+                  indeks: 0,
+                  ikonAktif: Icons.home,
+                  ikonTidakAktif: Icons.home_outlined,
+                  label: 'BERANDA',
+                ),
+                _bangunItemTab(
+                  indeks: 1,
+                  ikonAktif: Icons.explore,
+                  ikonTidakAktif: Icons.explore_outlined,
+                  label: 'JELAJAH',
+                ),
+                _bangunItemTab(
+                  indeks: 2,
+                  ikonAktif: Icons.receipt_long,
+                  ikonTidakAktif: Icons.receipt_long_outlined,
+                  label: 'PESANAN',
+                ),
+                _bangunItemTab(
+                  indeks: 3,
+                  ikonAktif: Icons.person,
+                  ikonTidakAktif: Icons.person_outline,
+                  label: 'KELOLA',
+                  pakaiAvatar: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _bangunItemTab({
+    required int indeks,
+    required IconData ikonAktif,
+    required IconData ikonTidakAktif,
+    required String label,
+    bool pakaiAvatar = false,
+  }) {
+    final isAktif = _indeksAktif == indeks;
+
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _indeksAktif = indeks;
+          });
+        },
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        child: SizedBox(
+          height: 64,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Ikon atau Micro Avatar (Sesuai State 2A & 2B di cek-navbar.html)
+              if (pakaiAvatar && isAktif)
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: const BoxDecoration(
+                    color: TemaAplikasi.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'M',
+                      style: TextStyle(
+                        color: TemaAplikasi.onPrimary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        height: 1.0,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Icon(
+                  isAktif ? ikonAktif : ikonTidakAktif,
+                  size: 22,
+                  color: isAktif
+                      ? TemaAplikasi.primary
+                      : TemaAplikasi.mutedGray,
+                ),
+              const SizedBox(height: 3),
+              // Label (font-label-sm uppercase tracking-widest)
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.5,
+                  fontWeight: isAktif ? FontWeight.w700 : FontWeight.w500,
+                  color: isAktif
+                      ? TemaAplikasi.primary
+                      : TemaAplikasi.mutedGray,
+                ),
+              ),
+              const SizedBox(height: 2),
+              // Titik Indikator 2x6px Aktif (Sesuai State 2A di cek-navbar.html)
+              Container(
+                width: 6,
+                height: 2,
+                decoration: BoxDecoration(
+                  color: isAktif ? TemaAplikasi.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -11,7 +11,9 @@ import 'halaman_keranjang.dart';
 import 'halaman_rincian_produk.dart';
 
 class HalamanKatalog extends StatefulWidget {
-  const HalamanKatalog({super.key});
+  final bool modeJelajah;
+
+  const HalamanKatalog({super.key, this.modeJelajah = false});
 
   @override
   State<HalamanKatalog> createState() => _HalamanKatalogState();
@@ -61,6 +63,9 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   @override
   void initState() {
     super.initState();
+    if (widget.modeJelajah) {
+      _tampilkanPencarian = true;
+    }
     _muatData();
   }
 
