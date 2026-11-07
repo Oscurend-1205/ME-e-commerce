@@ -10,6 +10,7 @@ use App\Models\MetodePembayaran;
 use App\Models\Pelanggan;
 use App\Models\Pesanan;
 use App\Models\Produk;
+use App\Models\User;
 use App\Models\VarianProduk;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -18,6 +19,18 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // 0. Akun Admin untuk Panel Filament (/admin)
+        User::updateOrCreate(
+            ['email' => 'admin@toko-me.test'],
+            [
+                'name' => 'Admin Toko ME',
+                'password' => 'password',
+            ],
+        );
+
+        // 0b. Aset Tampilan (Gambar Banner/Beranda) yang dapat diedit dari Filament
+        $this->call(AsetTampilanSeeder::class);
+
         // 1. Pelanggan Tetap untuk Pengujian (PRD Bagian 9)
         $pelanggan = Pelanggan::create([
             'id' => 1,
