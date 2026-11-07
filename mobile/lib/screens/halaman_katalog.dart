@@ -2152,30 +2152,38 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'ÉDITION 2025 · CURATED',
-                    style: TextStyle(
-                      fontSize: 10,
-                      letterSpacing: 2.0,
-                      fontWeight: FontWeight.w600,
-                      color: TemaAplikasi.secondary,
-                    ),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
                   ),
-                  Text(
-                    '${produkTerfilter.length} PRODUK PILIHAN',
-                    style: const TextStyle(
-                      fontSize: 10,
-                      letterSpacing: 2.0,
-                      fontWeight: FontWeight.w700,
-                      color: TemaAplikasi.mutedGray,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'ÉDITION 2025 · CURATED',
+                      style: TextStyle(
+                        fontSize: 10,
+                        letterSpacing: 2.0,
+                        fontWeight: FontWeight.w600,
+                        color: TemaAplikasi.secondary,
+                      ),
                     ),
-                  ),
-                ],
+                    Text(
+                      '${produkTerfilter.length} PRODUK PILIHAN',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        letterSpacing: 2.0,
+                        fontWeight: FontWeight.w700,
+                        color: TemaAplikasi.primary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               const Text(
                 'Men’s Atelier',
                 style: TextStyle(
@@ -2198,7 +2206,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
           ),
         ),
 
-        // 3. Campaign Spotlight Banner (Hero Card) (cek-katalogPria.html)
+        // 3. Campaign Spotlight Lookbook Card (cek-katalogPria.html)
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: AspectRatio(
@@ -2241,29 +2249,15 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-                              color: Colors.white.withValues(alpha: 0.25),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 5,
-                                    height: 5,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  const Text(
-                                    'KAMPANYE UTAMA',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 8.5,
-                                      letterSpacing: 2.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
+                              color: Colors.black.withValues(alpha: 0.75),
+                              child: const Text(
+                                '• KAMPANYE UTAMA',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8.5,
+                                  letterSpacing: 2.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                             const Text(
@@ -2297,41 +2291,36 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                                 fontSize: 12,
                               ),
                             ),
-                            const SizedBox(height: 14),
-                            SizedBox(
-                              height: 38,
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  setState(() {
-                                    _subKategoriPria = 'SUITING & BLAZER';
-                                  });
-                                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Menampilkan Seri 01: L’Homme Contemporain'),
-                                      duration: Duration(milliseconds: 1500),
-                                      behavior: SnackBarBehavior.floating,
+                            const SizedBox(height: 12),
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _subKategoriPria = 'SUITING & BLAZER';
+                                });
+                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Menampilkan Seri 01: L’Homme Contemporain'),
+                                    duration: Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              },
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Text(
+                                    'JELAJAHI SERI 01',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      letterSpacing: 2.0,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: TemaAplikasi.primary,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(2),
                                   ),
-                                ),
-                                icon: const Text(
-                                  'JELAJAHI SERI 01',
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    letterSpacing: 1.5,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                label: const Icon(Icons.arrow_forward, size: 14),
+                                  SizedBox(width: 6),
+                                  Icon(Icons.arrow_forward, size: 14, color: Colors.white),
+                                ],
                               ),
                             ),
                           ],
@@ -2366,7 +2355,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                     color: isSelected
                         ? TemaAplikasi.primary
-                        : TemaAplikasi.surfaceContainer,
+                        : TemaAplikasi.surfaceContainerLow,
                     child: Text(
                       chip,
                       style: TextStyle(
@@ -2375,7 +2364,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                         fontWeight: FontWeight.w600,
                         color: isSelected
                             ? TemaAplikasi.onPrimary
-                            : TemaAplikasi.primary,
+                            : TemaAplikasi.secondary,
                       ),
                     ),
                   ),
@@ -2390,24 +2379,43 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            color: TemaAplikasi.surfaceContainerLow,
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: const BoxDecoration(
+              border: Border.symmetric(
+                horizontal: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
+              ),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 InkWell(
                   onTap: _tampilkanModalFilter,
                   child: Row(
-                    children: const [
-                      Icon(Icons.tune, size: 16, color: TemaAplikasi.primary),
-                      SizedBox(width: 5),
-                      Text(
-                        'FILTER (3)',
+                    children: [
+                      const Text(
+                        'FILTER',
                         style: TextStyle(
                           fontSize: 10.5,
-                          letterSpacing: 1.5,
+                          letterSpacing: 2.0,
                           fontWeight: FontWeight.w700,
                           color: TemaAplikasi.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Container(
+                        width: 5,
+                        height: 5,
+                        decoration: const BoxDecoration(
+                          color: TemaAplikasi.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Text(
+                        '(3)',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: TemaAplikasi.secondary,
                         ),
                       ),
                     ],
@@ -2444,7 +2452,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                     IconButton(
                       icon: const Icon(Icons.grid_view, size: 18),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+                      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                       color: _modeGrid ? TemaAplikasi.primary : TemaAplikasi.mutedGray,
                       onPressed: () {
                         setState(() {
@@ -2456,7 +2464,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                     IconButton(
                       icon: const Icon(Icons.splitscreen, size: 18),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+                      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                       color: !_modeGrid ? TemaAplikasi.primary : TemaAplikasi.mutedGray,
                       onPressed: () {
                         setState(() {
