@@ -7,6 +7,7 @@ import '../theme.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/kartu_produk.dart';
 import '../widgets/widget_keadaan.dart';
+import 'halaman_kelola_produk.dart';
 import 'halaman_keranjang.dart';
 import 'halaman_rincian_produk.dart';
 
@@ -28,37 +29,44 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   String? _kategoriTerpilih;
   String _storyTerpilih = 'Baru Tiba';
   final TextEditingController _cariController = TextEditingController();
+  final TextEditingController _emailVipController = TextEditingController();
+  final Set<int> _wishlistIds = {};
   bool _tampilkanPencarian = false;
   int _jumlahItemKeranjang = 0;
 
-  // Story highlight pills (sesuai cek-beranda.html)
+  // 6 Story highlight pills sesuai mobile/penampung-tampilan/cek-beranda.html
   List<Map<String, dynamic>> get _stories => [
-    {
-      'label': 'Baru Tiba',
-      'foto': FotoDummy.stories[0],
-      'kat': null,
-    },
-    {
-      'label': 'Wanita',
-      'foto': FotoDummy.stories[1],
-      'kat': 'Pakaian',
-    },
-    {
-      'label': 'Pria',
-      'foto': FotoDummy.stories[2],
-      'kat': 'Pakaian',
-    },
-    {
-      'label': 'Tas & Dompet',
-      'foto': FotoDummy.stories[3],
-      'kat': 'Aksesori',
-    },
-    {
-      'label': 'Aksesori',
-      'foto': FotoDummy.stories[4],
-      'kat': 'Aksesori',
-    },
-  ];
+        {
+          'label': 'Baru Tiba',
+          'foto': FotoDummy.stories[0],
+          'kat': null,
+        },
+        {
+          'label': 'Wanita',
+          'foto': FotoDummy.stories[1],
+          'kat': 'Pakaian',
+        },
+        {
+          'label': 'Pria',
+          'foto': FotoDummy.stories[2],
+          'kat': 'Pakaian',
+        },
+        {
+          'label': 'Aksesori',
+          'foto': FotoDummy.stories[3],
+          'kat': 'Aksesori',
+        },
+        {
+          'label': 'Lookbook',
+          'foto': FotoDummy.stories[4],
+          'kat': null,
+        },
+        {
+          'label': 'Sale',
+          'foto': FotoDummy.stories[5],
+          'kat': null,
+        },
+      ];
 
   @override
   void initState() {
@@ -72,6 +80,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   @override
   void dispose() {
     _cariController.dispose();
+    _emailVipController.dispose();
     super.dispose();
   }
 
@@ -96,9 +105,14 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
 
     if (respon.berhasil) {
       final List dataRaw = respon.data is List ? respon.data as List : [];
-      final produkList = dataRaw
+      List<Produk> produkList = dataRaw
           .map((item) => Produk.fromJson(item as Map<String, dynamic>))
           .toList();
+
+      // Filter khusus Story: Lookbook atau Sale
+      if (_storyTerpilih == 'Sale') {
+        produkList = produkList.where((p) => p.harga <= 150000 || p.stok < 30).toList();
+      }
 
       setState(() {
         _daftarProduk = produkList;
@@ -152,6 +166,134 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     _muatProduk();
   }
 
+  void _toggleWishlist(Produk produk) {
+    setState(() {
+      if (_wishlistIds.contains(produk.id)) {
+        _wishlistIds.remove(produk.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${produk.nama} dihapus dari Wishlist'),
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else {
+        _wishlistIds.add(produk.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.favorite, color: Colors.white, size: 16),
+                const SizedBox(width: 8),
+                Expanded(child: Text('${produk.nama} ditambahkan ke Wishlist')),
+              ],
+            ),
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    });
+  }
+
+  Future<void> _tambahItemKeKeranjang(Produk produk) async {
+    // Ambil ID varian pertama yang tersedia atau null
+    int? varianId;
+    if (produk.varian != null && produk.varian!.isNotEmpty) {
+      final varianTersedia = produk.varian!.firstWhere(
+        (v) => v.stok > 0,
+        orElse: () => produk.varian!.first,
+      );
+      varianId = varianTersedia.id;
+    } else {
+      // Ambil rincian produk untuk mendapatkan varian ID jika belum termuat
+      final detail = await LayananApi.ambilRincianProduk(produk.id);
+      if (detail.berhasil && detail.data != null) {
+        final p = Produk.fromJson(detail.data as Map<String, dynamic>);
+        if (p.varian != null && p.varian!.isNotEmpty) {
+          final v = p.varian!.firstWhere(
+            (x) => x.stok > 0,
+            orElse: () => p.varian!.first,
+          );
+          varianId = v.id;
+        }
+      }
+    }
+
+    if (varianId == null) {
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HalamanRincianProduk(produkId: produk.id),
+        ),
+      ).then((_) => _muatJumlahKeranjang());
+      return;
+    }
+
+    final respon = await LayananApi.tambahKeKeranjang(
+      produkId: produk.id,
+      varianId: varianId,
+      jumlah: 1,
+    );
+
+    if (!mounted) return;
+
+    if (respon.berhasil) {
+      await _muatJumlahKeranjang();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${produk.nama} berhasil ditambahkan ke Tas Belanja.'),
+          action: SnackBarAction(
+            label: 'LIHAT',
+            textColor: Colors.white,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HalamanKeranjang()),
+              ).then((_) => _muatJumlahKeranjang());
+            },
+          ),
+          backgroundColor: TemaAplikasi.primary,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(respon.message),
+          backgroundColor: TemaAplikasi.errorColor,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _daftarVipNewsletter() {
+    final email = _emailVipController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Silakan masukkan alamat email yang valid.'),
+          backgroundColor: TemaAplikasi.errorColor,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    _emailVipController.clear();
+    FocusScope.of(context).unfocus();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Terima kasih telah bergabung dengan ME Privé.'),
+        backgroundColor: TemaAplikasi.primary,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,20 +307,20 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Story Highlight Circles Row (cek-beranda.html)
+              // 1. Story Highlight Pills (cek-beranda.html)
               _bangunStoryHighlights(),
 
-              // 2. Full-bleed Hero Editorial Banner dengan Foto "ME MINIMALISM"
+              // 2. Full-bleed Mobile Hero Editorial Banner (cek-beranda.html)
               if (_kategoriTerpilih == null && !_tampilkanPencarian)
                 _bangunHeroBanner(),
 
-              // 3. Kategori Pilihan (Curated Categories 2x2 Grid dengan Foto)
+              // 3. Kategori Pilihan (Curated Categories 2x2 Grid) (cek-beranda.html)
               if (_kategoriTerpilih == null && !_tampilkanPencarian)
                 _bangunKategoriPilihan(),
 
-              // 4. Section Header Koleksi Terbaru / Katalog
+              // 4. Section Header Koleksi Terbaru / Katalog (cek-beranda.html)
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                padding: const EdgeInsets.fromLTRB(16, 28, 16, 14),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -197,14 +339,14 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                             color: TemaAplikasi.secondary,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 3),
                         Text(
                           _cariController.text.isNotEmpty
                               ? 'Hasil: "${_cariController.text}"'
                               : (_kategoriTerpilih ?? 'Koleksi Terbaru'),
                           style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w500,
                             letterSpacing: 0.5,
                             color: TemaAplikasi.primary,
                           ),
@@ -225,9 +367,26 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 ),
               ),
 
-              // 5. Grid Produk / Status Keadaan (Koleksi Terbaru)
+              // 5. Grid Produk / Status Keadaan (cek-beranda.html)
               _bangunKontenProduk(),
-              const SizedBox(height: 40),
+
+              // 6. Manifesto Editorial Inset / Campaign Showcase (cek-beranda.html)
+              if (_kategoriTerpilih == null && !_tampilkanPencarian)
+                _bangunManifestoEditorial(),
+
+              // 7. Curated Editorial Highlight (Asymmetric Banner) (cek-beranda.html)
+              if (_kategoriTerpilih == null && !_tampilkanPencarian)
+                _bangunCuratedEditorialHighlight(),
+
+              // 8. Pelayanan & Garansi Eksklusif (Trust Badges) (cek-beranda.html)
+              if (_kategoriTerpilih == null && !_tampilkanPencarian)
+                _bangunPelayananEksklusif(),
+
+              // 9. Newsletter / VIP Club Editorial Sign-up (cek-beranda.html)
+              if (_kategoriTerpilih == null && !_tampilkanPencarian)
+                _bangunNewsletterVip(),
+
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -239,13 +398,14 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     return AppBar(
       backgroundColor: TemaAplikasi.surfaceWhite,
       surfaceTintColor: Colors.transparent,
+      elevation: 0,
       title: _tampilkanPencarian
           ? TextField(
               controller: _cariController,
               autofocus: true,
               style: const TextStyle(fontSize: 14, color: TemaAplikasi.primary),
               decoration: const InputDecoration(
-                hintText: 'Cari kemeja, celana, jaket...',
+                hintText: 'Cari kemeja, celana, tas, aksesori...',
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
@@ -257,36 +417,43 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
             )
           : Row(
               children: [
+                // Brand Logo ME (Playfair Display)
                 const Text(
                   'ME',
                   style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 3.0,
-                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 1.5,
+                    fontSize: 22,
+                    color: TemaAplikasi.primary,
                   ),
                 ),
                 const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: TemaAplikasi.borderGray),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                  child: const Text(
-                    'STUDIO',
-                    style: TextStyle(
-                      fontSize: 9,
-                      letterSpacing: 2.0,
-                      fontWeight: FontWeight.w600,
-                      color: TemaAplikasi.secondary,
-                    ),
+                const Text(
+                  'STUDIO',
+                  style: TextStyle(
+                    fontSize: 9,
+                    letterSpacing: 2.5,
+                    fontWeight: FontWeight.w600,
+                    color: TemaAplikasi.secondary,
                   ),
                 ),
+                const Spacer(),
+                const Text(
+                  'BERANDA',
+                  style: TextStyle(
+                    fontSize: 11,
+                    letterSpacing: 2.5,
+                    fontWeight: FontWeight.w600,
+                    color: TemaAplikasi.primary,
+                  ),
+                ),
+                const Spacer(),
               ],
             ),
       actions: [
+        // Tombol Cari
         IconButton(
-          icon: Icon(_tampilkanPencarian ? Icons.close : Icons.search_outlined),
+          icon: Icon(_tampilkanPencarian ? Icons.close : Icons.search_outlined, size: 22),
           onPressed: () {
             setState(() {
               if (_tampilkanPencarian) {
@@ -299,25 +466,27 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
             });
           },
         ),
+
+        // Tombol Shopping Bag dengan Badge Kuantitas
         Stack(
           alignment: Alignment.center,
           children: [
             IconButton(
-              icon: const Icon(Icons.shopping_bag_outlined),
+              icon: const Icon(Icons.shopping_bag_outlined, size: 22),
               onPressed: () async {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const HalamanKeranjang()),
                 );
-                _muatData();
+                _muatJumlahKeranjang();
               },
             ),
             if (_jumlahItemKeranjang > 0)
               Positioned(
-                right: 8,
-                top: 8,
+                right: 7,
+                top: 7,
                 child: Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(3),
                   decoration: const BoxDecoration(
                     color: TemaAplikasi.primary,
                     shape: BoxShape.circle,
@@ -327,7 +496,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                     '$_jumlahItemKeranjang',
                     style: const TextStyle(
                       color: TemaAplikasi.onPrimary,
-                      fontSize: 9,
+                      fontSize: 8.5,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
@@ -336,15 +505,55 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
               ),
           ],
         ),
-        const SizedBox(width: 8),
+
+        // Profile Avatar (cek-beranda.html)
+        Padding(
+          padding: const EdgeInsets.only(left: 4, right: 14),
+          child: InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HalamanKelolaProduk()),
+              );
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: TemaAplikasi.borderGray),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: FotoDummy.bangunGambar(
+                url: FotoDummy.avatar,
+                fit: BoxFit.cover,
+                fallbackWidget: Container(
+                  color: TemaAplikasi.primary,
+                  child: const Center(
+                    child: Text(
+                      'M',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
 
+  // 1. Story / Category Highlight Pills (Horizontal Scroll)
   Widget _bangunStoryHighlights() {
     return Container(
       color: TemaAplikasi.surfaceWhite,
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -353,33 +562,58 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
             final isSelected = _storyTerpilih == story['label'];
 
             return Padding(
-              padding: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.only(right: 14),
               child: InkWell(
                 onTap: () => _pilihStory(story),
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(36),
                 child: Column(
                   children: [
+                    // Lingkaran Foto dengan Indikator Aktif Bergradasi Sesuai cek-beranda.html
                     Container(
-                      width: 58,
-                      height: 58,
+                      width: 64,
+                      height: 64,
                       padding: const EdgeInsets.all(2.5),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected ? TemaAplikasi.primary : TemaAplikasi.borderGray,
-                          width: isSelected ? 2 : 1,
-                        ),
+                        gradient: isSelected
+                            ? const LinearGradient(
+                                begin: Alignment.bottomLeft,
+                                end: Alignment.topRight,
+                                colors: [
+                                  TemaAplikasi.primary,
+                                  TemaAplikasi.secondary,
+                                  Color(0xFFE5E2E1),
+                                ],
+                              )
+                            : null,
+                        border: isSelected
+                            ? null
+                            : Border.all(
+                                color: const Color(0xFFE2E2E2),
+                                width: 1.5,
+                              ),
                       ),
-                      child: ClipOval(
-                        child: FotoDummy.bangunGambar(
-                          url: story['foto'] as String,
-                          fit: BoxFit.cover,
-                          fallbackWidget: Container(
-                            color: isSelected ? TemaAplikasi.primary : TemaAplikasi.surfaceContainer,
-                            child: Icon(
-                              Icons.checkroom_outlined,
-                              size: 24,
-                              color: isSelected ? TemaAplikasi.onPrimary : TemaAplikasi.primary,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          color: TemaAplikasi.surfaceWhite,
+                          shape: BoxShape.circle,
+                        ),
+                        child: ClipOval(
+                          child: FotoDummy.bangunGambar(
+                            url: story['foto'] as String,
+                            fit: BoxFit.cover,
+                            fallbackWidget: Container(
+                              color: isSelected
+                                  ? TemaAplikasi.primary
+                                  : TemaAplikasi.surfaceContainer,
+                              child: Icon(
+                                Icons.checkroom_outlined,
+                                size: 24,
+                                color: isSelected
+                                    ? TemaAplikasi.onPrimary
+                                    : TemaAplikasi.primary,
+                              ),
                             ),
                           ),
                         ),
@@ -405,11 +639,12 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     );
   }
 
+  // 2. Full-bleed Mobile Hero Editorial Banner (cek-beranda.html)
   Widget _bangunHeroBanner() {
     return Container(
       width: double.infinity,
-      height: 380,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      height: 420,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: TemaAplikasi.primary,
         borderRadius: BorderRadius.circular(2),
@@ -418,13 +653,13 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Foto Dummy Editorial ME MINIMALISM
+          // Foto Editorial ME MINIMALISM
           FotoDummy.bangunGambar(
             url: FotoDummy.heroBanner,
             fit: BoxFit.cover,
           ),
 
-          // Gradient Monokrom Mewah Sesuai cek-beranda.html
+          // Gradient Overlay Dramatis Sesuai cek-beranda.html
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -432,27 +667,27 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.transparent,
-                  Color(0x66000000),
+                  Color(0x4D000000),
                   Color(0xEE000000),
                 ],
-                stops: [0.3, 0.6, 1.0],
+                stops: [0.25, 0.55, 1.0],
               ),
             ),
           ),
 
-          // Teks Editorial ME MINIMALISM
+          // Teks & Tombol Aksi Hero Banner
           Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 const Text(
-                  'KOLEKSI 2026 // ME STUDIO',
+                  'KOLEKSI 2025 // ME STUDIO',
                   style: TextStyle(
-                    color: Color(0xFFC8C6C5),
+                    color: Color(0xFFE5E2E1),
                     fontSize: 10,
-                    letterSpacing: 3.0,
+                    letterSpacing: 2.5,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -460,17 +695,17 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 const Text(
                   'ME MINIMALISM',
                   style: TextStyle(
-                    color: TemaAplikasi.onPrimary,
-                    fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.0,
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 0.5,
                   ),
                 ),
                 const SizedBox(height: 6),
                 const Text(
-                  'Eksplorasi siluet bersih, material katun combed & linen, serta palet monokrom abadi.',
+                  'Eksplorasi siluet bersih, material linen premium, dan palet monokrom abadi.',
                   style: TextStyle(
-                    color: Color(0xFFEEEEEE),
+                    color: Color(0xFFE5E2E1),
                     fontSize: 12,
                     height: 1.4,
                   ),
@@ -478,27 +713,62 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
+                    // Tombol Wanita Sesuai cek-beranda.html
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => _pilihKategori('Pakaian'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: TemaAplikasi.onPrimary,
-                          foregroundColor: TemaAplikasi.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: SizedBox(
+                        height: 44,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _pilihStory(_stories[1]); // Wanita
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: TemaAplikasi.primary,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          child: const Text(
+                            'WANITA',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
                         ),
-                        child: const Text('PAKAIAN'),
                       ),
                     ),
                     const SizedBox(width: 10),
+                    // Tombol Pria Sesuai cek-beranda.html
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => _pilihKategori('Aksesori'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: TemaAplikasi.onPrimary,
-                          side: const BorderSide(color: TemaAplikasi.onPrimary),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: SizedBox(
+                        height: 44,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            _pilihStory(_stories[2]); // Pria
+                          },
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.black.withValues(alpha: 0.4),
+                            foregroundColor: Colors.white,
+                            side: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              width: 1,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          child: const Text(
+                            'PRIA',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
                         ),
-                        child: const Text('AKSESORI'),
                       ),
                     ),
                   ],
@@ -511,32 +781,62 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     );
   }
 
+  // 3. Kategori Pilihan (Curated Categories 2x2 Grid) (cek-beranda.html)
   Widget _bangunKategoriPilihan() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'EKSPLORASI LEMARI',
-            style: TextStyle(
-              fontSize: 10,
-              letterSpacing: 2.0,
-              fontWeight: FontWeight.w600,
-              color: TemaAplikasi.secondary,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'EKSPLORASI LEMARI',
+                    style: TextStyle(
+                      fontSize: 10,
+                      letterSpacing: 2.0,
+                      fontWeight: FontWeight.w600,
+                      color: TemaAplikasi.secondary,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Kategori Pilihan',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                      color: TemaAplikasi.primary,
+                    ),
+                  ),
+                ],
+              ),
+              InkWell(
+                onTap: () => _pilihKategori(null),
+                child: Row(
+                  children: const [
+                    Text(
+                      'LIHAT SEMUA',
+                      style: TextStyle(
+                        fontSize: 10,
+                        letterSpacing: 1.5,
+                        fontWeight: FontWeight.w600,
+                        color: TemaAplikasi.primary,
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(Icons.arrow_forward, size: 14, color: TemaAplikasi.primary),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 2),
-          const Text(
-            'Kategori Pilihan',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
-              color: TemaAplikasi.primary,
-            ),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
           // 2x2 Grid Kategori Pilihan dengan Foto Editorial (cek-beranda.html)
           GridView.count(
@@ -545,7 +845,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
             physics: const NeverScrollableScrollPhysics(),
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            childAspectRatio: 0.85,
+            childAspectRatio: 0.75, // Aspek rasio 3:4 sesuai cek-beranda.html
             children: [
               _bangunKartuKategoriFoto('01 // ESENSIAL', 'Atasan & Kemeja', FotoDummy.katAtasan, 'Pakaian'),
               _bangunKartuKategoriFoto('02 // TAILORING', 'Bawahan & Celana', FotoDummy.katBawahan, 'Pakaian'),
@@ -565,19 +865,15 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
         decoration: BoxDecoration(
           color: TemaAplikasi.surfaceContainer,
           borderRadius: BorderRadius.circular(2),
-          border: Border.all(color: TemaAplikasi.borderGray),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Foto Kategori Editorial
             FotoDummy.bangunGambar(
               url: urlFoto,
               fit: BoxFit.cover,
             ),
-
-            // Gradient Overlay
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -585,15 +881,13 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Color(0x33000000),
-                    Color(0xD9000000),
+                    Color(0x22000000),
+                    Color(0xCC000000),
                   ],
-                  stops: [0.3, 0.6, 1.0],
+                  stops: [0.4, 0.7, 1.0],
                 ),
               ),
             ),
-
-            // Teks Kategori
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -605,7 +899,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                     style: const TextStyle(
                       fontSize: 9,
                       letterSpacing: 1.5,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       color: Color(0xFFE5E2E1),
                     ),
                   ),
@@ -613,9 +907,9 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                   Text(
                     judul,
                     style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: TemaAplikasi.onPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
                       height: 1.2,
                     ),
                   ),
@@ -628,6 +922,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     );
   }
 
+  // 4 & 5. Grid Produk / Status Keadaan (cek-beranda.html)
   Widget _bangunKontenProduk() {
     switch (_keadaan) {
       case KeadaanMuat.memuat:
@@ -673,12 +968,15 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
               crossAxisCount: 2,
               crossAxisSpacing: 12,
               mainAxisSpacing: 20,
-              childAspectRatio: 0.58, // Rasio 3:4 foto + info teks
+              childAspectRatio: 0.51, // Pas untuk foto 3:4 + title + price + tombol Tas Belanja
             ),
             itemBuilder: (context, index) {
               final produk = _daftarProduk[index];
               return KartuProduk(
                 produk: produk,
+                isWishlist: _wishlistIds.contains(produk.id),
+                onToggleWishlist: () => _toggleWishlist(produk),
+                onTambahKeranjang: () => _tambahItemKeKeranjang(produk),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -692,5 +990,406 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
           ),
         );
     }
+  }
+
+  // 6. Manifesto Editorial Inset / Campaign Showcase (cek-beranda.html)
+  Widget _bangunManifestoEditorial() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 28),
+      color: const Color(0xFF1C1B1B),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'MANIFESTO DESAIN',
+            style: TextStyle(
+              fontSize: 10,
+              letterSpacing: 2.5,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF868381),
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'THE MONOCHROME CAPSULE',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0.5,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '"Kesederhanaan adalah wujud kemewahan tertinggi. Setiap jahitan dirancang untuk ketahanan gaya lintas dekade."',
+            style: TextStyle(
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
+              color: Color(0xFFE2E2E2),
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Foto Showcase 16:9 Sesuai cek-beranda.html
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: TemaAplikasi.surfaceContainer,
+                borderRadius: BorderRadius.circular(2),
+              ),
+              child: FotoDummy.bangunGambar(
+                url: FotoDummy.manifesto,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'EDISI KOLEKTOR',
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      letterSpacing: 1.5,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFC8C6C5),
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Vol. 04 / Autumn-Winter',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 40,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    _pilihStory(_stories[4]); // Lookbook
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: TemaAplikasi.primary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                  ),
+                  icon: const Text(
+                    'JELAJAHI LOOKBOOK',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  label: const Icon(Icons.arrow_forward, size: 14),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 7. Curated Editorial Highlight (Asymmetric Banner) (cek-beranda.html)
+  Widget _bangunCuratedEditorialHighlight() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: InkWell(
+        onTap: () {
+          _pilihKategori('Pakaian');
+        },
+        child: AspectRatio(
+          aspectRatio: 4 / 3,
+          child: Container(
+            decoration: BoxDecoration(
+              color: TemaAplikasi.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(2),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                FotoDummy.bangunGambar(
+                  url: FotoDummy.siluetBaru,
+                  fit: BoxFit.cover,
+                ),
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Color(0x33000000),
+                        Color(0xCC000000),
+                      ],
+                      stops: [0.35, 0.65, 1.0],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'SILUET BARU',
+                        style: TextStyle(
+                          fontSize: 10,
+                          letterSpacing: 2.0,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFE5E2E1),
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        'Garis Arsitektural',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        'Potongan tegas yang merayakan proporsi tubuh kontemporer.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFFEEEEEE),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 8. Pelayanan & Garansi Eksklusif (Trust Badges) (cek-beranda.html)
+  Widget _bangunPelayananEksklusif() {
+    return Container(
+      width: double.infinity,
+      color: TemaAplikasi.surfaceContainerLow,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 28),
+      child: Column(
+        children: [
+          const Text(
+            'STANDAR ME STUDIO',
+            style: TextStyle(
+              fontSize: 10,
+              letterSpacing: 2.0,
+              fontWeight: FontWeight.w600,
+              color: TemaAplikasi.secondary,
+            ),
+          ),
+          const SizedBox(height: 3),
+          const Text(
+            'Pelayanan Eksklusif',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.5,
+              color: TemaAplikasi.primary,
+            ),
+          ),
+          const SizedBox(height: 18),
+          _bangunItemPelayanan(
+            ikon: Icons.local_shipping_outlined,
+            judul: 'Gratis Ongkir Seluruh Indonesia',
+            deskripsi: 'Pengiriman ekspres tanpa minimum pembelian',
+          ),
+          const SizedBox(height: 10),
+          _bangunItemPelayanan(
+            ikon: Icons.sync_alt,
+            judul: 'Pengembalian 14 Hari Tanpa Syarat',
+            deskripsi: 'Penukaran ukuran atau pengembalian dana mudah',
+          ),
+          const SizedBox(height: 10),
+          _bangunItemPelayanan(
+            ikon: Icons.verified_outlined,
+            judul: '100% Autentik & Dijamin',
+            deskripsi: 'Dibuat dengan kurasi material standar couture',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bangunItemPelayanan({
+    required IconData ikon,
+    required String judul,
+    required String deskripsi,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: TemaAplikasi.surfaceWhite,
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(color: TemaAplikasi.borderGray.withValues(alpha: 0.7)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: TemaAplikasi.surfaceContainer,
+              borderRadius: BorderRadius.circular(2),
+            ),
+            child: Icon(ikon, size: 20, color: TemaAplikasi.primary),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  judul,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: TemaAplikasi.primary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  deskripsi,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: TemaAplikasi.secondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 9. Newsletter / VIP Club Editorial Sign-up (cek-beranda.html)
+  Widget _bangunNewsletterVip() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            'ME PRIVÉ',
+            style: TextStyle(
+              fontSize: 10,
+              letterSpacing: 2.5,
+              fontWeight: FontWeight.w700,
+              color: TemaAplikasi.secondary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Dapatkan Akses Pratinjau Eksklusif',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.5,
+              color: TemaAplikasi.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Jadilah yang pertama mengakses rilis terbatas dan lookbook privat setiap musim.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12,
+              color: TemaAplikasi.secondary,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 44,
+                  child: TextField(
+                    controller: _emailVipController,
+                    keyboardType: TextInputType.emailAddress,
+                    style: const TextStyle(fontSize: 12, color: TemaAplikasi.primary),
+                    decoration: InputDecoration(
+                      hintText: 'Masukkan alamat email Anda',
+                      hintStyle: const TextStyle(color: TemaAplikasi.mutedGray, fontSize: 12),
+                      fillColor: TemaAplikasi.surfaceContainerLow,
+                      filled: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(2),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                height: 44,
+                child: ElevatedButton(
+                  onPressed: _daftarVipNewsletter,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: TemaAplikasi.primary,
+                    foregroundColor: TemaAplikasi.onPrimary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                  ),
+                  child: const Text(
+                    'DAFTAR',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'PRIVASI ANDA TERJAMIN SEPENUHNYA',
+            style: TextStyle(
+              fontSize: 9.5,
+              letterSpacing: 1.5,
+              color: TemaAplikasi.mutedGray,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

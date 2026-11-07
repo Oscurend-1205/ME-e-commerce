@@ -9,19 +9,25 @@ class FotoDummy {
   // Hero Container ME MINIMALISM
   static String get heroBanner => '${Konstan.storageUrl}/hero-banner.jpg';
 
+  // Editorial Inset & Highlight
+  static String get manifesto => '${Konstan.storageUrl}/manifesto.jpg';
+  static String get siluetBaru => '${Konstan.storageUrl}/siluet-baru.jpg';
+  static String get avatar => '${Konstan.storageUrl}/avatar.jpg';
+
   // 4 Kategori Pilihan (Curated 2x2)
   static String get katAtasan => '${Konstan.storageUrl}/kat-atasan.jpg';
   static String get katBawahan => '${Konstan.storageUrl}/kat-bawahan.jpg';
   static String get katOuterwear => '${Konstan.storageUrl}/kat-outerwear.jpg';
   static String get katAksesori => '${Konstan.storageUrl}/kat-aksesori.jpg';
 
-  // Story Highlight Circles
+  // Story Highlight Circles (6 Stories sesuai cek-beranda.html)
   static List<String> get stories => [
         '${Konstan.storageUrl}/story-1.jpg',
         '${Konstan.storageUrl}/story-2.jpg',
         '${Konstan.storageUrl}/story-3.jpg',
         '${Konstan.storageUrl}/story-4.jpg',
         '${Konstan.storageUrl}/story-5.jpg',
+        '${Konstan.storageUrl}/story-6.jpg',
       ];
 
   // Daftar Foto Produk Editorial untuk Katalog Koleksi Terbaru

@@ -8,6 +8,7 @@ class TemaAplikasi {
   static const Color surfaceBright = Color(0xFFF9F9F9);
   static const Color surfaceWhite = Color(0xFFFFFFFF);
   static const Color surfaceContainer = Color(0xFFEEEEEE);
+  static const Color surfaceContainerLow = Color(0xFFF3F3F4);
   static const Color surfaceContainerHigh = Color(0xFFE8E8E8);
   static const Color borderGray = Color(0xFFE5E5E5);
   static const Color secondary = Color(0xFF5E5E5E);
