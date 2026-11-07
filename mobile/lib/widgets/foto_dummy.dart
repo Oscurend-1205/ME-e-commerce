@@ -13,6 +13,8 @@ class FotoDummy {
   static String get manifesto => '${Konstan.storageUrl}/manifesto.jpg';
   static String get siluetBaru => '${Konstan.storageUrl}/siluet-baru.jpg';
   static String get avatar => '${Konstan.storageUrl}/avatar.jpg';
+  static String get upsell1 => '${Konstan.storageUrl}/upsell-1.jpg';
+  static String get upsell2 => '${Konstan.storageUrl}/upsell-2.jpg';
 
   // 4 Kategori Pilihan (Curated 2x2)
   static String get katAtasan => '${Konstan.storageUrl}/kat-atasan.jpg';

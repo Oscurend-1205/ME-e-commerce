@@ -6,6 +6,7 @@ class TemaAplikasi {
   // Palet Warna dari cek-beranda.html & DESIGN.md
   static const Color primary = Color(0xFF000000);
   static const Color surfaceBright = Color(0xFFF9F9F9);
+  static const Color surfaceLight = Color(0xFFF7F7F7);
   static const Color surfaceWhite = Color(0xFFFFFFFF);
   static const Color surfaceContainer = Color(0xFFEEEEEE);
   static const Color surfaceContainerLow = Color(0xFFF3F3F4);
