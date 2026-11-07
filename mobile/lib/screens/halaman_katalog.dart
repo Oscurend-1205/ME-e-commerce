@@ -1902,9 +1902,9 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       children: [
         // 1. Stories Highlights Row (cek-katalogWanita.html)
         Container(
-          color: TemaAplikasi.surfaceWhite,
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: const BoxDecoration(
+            color: TemaAplikasi.surfaceWhite,
             border: Border(
               bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
             ),
@@ -2354,9 +2354,9 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       children: [
         // 1. Stories Highlights Row (cek-katalogPria.html)
         Container(
-          color: TemaAplikasi.surfaceWhite,
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: const BoxDecoration(
+            color: TemaAplikasi.surfaceWhite,
             border: Border(
               bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
             ),
@@ -2917,9 +2917,9 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 Container(
                   width: double.infinity,
                   height: double.infinity,
-                  color: TemaAplikasi.surfaceContainerLow,
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
+                    color: TemaAplikasi.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(2),
                   ),
                   child: FotoDummy.bangunGambar(
