@@ -96,9 +96,11 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     if (respon.berhasil) {
       _muatKeranjang();
     } else {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(respon.message),
+          duration: const Duration(milliseconds: 1500),
           backgroundColor: TemaAplikasi.errorColor,
           behavior: SnackBarBehavior.floating,
         ),
@@ -130,18 +132,22 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     });
 
     if (respon.berhasil) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Item berhasil dihapus dari tas belanja.'),
+          duration: Duration(milliseconds: 1500),
           backgroundColor: TemaAplikasi.primary,
           behavior: SnackBarBehavior.floating,
         ),
       );
       _muatKeranjang();
     } else {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(respon.message),
+          duration: const Duration(milliseconds: 1500),
           backgroundColor: TemaAplikasi.errorColor,
           behavior: SnackBarBehavior.floating,
         ),
@@ -180,6 +186,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
   }
 
   void _pindahKeWishlist(ItemKeranjang item) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -189,6 +196,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
             Expanded(child: Text('${item.namaProduk} dipindahkan ke Wishlist.')),
           ],
         ),
+        duration: const Duration(milliseconds: 1500),
         backgroundColor: TemaAplikasi.primary,
         behavior: SnackBarBehavior.floating,
       ),
@@ -197,6 +205,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
 
   void _terapkanVoucher() {
     final kode = _voucherController.text.trim();
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     if (kode.isEmpty) {
       setState(() {
         _voucherDiterapkan = false;
@@ -204,6 +213,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Voucher dibatalkan.'),
+          duration: Duration(milliseconds: 1500),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -217,6 +227,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Kode promo MEVIP-150 berhasil diterapkan! Potongan Rp 150.000.'),
+        duration: Duration(milliseconds: 1500),
         backgroundColor: TemaAplikasi.primary,
         behavior: SnackBarBehavior.floating,
       ),
@@ -1055,9 +1066,11 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                   );
                   _muatKeranjang();
                   if (!mounted) return;
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('$nama berhasil ditambahkan ke tas belanja!'),
+                      duration: const Duration(milliseconds: 1500),
                       backgroundColor: TemaAplikasi.primary,
                       behavior: SnackBarBehavior.floating,
                     ),

@@ -168,12 +168,13 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
 
   void _toggleWishlist(Produk produk) {
     setState(() {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       if (_wishlistIds.contains(produk.id)) {
         _wishlistIds.remove(produk.id);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${produk.nama} dihapus dari Wishlist'),
-            duration: const Duration(seconds: 2),
+            duration: const Duration(milliseconds: 1500),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -188,7 +189,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 Expanded(child: Text('${produk.nama} ditambahkan ke Wishlist')),
               ],
             ),
-            duration: const Duration(seconds: 2),
+            duration: const Duration(milliseconds: 1500),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -242,9 +243,11 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     if (respon.berhasil) {
       await _muatJumlahKeranjang();
       if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${produk.nama} berhasil ditambahkan ke Tas Belanja.'),
+          duration: const Duration(milliseconds: 1500),
           action: SnackBarAction(
             label: 'LIHAT',
             textColor: Colors.white,
@@ -260,9 +263,11 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
         ),
       );
     } else {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(respon.message),
+          duration: const Duration(milliseconds: 1500),
           backgroundColor: TemaAplikasi.errorColor,
           behavior: SnackBarBehavior.floating,
         ),

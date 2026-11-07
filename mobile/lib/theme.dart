@@ -100,6 +100,10 @@ class TemaAplikasi {
         thickness: 0.8,
         space: 1,
       ),
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: primary,
+      ),
     );
   }
 }

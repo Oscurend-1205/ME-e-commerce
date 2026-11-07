@@ -111,9 +111,11 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
     });
 
     if (respon.berhasil) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${_produk!.nama} (${_varianTerpilih!.ukuran}, ${_varianTerpilih!.warna}) masuk ke keranjang.'),
+          duration: const Duration(milliseconds: 1500),
           action: SnackBarAction(
             label: 'LIHAT',
             textColor: TemaAplikasi.surfaceWhite,
@@ -129,9 +131,11 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
         ),
       );
     } else {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(respon.message),
+          duration: const Duration(milliseconds: 1500),
           backgroundColor: TemaAplikasi.errorColor,
           behavior: SnackBarBehavior.floating,
         ),
