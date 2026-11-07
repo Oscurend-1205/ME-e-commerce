@@ -39,77 +39,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   bool _modeGrid = true;
   String _subKategoriWanita = 'SEMUA';
   String _subKategoriPria = 'SEMUA';
-  String _storyTerpilihWanita = 'Baru Tiba';
-  String _storyTerpilihPria = 'Baru Tiba';
   String _urutan = 'KURASI TERBARU';
-
-  // 6 Story highlight pills khusus Wanita (cek-katalogWanita.html)
-  List<Map<String, dynamic>> get _storiesWanita => [
-        {
-          'label': 'Baru Tiba',
-          'foto': FotoDummy.storiesWanita[0],
-          'filter': 'SEMUA',
-        },
-        {
-          'label': 'Outerwear',
-          'foto': FotoDummy.storiesWanita[1],
-          'filter': 'OUTERWEAR & COAT',
-        },
-        {
-          'label': 'Gaun & Sutra',
-          'foto': FotoDummy.storiesWanita[2],
-          'filter': 'SILK & DRESSES',
-        },
-        {
-          'label': 'Setelan',
-          'foto': FotoDummy.storiesWanita[3],
-          'filter': 'SUITING & TAILORED',
-        },
-        {
-          'label': 'Rajut & Kasmir',
-          'foto': FotoDummy.storiesWanita[4],
-          'filter': 'KNITWEAR KASMIR',
-        },
-        {
-          'label': 'Aksesori',
-          'foto': FotoDummy.storiesWanita[5],
-          'filter': 'AKSESORI',
-        },
-      ];
-
-  // 6 Story highlight pills khusus Pria (cek-katalogPria.html)
-  List<Map<String, dynamic>> get _storiesPria => [
-        {
-          'label': 'Baru Tiba',
-          'foto': FotoDummy.storiesPria[0],
-          'filter': 'SEMUA',
-        },
-        {
-          'label': 'Suiting',
-          'foto': FotoDummy.storiesPria[1],
-          'filter': 'SUITING & BLAZER',
-        },
-        {
-          'label': 'Kasual',
-          'foto': FotoDummy.storiesPria[2],
-          'filter': 'KEMEJA & SHIRTING',
-        },
-        {
-          'label': 'Mantel',
-          'foto': FotoDummy.storiesPria[3],
-          'filter': 'MANTEL',
-        },
-        {
-          'label': 'Esensial',
-          'foto': FotoDummy.storiesPria[4],
-          'filter': 'CELANA TAILORED',
-        },
-        {
-          'label': 'Kasmir',
-          'foto': FotoDummy.storiesPria[5],
-          'filter': 'KNITWEAR',
-        },
-      ];
 
   final List<String> _chipsWanita = const [
     'SEMUA',
@@ -259,10 +189,8 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       _kategoriTerpilih = (kat == null || kat == 'Semua') ? null : kat;
       if (label == 'Wanita') {
         _subKategoriWanita = 'SEMUA';
-        _storyTerpilihWanita = 'Baru Tiba';
       } else if (label == 'Pria') {
         _subKategoriPria = 'SEMUA';
-        _storyTerpilihPria = 'Baru Tiba';
       }
     });
     _muatProduk();
@@ -411,23 +339,30 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
         onRefresh: _muatData,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          child: _storyTerpilih == 'Wanita'
-              ? _bangunKatalogWanita()
-              : (_storyTerpilih == 'Pria'
-                  ? _bangunKatalogPria()
-                  : _bangunBerandaUtama()),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Story Highlight Pills (Circular Category Chips) - Tetap ada di semua halaman
+              _bangunStoryHighlights(),
+
+              // 2. Konten Halaman Sesuai Kategori / Story yang Dipilih
+              if (_storyTerpilih == 'Wanita')
+                _bangunKatalogWanita()
+              else if (_storyTerpilih == 'Pria')
+                _bangunKatalogPria()
+              else
+                _bangunKontenBerandaUtama(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _bangunBerandaUtama() {
+  Widget _bangunKontenBerandaUtama() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. Story Highlight Pills (cek-beranda.html)
-        _bangunStoryHighlights(),
-
         // 2. Full-bleed Mobile Hero Editorial Banner (cek-beranda.html)
         if (_kategoriTerpilih == null && !_tampilkanPencarian)
           _bangunHeroBanner(),
@@ -545,80 +480,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       );
     }
 
-    if (_storyTerpilih == 'Wanita') {
-      return AppBar(
-        backgroundColor: TemaAplikasi.surfaceWhite,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, size: 22, color: TemaAplikasi.primary),
-          tooltip: 'Kembali ke Beranda',
-          onPressed: () {
-            setState(() {
-              _storyTerpilih = 'Baru Tiba';
-              _kategoriTerpilih = null;
-            });
-            _muatProduk();
-          },
-        ),
-        title: const Text(
-          'Women’s Atelier',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w400,
-            letterSpacing: -0.2,
-            color: TemaAplikasi.primary,
-          ),
-        ),
-        actions: _bangunHeaderActions(),
-      );
-    }
-
-    if (_storyTerpilih == 'Pria') {
-      return AppBar(
-        backgroundColor: TemaAplikasi.surfaceWhite,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, size: 22, color: TemaAplikasi.primary),
-          tooltip: 'Kembali ke Beranda',
-          onPressed: () {
-            setState(() {
-              _storyTerpilih = 'Baru Tiba';
-              _kategoriTerpilih = null;
-            });
-            _muatProduk();
-          },
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            Text(
-              'Men’s Atelier',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w400,
-                letterSpacing: -0.2,
-                color: TemaAplikasi.primary,
-              ),
-            ),
-            Text(
-              'ÉDITION 2025',
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 2.0,
-                color: TemaAplikasi.secondary,
-              ),
-            ),
-          ],
-        ),
-        actions: _bangunHeaderActions(),
-      );
-    }
-
-    // Default Beranda Header (cek-beranda.html)
+    // Header Beranda PERSIS & SAMA untuk semua halaman/kategori (Tanpa Tombol Back)
     return AppBar(
       backgroundColor: TemaAplikasi.surfaceWhite,
       surfaceTintColor: Colors.transparent,
@@ -1900,75 +1762,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. Stories Highlights Row (cek-katalogWanita.html)
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: const BoxDecoration(
-            color: TemaAplikasi.surfaceWhite,
-            border: Border(
-              bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
-            ),
-          ),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: _storiesWanita.map((story) {
-                final isSelected = _storyTerpilihWanita == story['label'];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 14),
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _storyTerpilihWanita = story['label'] as String;
-                        _subKategoriWanita = story['filter'] as String;
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(36),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 64,
-                          height: 64,
-                          padding: const EdgeInsets.all(2.5),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isSelected
-                                  ? TemaAplikasi.primary
-                                  : TemaAplikasi.borderGray,
-                              width: isSelected ? 2 : 1,
-                            ),
-                          ),
-                          child: ClipOval(
-                            child: FotoDummy.bangunGambar(
-                              url: story['foto'] as String,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          story['label'] as String,
-                          style: TextStyle(
-                            fontSize: 10,
-                            letterSpacing: 1.0,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                            color: isSelected
-                                ? TemaAplikasi.primary
-                                : TemaAplikasi.secondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ),
-
-        // 2. Editorial Metadata & Heading (cek-katalogWanita.html)
+        // Editorial Metadata & Heading (cek-katalogWanita.html)
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
           child: Column(
@@ -2352,75 +2146,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. Stories Highlights Row (cek-katalogPria.html)
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: const BoxDecoration(
-            color: TemaAplikasi.surfaceWhite,
-            border: Border(
-              bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
-            ),
-          ),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: _storiesPria.map((story) {
-                final isSelected = _storyTerpilihPria == story['label'];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 14),
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _storyTerpilihPria = story['label'] as String;
-                        _subKategoriPria = story['filter'] as String;
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(36),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 64,
-                          height: 64,
-                          padding: const EdgeInsets.all(2.5),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isSelected
-                                  ? TemaAplikasi.primary
-                                  : TemaAplikasi.borderGray,
-                              width: isSelected ? 2 : 1,
-                            ),
-                          ),
-                          child: ClipOval(
-                            child: FotoDummy.bangunGambar(
-                              url: story['foto'] as String,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          story['label'] as String,
-                          style: TextStyle(
-                            fontSize: 10,
-                            letterSpacing: 1.0,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                            color: isSelected
-                                ? TemaAplikasi.primary
-                                : TemaAplikasi.secondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ),
-
-        // 2. Editorial Metadata & Heading (cek-katalogPria.html)
+        // Editorial Metadata & Heading (cek-katalogPria.html)
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
           child: Column(
