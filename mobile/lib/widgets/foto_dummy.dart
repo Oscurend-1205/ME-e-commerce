@@ -6,8 +6,10 @@ import '../theme.dart';
 /// Mengelola URL Foto Produk & Banner yang disimpan di Backend Laravel Storage
 /// (backend/storage/app/public/produk)
 class FotoDummy {
-  // Hero Container ME MINIMALISM
+  // Hero Container ME MINIMALISM & Spotlight Kategori
   static String get heroBanner => '${Konstan.storageUrl}/hero-banner.jpg';
+  static String get heroWanita => '${Konstan.storageUrl}/hero-wanita.jpg';
+  static String get heroPria => '${Konstan.storageUrl}/hero-pria.jpg';
 
   // Editorial Inset & Highlight
   static String get manifesto => '${Konstan.storageUrl}/manifesto.jpg';
@@ -30,6 +32,26 @@ class FotoDummy {
         '${Konstan.storageUrl}/story-4.jpg',
         '${Konstan.storageUrl}/story-5.jpg',
         '${Konstan.storageUrl}/story-6.jpg',
+      ];
+
+  // Story Highlight Circles Khusus Wanita (cek-katalogWanita.html)
+  static List<String> get storiesWanita => [
+        '${Konstan.storageUrl}/story-wanita-1.jpg',
+        '${Konstan.storageUrl}/story-wanita-2.jpg',
+        '${Konstan.storageUrl}/story-wanita-3.jpg',
+        '${Konstan.storageUrl}/story-wanita-4.jpg',
+        '${Konstan.storageUrl}/story-wanita-5.jpg',
+        '${Konstan.storageUrl}/story-wanita-6.jpg',
+      ];
+
+  // Story Highlight Circles Khusus Pria (cek-katalogPria.html)
+  static List<String> get storiesPria => [
+        '${Konstan.storageUrl}/story-pria-1.jpg',
+        '${Konstan.storageUrl}/story-pria-2.jpg',
+        '${Konstan.storageUrl}/story-pria-3.jpg',
+        '${Konstan.storageUrl}/story-pria-4.jpg',
+        '${Konstan.storageUrl}/story-pria-5.jpg',
+        '${Konstan.storageUrl}/story-pria-6.jpg',
       ];
 
   // Daftar Foto Produk Editorial untuk Katalog Koleksi Terbaru

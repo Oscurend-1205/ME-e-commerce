@@ -1,0 +1,1185 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      name="viewport"
+    />
+    <meta content="mobile_tab" name="shell-type" />
+    <title>ME Fashion Store</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-bright": "#f9f9f9",
+              secondary: "#5e5e5e",
+              "primary-container": "#1c1b1b",
+              "primary-fixed": "#e5e2e1",
+              "inverse-on-surface": "#f0f1f1",
+              "surface-dim": "#dadada",
+              "outline-variant": "#c4c7c7",
+              "surface-container": "#eeeeee",
+              "on-secondary-container": "#646464",
+              "on-primary": "#ffffff",
+              "on-error-container": "#93000a",
+              "on-tertiary-container": "#868381",
+              "on-secondary-fixed-variant": "#464747",
+              "error-container": "#ffdad6",
+              "on-primary-fixed": "#1c1b1b",
+              "primary-fixed-dim": "#c8c6c5",
+              "on-primary-fixed-variant": "#474646",
+              background: "#f9f9f9",
+              surface: "#f9f9f9",
+              "on-primary-container": "#858383",
+              "on-secondary": "#ffffff",
+              "secondary-container": "#e3e2e2",
+              "surface-container-lowest": "#ffffff",
+              "border-gray": "#E5E5E5",
+              "surface-light": "#F7F7F7",
+              primary: "#000000",
+              "on-secondary-fixed": "#1b1c1c",
+              outline: "#747878",
+              "secondary-fixed": "#e3e2e2",
+              "surface-container-highest": "#e2e2e2",
+              "on-surface-variant": "#444748",
+              "surface-tint": "#5f5e5e",
+              "on-error": "#ffffff",
+              error: "#ba1a1a",
+              "tertiary-fixed": "#e6e1df",
+              "tertiary-container": "#1d1b1a",
+              "surface-variant": "#e2e2e2",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed-variant": "#484645",
+              "surface-container-high": "#e8e8e8",
+              "on-background": "#1a1c1c",
+              tertiary: "#000000",
+              "on-tertiary-fixed": "#1d1b1a",
+              "secondary-fixed-dim": "#c7c6c6",
+              "muted-gray": "#767676",
+              "inverse-surface": "#2f3131",
+              "surface-container-low": "#f3f3f4",
+              "on-surface": "#1a1c1c",
+              "inverse-primary": "#c8c6c5",
+              "tertiary-fixed-dim": "#cac6c3",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              gutter: "1rem",
+              margin: "1rem",
+              "space-lg": "1.5rem",
+              "space-md": "1rem",
+              "space-sm": "0.5rem",
+              "margin-desktop": "3rem",
+              "space-xs": "0.25rem",
+              "gutter-desktop": "1.5rem",
+              "space-xl": "2.5rem",
+              "margin-tablet": "2rem",
+            },
+            fontFamily: {
+              "label-md": ["Inter"],
+              "headline-lg": ["Playfair Display"],
+              "label-lg": ["Inter"],
+              "body-lg": ["Inter"],
+              "headline-xl": ["Playfair Display"],
+              "headline-xl-mobile": ["Playfair Display"],
+              "label-sm": ["Inter"],
+              "body-md": ["Inter"],
+              "headline-lg-mobile": ["Playfair Display"],
+              "headline-sm": ["Playfair Display"],
+              "headline-md": ["Playfair Display"],
+              "body-sm": ["Inter"],
+            },
+            fontSize: {
+              "label-md": [
+                "11px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.16em",
+                  fontWeight: "500",
+                },
+              ],
+              "headline-lg": [
+                "40px",
+                {
+                  lineHeight: "48px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "label-lg": [
+                "13px",
+                {
+                  lineHeight: "18px",
+                  letterSpacing: "0.14em",
+                  fontWeight: "500",
+                },
+              ],
+              "body-lg": [
+                "16px",
+                {
+                  lineHeight: "26px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-xl": [
+                "56px",
+                {
+                  lineHeight: "64px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-xl-mobile": [
+                "36px",
+                {
+                  lineHeight: "44px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "label-sm": [
+                "10px",
+                {
+                  lineHeight: "14px",
+                  letterSpacing: "0.18em",
+                  fontWeight: "600",
+                },
+              ],
+              "body-md": [
+                "14px",
+                {
+                  lineHeight: "22px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-lg-mobile": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "400" },
+              ],
+              "headline-sm": [
+                "22px",
+                { lineHeight: "30px", fontWeight: "500" },
+              ],
+              "headline-md": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "400" },
+              ],
+              "body-sm": [
+                "12px",
+                {
+                  lineHeight: "18px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "400",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      @layer base {
+        html,
+        body {
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          min-height: 100%;
+        }
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .pt-safe {
+          padding-top: env(safe-area-inset-top, 0px);
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-surface-container-lowest text-on-surface antialiased flex flex-col min-h-screen"
+  >
+    <header
+      class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/95 backdrop-blur-xl border-b border-border-gray"
+    >
+      <div class="h-16 px-margin flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span
+            class="font-headline-sm text-[24px] tracking-widest text-primary font-normal uppercase"
+            >ME</span
+          ><span
+            class="font-label-sm text-label-sm uppercase tracking-widest text-secondary hidden sm:inline-block pl-1"
+            >Studio</span
+          >
+        </div>
+        <div class="flex items-center gap-1">
+          <button
+            aria-label="Search"
+            class="w-10 h-10 flex items-center justify-center text-primary transition-opacity hover:opacity-60"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[22px]"
+              >search</span
+            ></button
+          ><button
+            aria-label="Wishlist"
+            class="w-10 h-10 flex items-center justify-center text-primary transition-opacity hover:opacity-60"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[22px]"
+              >favorite</span
+            ></button
+          ><button
+            aria-label="Shopping Bag"
+            class="w-10 h-10 relative flex items-center justify-center text-primary transition-opacity hover:opacity-60"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[22px]"
+              >shopping_bag</span
+            ><span
+              class="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-on-primary font-label-sm text-[9px] leading-none flex items-center justify-center rounded-full"
+              >2</span
+            >
+          </button>
+        </div>
+      </div>
+    </header>
+    <main class="flex-1 w-full bg-surface-container-lowest pt-16 pb-20">
+      <div class="flex flex-col w-full pb-24">
+        <!-- Top App Sub-Bar (In-page Nav) -->
+        <div
+          class="w-full bg-surface-container-lowest px-margin py-space-sm flex items-center justify-between shadow-sm"
+        >
+          <div class="flex items-center gap-space-sm">
+            <button
+              aria-label="Kembali"
+              class="w-9 h-9 flex items-center justify-center text-primary transition-opacity hover:opacity-70 active:scale-95"
+              type="button"
+            >
+              <span class="material-symbols-outlined text-[20px]"
+                >arrow_back</span
+              >
+            </button>
+            <div class="flex items-baseline gap-1.5">
+              <h1
+                class="font-headline-sm text-headline-sm text-primary tracking-tight"
+              >
+                Tas Belanja
+              </h1>
+              <span
+                class="font-label-sm text-label-sm text-secondary tracking-widest"
+                >(3)</span
+              >
+            </div>
+          </div>
+          <div class="flex items-center gap-space-xs">
+            <button
+              class="px-2.5 py-1 text-secondary hover:text-primary transition-colors flex items-center gap-1 font-label-sm text-label-sm uppercase tracking-wider"
+              id="clearAllBtn"
+              type="button"
+            >
+              <span class="material-symbols-outlined text-[16px]"
+                >delete_sweep</span
+              >
+              <span>Kosongkan</span>
+            </button>
+          </div>
+        </div>
+        <!-- Editorial Free Shipping Progress Notice -->
+        <div
+          class="mx-margin mt-space-md p-space-md bg-surface-light text-on-surface"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-[20px]"
+                >local_shipping</span
+              >
+              <p class="font-body-sm text-body-sm text-primary font-medium">
+                Bebas Ongkir Kilat Atelier
+              </p>
+            </div>
+            <span
+              class="font-label-sm text-label-sm text-secondary uppercase tracking-widest"
+              >85%</span
+            >
+          </div>
+          <p class="font-body-sm text-body-sm text-secondary mt-1">
+            Tambahkan
+            <span class="text-primary font-semibold">Rp 110.000</span> lagi
+            untuk kualifikasi kurir prioritas tanpa biaya.
+          </p>
+          <div class="w-full bg-surface-variant h-1 mt-3 overflow-hidden">
+            <div
+              class="bg-primary h-full transition-all duration-700 ease-out"
+              style="width: 85%"
+            ></div>
+          </div>
+        </div>
+        <!-- Cart Batch Controls & Atelier Dispatch Note -->
+        <div
+          class="mx-margin mt-space-md py-space-xs flex items-center justify-between"
+        >
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              checked=""
+              class="w-4 h-4 rounded-none accent-primary cursor-pointer"
+              id="selectAllCheckbox"
+              type="checkbox"
+            />
+            <span
+              class="font-label-md text-label-md uppercase tracking-wider text-primary font-medium"
+              >Pilih Semua (3)</span
+            >
+          </label>
+          <div class="flex items-center gap-1.5 text-secondary">
+            <span class="material-symbols-outlined text-[16px]">schedule</span>
+            <span class="font-body-sm text-body-sm">Kirim Hari Ini</span>
+          </div>
+        </div>
+        <!-- Shopping Bag Items List -->
+        <div
+          class="mx-margin mt-space-sm flex flex-col gap-space-md"
+          id="cartItemList"
+        >
+          <!-- Item 1: Wool Blazer -->
+          <div
+            class="cart-item bg-surface-container-lowest p-space-md shadow-sm flex flex-col gap-space-sm"
+            data-id="item-1"
+            data-price="1890000"
+          >
+            <div class="flex gap-space-md">
+              <div class="pt-1 flex items-start">
+                <input
+                  aria-label="Pilih Double-Breasted Wool Blazer"
+                  checked=""
+                  class="item-select w-4 h-4 rounded-none accent-primary cursor-pointer"
+                  type="checkbox"
+                />
+              </div>
+              <div
+                class="w-24 h-32 flex-shrink-0 bg-surface-light overflow-hidden relative"
+              >
+                <img
+                  class="w-full h-full object-cover object-center"
+                  data-alt="High-fashion studio shot of a tailored double-breasted charcoal black wool blazer with sharp lapels, styled against a muted ivory minimalist runway background, captured with clean rim light."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgkz_H2nfo2EGF68ODxPrevwqsqulOr7iTLhdeEqAaSe9o4qLfTK2sDBJoP0kXAeuBrV9fVJ1E_RrR8H4_0yNbKOgyyJqteMCnYoq3xQz47BF8uKt80TmN6d64sU62VlI-CGCKIiBAAwnhwbN-oc9YGZJzt6CJp1hG2hN6fxC4_Iu7maVVAW6jmceE4y-bJ61UWZK6dm5X4tj0vVgStpuAGu4LyOrudpxvcIu2iGV-"
+                />
+              </div>
+              <div class="flex-1 flex flex-col justify-between min-w-0">
+                <div>
+                  <div class="flex items-start justify-between gap-1">
+                    <span
+                      class="font-label-sm text-label-sm text-secondary uppercase tracking-widest truncate"
+                      >Atelier ME · FW24</span
+                    >
+                    <button
+                      aria-label="Hapus produk"
+                      class="remove-btn text-secondary hover:text-error transition-colors p-0.5"
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-[18px]"
+                        >delete_outline</span
+                      >
+                    </button>
+                  </div>
+                  <h2
+                    class="font-body-md text-body-md text-primary font-medium mt-0.5 leading-snug line-clamp-1"
+                  >
+                    Double-Breasted Wool Blazer
+                  </h2>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="font-body-sm text-body-sm text-secondary"
+                      >Hitam Arang</span
+                    >
+                    <span
+                      class="inline-block w-1 h-1 rounded-full bg-outline-variant"
+                    ></span>
+                    <span class="font-body-sm text-body-sm text-secondary"
+                      >Size M</span
+                    >
+                  </div>
+                </div>
+                <div class="flex items-baseline justify-between mt-2 pt-1">
+                  <span class="font-headline-sm text-[18px] text-primary"
+                    >Rp 1.890.000</span
+                  >
+                  <!-- Quantity Control -->
+                  <div class="flex items-center bg-surface-light">
+                    <button
+                      aria-label="Kurangi jumlah"
+                      class="qty-btn qty-minus w-7 h-7 flex items-center justify-center text-primary hover:bg-surface-variant transition-colors"
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-[14px]"
+                        >remove</span
+                      >
+                    </button>
+                    <span
+                      class="qty-count font-label-md text-label-md w-7 text-center font-semibold text-primary"
+                      >1</span
+                    >
+                    <button
+                      aria-label="Tambah jumlah"
+                      class="qty-btn qty-plus w-7 h-7 flex items-center justify-center text-primary hover:bg-surface-variant transition-colors"
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-[14px]"
+                        >add</span
+                      >
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Sub-actions -->
+            <div
+              class="pt-2 flex items-center justify-end gap-3 text-secondary"
+            >
+              <button
+                class="wishlist-btn font-label-sm text-label-sm uppercase tracking-wider text-secondary hover:text-primary transition-colors flex items-center gap-1"
+                type="button"
+              >
+                <span class="material-symbols-outlined text-[15px]"
+                  >favorite_border</span
+                >
+                <span>Pindah ke Wishlist</span>
+              </button>
+            </div>
+          </div>
+          <!-- Item 2: Minimalist Leather Tote -->
+          <div
+            class="cart-item bg-surface-container-lowest p-space-md shadow-sm flex flex-col gap-space-sm"
+            data-id="item-2"
+            data-price="1250000"
+          >
+            <div class="flex gap-space-md">
+              <div class="pt-1 flex items-start">
+                <input
+                  aria-label="Pilih Structured Minimalist Leather Tote"
+                  checked=""
+                  class="item-select w-4 h-4 rounded-none accent-primary cursor-pointer"
+                  type="checkbox"
+                />
+              </div>
+              <div
+                class="w-24 h-32 flex-shrink-0 bg-surface-light overflow-hidden relative"
+              >
+                <img
+                  class="w-full h-full object-cover object-center"
+                  data-alt="Sculptural Nero Noir Italian grain leather tote bag sitting gracefully on an architecturally minimal plinth, subtle metallic stud accents, warm soft ambient interior gallery glow."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIDHkeSOKgtVehjxC0mWyyvlCKDT9_whUW_zbia5xJZ_Crz4LcBIzuwfjSG16pR7dRRgCnB0g3710NgRHOsJOcBhHbBR95IpxXrTIaZMCQdRgTGJhqEHbxTEO4PPtiWJUDpHjnLO20lzylX6EAZbUFz2eyyakTCbdruWYKeqBe5-byUdAn1cyx-K7xX9t4Y8GbcrfMbnLeId0Uq6o3KHQRzIlR6YYEaM1YtAEHfGf_"
+                />
+              </div>
+              <div class="flex-1 flex flex-col justify-between min-w-0">
+                <div>
+                  <div class="flex items-start justify-between gap-1">
+                    <span
+                      class="font-label-sm text-label-sm text-secondary uppercase tracking-widest truncate"
+                      >Accessoires</span
+                    >
+                    <button
+                      aria-label="Hapus produk"
+                      class="remove-btn text-secondary hover:text-error transition-colors p-0.5"
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-[18px]"
+                        >delete_outline</span
+                      >
+                    </button>
+                  </div>
+                  <h2
+                    class="font-body-md text-body-md text-primary font-medium mt-0.5 leading-snug line-clamp-1"
+                  >
+                    Structured Leather Tote
+                  </h2>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="font-body-sm text-body-sm text-secondary"
+                      >Nero Noir</span
+                    >
+                    <span
+                      class="inline-block w-1 h-1 rounded-full bg-outline-variant"
+                    ></span>
+                    <span class="font-body-sm text-body-sm text-secondary"
+                      >One Size</span
+                    >
+                  </div>
+                </div>
+                <div class="flex items-baseline justify-between mt-2 pt-1">
+                  <span class="font-headline-sm text-[18px] text-primary"
+                    >Rp 1.250.000</span
+                  >
+                  <!-- Quantity Control -->
+                  <div class="flex items-center bg-surface-light">
+                    <button
+                      aria-label="Kurangi jumlah"
+                      class="qty-btn qty-minus w-7 h-7 flex items-center justify-center text-primary hover:bg-surface-variant transition-colors"
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-[14px]"
+                        >remove</span
+                      >
+                    </button>
+                    <span
+                      class="qty-count font-label-md text-label-md w-7 text-center font-semibold text-primary"
+                      >1</span
+                    >
+                    <button
+                      aria-label="Tambah jumlah"
+                      class="qty-btn qty-plus w-7 h-7 flex items-center justify-center text-primary hover:bg-surface-variant transition-colors"
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-[14px]"
+                        >add</span
+                      >
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Sub-actions -->
+            <div
+              class="pt-2 flex items-center justify-end gap-3 text-secondary"
+            >
+              <button
+                class="wishlist-btn font-label-sm text-label-sm uppercase tracking-wider text-secondary hover:text-primary transition-colors flex items-center gap-1"
+                type="button"
+              >
+                <span class="material-symbols-outlined text-[15px]"
+                  >favorite_border</span
+                >
+                <span>Pindah ke Wishlist</span>
+              </button>
+            </div>
+          </div>
+          <!-- Item 3: Sterling Silver Cuff -->
+          <div
+            class="cart-item bg-surface-container-lowest p-space-md shadow-sm flex flex-col gap-space-sm"
+            data-id="item-3"
+            data-price="650000"
+          >
+            <div class="flex gap-space-md">
+              <div class="pt-1 flex items-start">
+                <input
+                  aria-label="Pilih Solid Sterling Silver Cuff"
+                  checked=""
+                  class="item-select w-4 h-4 rounded-none accent-primary cursor-pointer"
+                  type="checkbox"
+                />
+              </div>
+              <div
+                class="w-24 h-32 flex-shrink-0 bg-surface-light overflow-hidden relative"
+              >
+                <img
+                  class="w-full h-full object-cover object-center"
+                  data-alt="Chunky solid 925 sterling silver wrist cuff bracelet, ultra clean mirror polish finish, resting on raw black slate stone texture, crisp reflections and dramatic editorial shadows."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuNOtJbqxPX9vMGNDTeILjcsSqjx4W4hC0D-xaMNww7BSu7BP5rzGAJoltgNFOPt_O-x-ndKvujG__EvC-Zod8rRtYkJ2BssZoAd04UxzB2a7EnMyjxCnbRHc-50zT88uAP9diQ-sM9U9FrbJuPf3y-gGXncYAnIIWIn4pgSOpeuEsollwCjR2iZKGN1K7jEUmoQ_zzlaGu1ifAYkQx5_n2grm8Iqzco-htiAzVGLq"
+                />
+              </div>
+              <div class="flex-1 flex flex-col justify-between min-w-0">
+                <div>
+                  <div class="flex items-start justify-between gap-1">
+                    <span
+                      class="font-label-sm text-label-sm text-secondary uppercase tracking-widest truncate"
+                      >Fine Jewels</span
+                    >
+                    <button
+                      aria-label="Hapus produk"
+                      class="remove-btn text-secondary hover:text-error transition-colors p-0.5"
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-[18px]"
+                        >delete_outline</span
+                      >
+                    </button>
+                  </div>
+                  <h2
+                    class="font-body-md text-body-md text-primary font-medium mt-0.5 leading-snug line-clamp-1"
+                  >
+                    Solid Sterling Silver Cuff
+                  </h2>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="font-body-sm text-body-sm text-secondary"
+                      >Silver 925</span
+                    >
+                    <span
+                      class="inline-block w-1 h-1 rounded-full bg-outline-variant"
+                    ></span>
+                    <span class="font-body-sm text-body-sm text-secondary"
+                      >Adjustable</span
+                    >
+                  </div>
+                </div>
+                <div class="flex items-baseline justify-between mt-2 pt-1">
+                  <span class="font-headline-sm text-[18px] text-primary"
+                    >Rp 650.000</span
+                  >
+                  <!-- Quantity Control -->
+                  <div class="flex items-center bg-surface-light">
+                    <button
+                      aria-label="Kurangi jumlah"
+                      class="qty-btn qty-minus w-7 h-7 flex items-center justify-center text-primary hover:bg-surface-variant transition-colors"
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-[14px]"
+                        >remove</span
+                      >
+                    </button>
+                    <span
+                      class="qty-count font-label-md text-label-md w-7 text-center font-semibold text-primary"
+                      >1</span
+                    >
+                    <button
+                      aria-label="Tambah jumlah"
+                      class="qty-btn qty-plus w-7 h-7 flex items-center justify-center text-primary hover:bg-surface-variant transition-colors"
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-[14px]"
+                        >add</span
+                      >
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Sub-actions -->
+            <div
+              class="pt-2 flex items-center justify-end gap-3 text-secondary"
+            >
+              <button
+                class="wishlist-btn font-label-sm text-label-sm uppercase tracking-wider text-secondary hover:text-primary transition-colors flex items-center gap-1"
+                type="button"
+              >
+                <span class="material-symbols-outlined text-[15px]"
+                  >favorite_border</span
+                >
+                <span>Pindah ke Wishlist</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Cross-sell Carousel: Anda Mungkin Juga Menyukai -->
+        <div class="mt-space-xl bg-surface-light py-space-lg">
+          <div
+            class="px-margin flex items-baseline justify-between mb-space-md"
+          >
+            <div>
+              <p
+                class="font-label-sm text-label-sm uppercase tracking-widest text-secondary"
+              >
+                Sempurnakan Tampilan
+              </p>
+              <h3
+                class="font-headline-sm text-headline-sm text-primary tracking-tight mt-0.5"
+              >
+                Lengkapi Koleksi Anda
+              </h3>
+            </div>
+            <span class="font-label-sm text-label-sm text-secondary"
+              >2 Pilihan</span
+            >
+          </div>
+          <!-- Horizontal Scrollable Cards -->
+          <div
+            class="flex gap-space-md px-margin overflow-x-auto no-scrollbar scroll-smooth"
+          >
+            <!-- Upsell 1 -->
+            <div
+              class="w-48 flex-shrink-0 bg-surface-container-lowest p-space-sm shadow-sm flex flex-col justify-between"
+            >
+              <div class="w-full h-52 bg-surface overflow-hidden relative">
+                <img
+                  class="w-full h-full object-cover object-center"
+                  data-alt="Monochrome geometric patterned silk neck scarf draped softly on a minimalist porcelain bust, clean lighting, premium texture definition."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-AiE8KF56669N8DH0yIU7ve9sVH2Cs76fmfzTBtqFHcrBYk0oFAsg4jTPTRYBAGRNvZV-EMInvDyclzjHs2zCWo_vyTNf7a9IjLzeZVA7E0pvsuWjwSRjMGHw1sUatn9FlW5Y594-ENoyoSohAd5YwmX2DtLInjqnzUzmfruBBNwwPnNe8cfFhFo5pg1c0Q79BLHaPt21ZeV6d-deQwpT6Au2-DHLQ2POfELSgSpI"
+                />
+                <span
+                  class="absolute top-2 left-2 bg-primary text-on-primary font-label-sm text-[9px] px-1.5 py-0.5 tracking-wider uppercase"
+                  >Pelengkap</span
+                >
+              </div>
+              <div class="pt-space-sm">
+                <h4
+                  class="font-body-sm text-body-sm text-primary font-medium truncate"
+                >
+                  Silk Neck Scarf
+                </h4>
+                <p class="font-body-sm text-body-sm text-secondary mt-0.5">
+                  Rp 320.000
+                </p>
+                <button
+                  class="add-upsell-btn mt-2.5 w-full bg-primary text-on-primary py-2 font-label-sm text-label-sm uppercase tracking-widest flex items-center justify-center gap-1 hover:bg-neutral-800 transition-colors active:scale-[0.98]"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[14px]">add</span>
+                  <span>Tambah</span>
+                </button>
+              </div>
+            </div>
+            <!-- Upsell 2 -->
+            <div
+              class="w-48 flex-shrink-0 bg-surface-container-lowest p-space-sm shadow-sm flex flex-col justify-between"
+            >
+              <div class="w-full h-52 bg-surface overflow-hidden relative">
+                <img
+                  class="w-full h-full object-cover object-center"
+                  data-alt="Wide-leg tailored high-waisted charcoal trousers on an editorial model, sharp pleats, paired with sleek minimalist leather boots, minimalist architectural background."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGbXkmK5TRD85U0Q_KD8v408je5NtvW91ECGOsAq0tj4x_DqftEDRcsblOnfEHCrc5wHm63pHOPBk4s1_M20sjzeP3M2DpJSgBVddYa0nUOQWwml58tlBEgrmzby4JR7ThfGK0_twfOhdOBMxW2f-keNejQ3ASXuOmOkYQB7bXspAeuzjmP_v1qkmlOSQUY6pW5bHXxGXMPalA6TDymou69BsE2Wm4StcaWfwc4xG8"
+                />
+                <span
+                  class="absolute top-2 left-2 bg-primary text-on-primary font-label-sm text-[9px] px-1.5 py-0.5 tracking-wider uppercase"
+                  >Set Pasangan</span
+                >
+              </div>
+              <div class="pt-space-sm">
+                <h4
+                  class="font-body-sm text-body-sm text-primary font-medium truncate"
+                >
+                  Wide-Leg Trousers
+                </h4>
+                <p class="font-body-sm text-body-sm text-secondary mt-0.5">
+                  Rp 890.000
+                </p>
+                <button
+                  class="add-upsell-btn mt-2.5 w-full bg-primary text-on-primary py-2 font-label-sm text-label-sm uppercase tracking-widest flex items-center justify-center gap-1 hover:bg-neutral-800 transition-colors active:scale-[0.98]"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[14px]">add</span>
+                  <span>Tambah</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Voucher & Privilege Code Input -->
+        <div
+          class="mx-margin mt-space-lg bg-surface-container-lowest p-space-md shadow-sm"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <span
+              class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-medium"
+              >Kode Promo / Hak Istimewa</span
+            >
+            <span
+              class="font-body-sm text-body-sm text-secondary flex items-center gap-1"
+            >
+              <span class="material-symbols-outlined text-[16px] text-primary"
+                >verified</span
+              >
+              <span>ME Club Terpasang</span>
+            </span>
+          </div>
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <input
+                class="w-full h-11 px-3 bg-surface-light font-body-sm text-body-sm text-primary uppercase placeholder-secondary focus:outline-none focus:ring-0 rounded-none"
+                id="voucherInput"
+                placeholder="Masukkan kode promo..."
+                type="text"
+                value="MEVIP-150"
+              />
+              <span
+                class="absolute right-3 top-3 text-primary text-[14px] material-symbols-outlined"
+                >check_circle</span
+              >
+            </div>
+            <button
+              class="h-11 px-5 bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider hover:bg-neutral-800 transition-colors"
+              id="applyVoucherBtn"
+              type="button"
+            >
+              Terapkan
+            </button>
+          </div>
+          <p
+            class="font-body-sm text-body-sm text-secondary mt-2 flex items-center gap-1.5"
+          >
+            <span
+              class="inline-block w-1.5 h-1.5 rounded-full bg-primary"
+            ></span>
+            <span
+              >Diskon keanggotaan ME VIP senilai
+              <strong>Rp 150.000</strong> berhasil digunakan.</span
+            >
+          </p>
+        </div>
+        <!-- Order Financial Summary -->
+        <div
+          class="mx-margin mt-space-md bg-surface-container-lowest p-space-md shadow-sm"
+        >
+          <h3
+            class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-medium mb-space-sm"
+          >
+            Ringkasan Pesanan
+          </h3>
+          <div class="flex flex-col gap-2 font-body-sm text-body-sm">
+            <div class="flex justify-between text-secondary">
+              <span
+                >Total Barang (<span id="summaryItemCount">3</span> item)</span
+              >
+              <span class="text-primary font-medium" id="subtotalDisplay"
+                >Rp 3.790.000</span
+              >
+            </div>
+            <div class="flex justify-between text-secondary">
+              <span>ME Club Privilege Benefit</span>
+              <span class="text-primary font-medium">-Rp 150.000</span>
+            </div>
+            <div class="flex justify-between text-secondary">
+              <span>Estimasi Pajak Pertambahan Nilai (PPN 11%)</span>
+              <span class="text-primary font-medium">Termasuk</span>
+            </div>
+            <div class="flex justify-between text-secondary">
+              <span>Pengiriman Ekspres Terpilih</span>
+              <span
+                class="text-primary font-medium uppercase tracking-wider text-[11px]"
+                >Gratis</span
+              >
+            </div>
+            <div
+              class="mt-2 pt-3 flex items-baseline justify-between bg-surface-light -mx-space-md -mb-space-md p-space-md"
+            >
+              <div>
+                <span
+                  class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold"
+                  >Total Estimasi</span
+                >
+                <p class="font-body-sm text-[11px] text-secondary">
+                  Sudah termasuk potongan membership
+                </p>
+              </div>
+              <span
+                class="font-headline-sm text-headline-sm text-primary tracking-tight"
+                id="estimatedTotalDisplay"
+                >Rp 3.640.000</span
+              >
+            </div>
+          </div>
+        </div>
+        <!-- Atelier Guarantee Note -->
+        <div
+          class="mx-margin mt-space-md py-space-sm flex items-center justify-center gap-4 text-secondary"
+        >
+          <div class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]"
+              >verified_user</span
+            >
+            <span class="font-body-sm text-body-sm">Keaslian Dijamin 100%</span>
+          </div>
+          <span
+            class="inline-block w-1 h-1 rounded-full bg-outline-variant"
+          ></span>
+          <div class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">sync_alt</span>
+            <span class="font-body-sm text-body-sm">Pengembalian 14 Hari</span>
+          </div>
+        </div>
+        <!-- Sticky Bottom Floating Action Bar for Checkout Initiation -->
+        <div
+          class="fixed bottom-16 left-0 right-0 z-40 bg-surface-container-lowest shadow-md p-space-md"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex flex-col">
+              <span
+                class="font-label-sm text-[10px] uppercase tracking-widest text-secondary"
+                >Total Pembayaran</span
+              >
+              <span
+                class="font-headline-sm text-headline-sm text-primary tracking-tight leading-none mt-0.5"
+                id="bottomBarTotal"
+                >Rp 3.640.000</span
+              >
+            </div>
+            <button
+              class="flex-1 max-w-[210px] h-12 bg-primary text-on-primary flex items-center justify-center gap-2 font-label-md text-label-md uppercase tracking-widest hover:bg-neutral-800 transition-all active:scale-[0.98]"
+              id="proceedCheckoutBtn"
+              type="button"
+            >
+              <span class="tracking-widest">Checkout</span>
+              <span
+                class="font-label-sm text-label-sm text-on-primary/80 tracking-normal"
+                id="checkoutBadgeCount"
+                >(3)</span
+              >
+              <span class="material-symbols-outlined text-[18px]"
+                >arrow_forward</span
+              >
+            </button>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          const formatIDR = (num) =>
+            "Rp " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+          const cartList = document.getElementById("cartItemList");
+          const selectAllCheckbox =
+            document.getElementById("selectAllCheckbox");
+          const subtotalDisplay = document.getElementById("subtotalDisplay");
+          const estimatedTotalDisplay = document.getElementById(
+            "estimatedTotalDisplay",
+          );
+          const bottomBarTotal = document.getElementById("bottomBarTotal");
+          const summaryItemCount = document.getElementById("summaryItemCount");
+          const checkoutBadgeCount =
+            document.getElementById("checkoutBadgeCount");
+          const discountAmount = 150000;
+
+          function recalculateCart() {
+            let subtotal = 0;
+            let totalQty = 0;
+            const items = cartList.querySelectorAll(".cart-item");
+
+            items.forEach((item) => {
+              const checkbox = item.querySelector(".item-select");
+              const qtyCount = parseInt(
+                item.querySelector(".qty-count").textContent,
+                10,
+              );
+              const unitPrice = parseInt(item.getAttribute("data-price"), 10);
+
+              if (checkbox && checkbox.checked) {
+                subtotal += unitPrice * qtyCount;
+                totalQty += qtyCount;
+              }
+            });
+
+            const grandTotal = Math.max(
+              0,
+              subtotal - (totalQty > 0 ? discountAmount : 0),
+            );
+
+            if (subtotalDisplay)
+              subtotalDisplay.textContent = formatIDR(subtotal);
+            if (estimatedTotalDisplay)
+              estimatedTotalDisplay.textContent = formatIDR(grandTotal);
+            if (bottomBarTotal)
+              bottomBarTotal.textContent = formatIDR(grandTotal);
+            if (summaryItemCount) summaryItemCount.textContent = totalQty;
+            if (checkoutBadgeCount)
+              checkoutBadgeCount.textContent = `(${totalQty})`;
+          }
+
+          // Item-level Quantity Adjusters & Selection
+          if (cartList) {
+            cartList.addEventListener("click", (e) => {
+              const target = e.target.closest("button") || e.target;
+              const item = e.target.closest(".cart-item");
+              if (!item) return;
+
+              // Increase quantity
+              if (
+                target.classList.contains("qty-plus") ||
+                target.closest(".qty-plus")
+              ) {
+                const qtyEl = item.querySelector(".qty-count");
+                let currentQty = parseInt(qtyEl.textContent, 10);
+                if (currentQty < 10) {
+                  qtyEl.textContent = currentQty + 1;
+                  recalculateCart();
+                }
+              }
+
+              // Decrease quantity
+              if (
+                target.classList.contains("qty-minus") ||
+                target.closest(".qty-minus")
+              ) {
+                const qtyEl = item.querySelector(".qty-count");
+                let currentQty = parseInt(qtyEl.textContent, 10);
+                if (currentQty > 1) {
+                  qtyEl.textContent = currentQty - 1;
+                  recalculateCart();
+                }
+              }
+
+              // Delete single item
+              if (
+                target.classList.contains("remove-btn") ||
+                target.closest(".remove-btn")
+              ) {
+                item.style.opacity = "0";
+                item.style.transform = "translateX(20px)";
+                item.style.transition = "all 0.3s ease";
+                setTimeout(() => {
+                  item.remove();
+                  recalculateCart();
+                }, 300);
+              }
+
+              // Wishlist interaction
+              if (
+                target.classList.contains("wishlist-btn") ||
+                target.closest(".wishlist-btn")
+              ) {
+                const icon = item.querySelector(
+                  ".wishlist-btn .material-symbols-outlined",
+                );
+                if (icon) {
+                  icon.textContent = "favorite";
+                  icon.style.fontVariationSettings = "'FILL' 1";
+                  icon.classList.add("text-primary");
+                }
+              }
+            });
+
+            // Item check/uncheck
+            cartList.addEventListener("change", (e) => {
+              if (e.target.classList.contains("item-select")) {
+                const allCheckboxes = cartList.querySelectorAll(".item-select");
+                const checkedCheckboxes = cartList.querySelectorAll(
+                  ".item-select:checked",
+                );
+                if (selectAllCheckbox) {
+                  selectAllCheckbox.checked =
+                    allCheckboxes.length > 0 &&
+                    allCheckboxes.length === checkedCheckboxes.length;
+                }
+                recalculateCart();
+              }
+            });
+          }
+
+          // Select All Toggle
+          if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener("change", () => {
+              const checkState = selectAllCheckbox.checked;
+              const itemCheckboxes = cartList.querySelectorAll(".item-select");
+              itemCheckboxes.forEach((cb) => {
+                cb.checked = checkState;
+              });
+              recalculateCart();
+            });
+          }
+
+          // Clear All
+          const clearAllBtn = document.getElementById("clearAllBtn");
+          if (clearAllBtn) {
+            clearAllBtn.addEventListener("click", () => {
+              const items = cartList.querySelectorAll(".cart-item");
+              items.forEach((it) => it.remove());
+              if (selectAllCheckbox) selectAllCheckbox.checked = false;
+              recalculateCart();
+            });
+          }
+
+          // Upsell buttons quick feedback
+          const upsellButtons = document.querySelectorAll(".add-upsell-btn");
+          upsellButtons.forEach((btn) => {
+            btn.addEventListener("click", function () {
+              const originalText = this.innerHTML;
+              this.innerHTML =
+                '<span class="material-symbols-outlined text-[14px]">check</span><span>Ditambahkan</span>';
+              this.classList.replace("bg-primary", "bg-neutral-700");
+              setTimeout(() => {
+                this.innerHTML = originalText;
+                this.classList.replace("bg-neutral-700", "bg-primary");
+              }, 1500);
+            });
+          });
+        })();
+      </script>
+    </main>
+    <nav
+      class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/95 backdrop-blur-xl border-t border-border-gray"
+      data-active-classes="text-primary font-semibold"
+    >
+      <div class="flex justify-around items-center h-16 px-space-xs">
+        <a
+          class="flex-1 flex flex-col items-center justify-center h-full text-secondary transition-colors hover:text-primary"
+          data-path="beranda"
+          href="#"
+          ><span
+            class="material-symbols-outlined text-[22px]"
+            style="
+              font-variation-settings:
+                &quot;FILL&quot; 1,
+                &quot;wght&quot; 500;
+            "
+            >home</span
+          ><span
+            class="font-label-sm text-[10px] font-semibold mt-0.5 uppercase tracking-wider"
+            >Beranda</span
+          ><span
+            class="absolute bottom-1 w-1 h-1 bg-primary rounded-full"
+          ></span></a
+        ><a
+          class="flex-1 flex flex-col items-center justify-center h-full text-secondary transition-colors hover:text-primary"
+          data-path="jelajah"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]">grid_view</span
+          ><span
+            class="font-label-sm text-[10px] mt-0.5 uppercase tracking-wider"
+            >Jelajah</span
+          ></a
+        ><a
+          class="flex-1 flex flex-col items-center justify-center h-full text-secondary transition-colors hover:text-primary"
+          data-path="wishlist"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]">favorite</span
+          ><span
+            class="font-label-sm text-[10px] mt-0.5 uppercase tracking-wider"
+            >Wishlist</span
+          ></a
+        ><a
+          class="flex-1 flex flex-col items-center justify-center h-full text-secondary transition-colors hover:text-primary"
+          data-path="akun"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]">person</span
+          ><span
+            class="font-label-sm text-[10px] mt-0.5 uppercase tracking-wider"
+            >Akun</span
+          ></a
+        >
+      </div>
+    </nav>
+  </body>
+</html>

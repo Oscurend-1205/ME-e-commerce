@@ -1,0 +1,1337 @@
+<!doctype html>
+
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      name="viewport"
+    />
+    <meta content="mobile_tab" name="shell-type" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;family=Inter:wght@300;400;500;600&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          width: 100vw;
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .pt-safe {
+          padding-top: env(safe-area-inset-top, 0px);
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed": "#e3e2e2",
+              "primary-fixed-dim": "#c8c6c5",
+              "tertiary-fixed": "#e6e1df",
+              "tertiary-fixed-dim": "#cac6c3",
+              "surface-light": "#F7F7F7",
+              "on-primary": "#ffffff",
+              "on-primary-fixed-variant": "#474646",
+              "surface-dim": "#dadada",
+              "on-secondary-container": "#646464",
+              "on-secondary-fixed-variant": "#464747",
+              "on-tertiary-container": "#868381",
+              "surface-container-highest": "#e2e2e2",
+              "surface-container-lowest": "#ffffff",
+              "on-error": "#ffffff",
+              "on-surface-variant": "#444748",
+              "secondary-container": "#e3e2e2",
+              background: "#f9f9f9",
+              "on-secondary-fixed": "#1b1c1c",
+              "on-tertiary-fixed": "#1d1b1a",
+              "inverse-primary": "#c8c6c5",
+              primary: "#000000",
+              "primary-container": "#1c1b1b",
+              "surface-container-high": "#e8e8e8",
+              "inverse-surface": "#2f3131",
+              "outline-variant": "#c4c7c7",
+              "secondary-fixed-dim": "#c7c6c6",
+              "on-surface": "#1a1c1c",
+              outline: "#747878",
+              secondary: "#5e5e5e",
+              "tertiary-container": "#1d1b1a",
+              error: "#ba1a1a",
+              "on-background": "#1a1c1c",
+              "inverse-on-surface": "#f0f1f1",
+              "on-primary-container": "#858383",
+              "surface-container-low": "#f3f3f4",
+              "surface-tint": "#5f5e5e",
+              "border-gray": "#E5E5E5",
+              "on-tertiary": "#ffffff",
+              surface: "#f9f9f9",
+              "error-container": "#ffdad6",
+              "on-primary-fixed": "#1c1b1b",
+              "surface-container": "#eeeeee",
+              "muted-gray": "#767676",
+              "on-secondary": "#ffffff",
+              "primary-fixed": "#e5e2e1",
+              "on-tertiary-fixed-variant": "#484645",
+              "surface-bright": "#f9f9f9",
+              "surface-variant": "#e2e2e2",
+              tertiary: "#000000",
+              "on-error-container": "#93000a",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              gutter: "1rem",
+              "space-xs": "0.25rem",
+              "gutter-desktop": "1.5rem",
+              "space-sm": "0.5rem",
+              margin: "1rem",
+              "margin-tablet": "2rem",
+              "space-lg": "1.5rem",
+              "space-xl": "2.5rem",
+              "margin-desktop": "3rem",
+              "space-md": "1rem",
+            },
+            fontFamily: {
+              "body-sm": ["Inter"],
+              "body-md": ["Inter"],
+              "headline-lg": ["Playfair Display"],
+              "headline-xl": ["Playfair Display"],
+              "headline-xl-mobile": ["Playfair Display"],
+              "body-lg": ["Inter"],
+              "label-md": ["Inter"],
+              "label-lg": ["Inter"],
+              "headline-lg-mobile": ["Playfair Display"],
+              "label-sm": ["Inter"],
+              "headline-md": ["Playfair Display"],
+              "headline-sm": ["Playfair Display"],
+            },
+            fontSize: {
+              "body-sm": [
+                "12px",
+                {
+                  lineHeight: "18px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "400",
+                },
+              ],
+              "body-md": [
+                "14px",
+                {
+                  lineHeight: "22px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-lg": [
+                "40px",
+                {
+                  lineHeight: "48px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-xl": [
+                "56px",
+                {
+                  lineHeight: "64px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-xl-mobile": [
+                "36px",
+                {
+                  lineHeight: "44px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "body-lg": [
+                "16px",
+                {
+                  lineHeight: "26px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "label-md": [
+                "11px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.16em",
+                  fontWeight: "500",
+                },
+              ],
+              "label-lg": [
+                "13px",
+                {
+                  lineHeight: "18px",
+                  letterSpacing: "0.14em",
+                  fontWeight: "500",
+                },
+              ],
+              "headline-lg-mobile": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "400" },
+              ],
+              "label-sm": [
+                "10px",
+                {
+                  lineHeight: "14px",
+                  letterSpacing: "0.18em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-md": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "400" },
+              ],
+              "headline-sm": [
+                "22px",
+                { lineHeight: "30px", fontWeight: "500" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-screen"
+  >
+    <header
+      class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"
+    >
+      <div class="h-16 px-gutter flex items-center justify-between">
+        <div class="flex items-center gap-space-sm">
+          <span
+            class="font-headline-md text-headline-md tracking-tight font-serif text-primary select-none"
+            >ME</span
+          ><span
+            class="font-label-sm text-label-sm uppercase tracking-widest text-secondary"
+            >Beranda</span
+          >
+        </div>
+        <div class="flex items-center gap-space-xs">
+          <button
+            aria-label="Search"
+            class="w-11 h-11 flex items-center justify-center text-primary hover:text-secondary transition-colors"
+          >
+            <span class="material-symbols-outlined text-[22px]"
+              >search</span
+            ></button
+          ><button
+            aria-label="Wishlist"
+            class="w-11 h-11 flex items-center justify-center text-primary hover:text-secondary transition-colors"
+          >
+            <span class="material-symbols-outlined text-[22px]"
+              >favorite</span
+            ></button
+          ><button
+            aria-label="Shopping Bag"
+            class="w-11 h-11 flex items-center justify-center text-primary hover:text-secondary transition-colors relative"
+          >
+            <span class="material-symbols-outlined text-[22px]"
+              >shopping_bag</span
+            ><span
+              class="absolute top-2 right-2 w-4 h-4 bg-primary text-on-primary font-label-sm text-[9px] flex items-center justify-center rounded-full leading-none"
+              >2</span
+            >
+          </button>
+          <div class="pl-space-xs flex items-center">
+            <img
+              alt="Profile"
+              class="w-8 h-8 rounded-full object-cover"
+              src="https://lh3.googleusercontent.com/aida/AEtjO1VLq1pfnbUP3toFZZzvnzAHtrkeSGUg4Vs50OzqRCrQdoo2lNArwi6oNLQx-fUiVjKWgcp0e7a4ddB3TOCxcs0mb59y-4C9kLo82YfbBBVdw42BzbyaEgv4pgAmSfhPaxqVpiL9pRkNh35xXNplPpt-IgTW2WGSzS2IVUA7CXvSSgbJuqiIKfhdjUeJp5uVn7cQ37wHTDBLS8yxNxqJbaavK8HiO_EswyIiCd8QmxyE787PNoR6BQfXJqdD"
+            />
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="flex-1 flex flex-col relative w-full pt-16 pb-20 bg-surface">
+      <div class="flex flex-col w-full">
+        <!-- Section 1: Editorial Component Showcase Header -->
+        <section
+          class="px-gutter pt-space-md pb-space-lg flex flex-col gap-space-xs bg-surface"
+        >
+          <div class="flex items-center gap-space-xs">
+            <span class="w-1.5 h-1.5 bg-primary rounded-full"></span>
+            <span
+              class="font-label-sm text-label-sm uppercase tracking-widest text-secondary"
+              >SISTEM NAVIGASI // MOBILE</span
+            >
+          </div>
+          <h1
+            class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-serif tracking-tight mt-1"
+          >
+            ME Mobile Navbar &amp; Navigation System
+          </h1>
+          <p class="font-body-md text-body-md text-secondary mt-1 max-w-sm">
+            Eksplorasi variasi status (states), anatomi komponen, dan interaksi
+            navigasi editorial monokrom presisi tinggi.
+          </p>
+          <!-- Visual Anchor / Brand Visual Spec Card -->
+          <div
+            class="mt-space-md bg-surface-container p-space-md rounded-none flex flex-col gap-space-sm relative overflow-hidden"
+          >
+            <div class="flex items-center justify-between">
+              <span
+                class="font-label-sm text-label-sm uppercase tracking-widest text-secondary"
+                >IDENTITAS LOGOMARK</span
+              >
+              <span class="font-label-sm text-label-sm text-secondary"
+                >SPECS 44px H-BAR</span
+              >
+            </div>
+            <div
+              class="w-full h-36 bg-surface-container-lowest flex items-center justify-center relative overflow-hidden p-space-sm"
+            >
+              <img
+                alt="ME Editorial Monogram Mark"
+                class="max-h-24 w-auto object-contain mix-blend-darken filter grayscale"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBjk1y0wIq7Wy_KU9N8i9VZ7wYZf3WrODmj6GqQqLnL2B8JZpzLNVsn9Y-ctEl7SNLCnBoDy6dNAm4gUSEwQpcJP_B3JzTw9ziewT0l-wnDXJQEHq1-2jOH5co3j7AM2uhbM-_HVkUPFfbNYY2xVC050njp67-uDu0QNsvx3DI95pJhqC_iA6GtYrdxpa4pUHfV3NNaN9okkQM5LvybF20hmkCcA9yKl6mH0GoqscRUKQrlwWYjhORhg"
+              />
+              <div
+                class="absolute bottom-2 right-2 px-1.5 py-0.5 bg-primary text-on-primary font-label-sm text-[9px] uppercase tracking-wider"
+              >
+                Editorial Baseline
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-1">
+              <span class="font-body-sm text-body-sm text-on-surface"
+                >Monogram Monokrom ME</span
+              >
+              <span
+                class="font-label-sm text-label-sm text-muted-gray uppercase"
+                >Ras 1:1 Sharp Vector</span
+              >
+            </div>
+          </div>
+        </section>
+        <!-- Section 2: Top App Bar (Header) States -->
+        <section
+          class="px-gutter py-space-md flex flex-col gap-space-md bg-surface-light"
+        >
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between">
+              <span
+                class="font-label-sm text-label-sm uppercase tracking-widest text-secondary"
+                >VARIASI 01</span
+              >
+              <span
+                class="font-label-sm text-label-sm uppercase text-primary font-semibold"
+                >3 STATES</span
+              >
+            </div>
+            <h2
+              class="font-headline-sm text-headline-sm text-primary font-serif"
+            >
+              Top App Bar (Header) States
+            </h2>
+            <p class="font-body-sm text-body-sm text-secondary">
+              Struktur bilah atas yang adaptif antara mode eksplorasi,
+              penjelajahan katalog, dan input dinamis.
+            </p>
+          </div>
+          <!-- State 1A: Default / Editorial State -->
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span
+                class="font-label-md text-label-md uppercase tracking-wider text-primary font-semibold"
+                >1A. Default Editorial State</span
+              >
+              <span
+                class="font-label-sm text-label-sm text-muted-gray uppercase"
+                >H: 56px / 64px</span
+              >
+            </div>
+            <div
+              class="bg-surface-container-lowest p-0 shadow-sm flex flex-col"
+            >
+              <!-- Mock App Shell Top Bar -->
+              <div
+                class="h-16 px-space-md flex items-center justify-between bg-surface-container-lowest"
+              >
+                <div class="flex items-center gap-2">
+                  <span
+                    class="font-headline-md text-headline-md tracking-tight font-serif text-primary leading-none"
+                    >ME</span
+                  >
+                  <span class="w-1 h-3.5 bg-primary-fixed-dim"></span>
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest text-secondary"
+                    >EDISI 2025</span
+                  >
+                </div>
+                <div class="flex items-center gap-1">
+                  <button
+                    aria-label="Search"
+                    class="w-10 h-10 flex items-center justify-center text-primary hover:bg-surface-container-low transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >search</span
+                    >
+                  </button>
+                  <button
+                    aria-label="Wishlist"
+                    class="w-10 h-10 flex items-center justify-center text-primary hover:bg-surface-container-low transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >favorite_border</span
+                    >
+                  </button>
+                  <button
+                    aria-label="Cart"
+                    class="w-10 h-10 flex items-center justify-center text-primary relative hover:bg-surface-container-low transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >shopping_bag</span
+                    >
+                    <span
+                      class="absolute top-2 right-2 w-3.5 h-3.5 bg-primary text-on-primary font-label-sm text-[8px] flex items-center justify-center rounded-full"
+                      >2</span
+                    >
+                  </button>
+                </div>
+              </div>
+              <div
+                class="bg-surface-container-high px-space-md py-2 flex items-center justify-between"
+              >
+                <span
+                  class="font-label-sm text-label-sm text-secondary uppercase tracking-wider"
+                  >Aset Monogram + Micro Counter</span
+                >
+                <span
+                  class="font-label-sm text-label-sm text-primary font-medium"
+                  >Touch Area 44×44px min</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- State 1B: Sub-Page / Detail State -->
+          <div class="flex flex-col gap-2 mt-2">
+            <div class="flex items-center justify-between">
+              <span
+                class="font-label-md text-label-md uppercase tracking-wider text-primary font-semibold"
+                >1B. Sub-Page / Navigation Context</span
+              >
+              <span
+                class="font-label-sm text-label-sm text-muted-gray uppercase"
+                >Detail Katalog</span
+              >
+            </div>
+            <div
+              class="bg-surface-container-lowest p-0 shadow-sm flex flex-col"
+            >
+              <div
+                class="h-16 px-space-sm flex items-center justify-between bg-surface-container-lowest"
+              >
+                <div class="flex items-center gap-2">
+                  <button
+                    aria-label="Kembali"
+                    class="w-10 h-10 flex items-center justify-center text-primary hover:bg-surface-container-low transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[22px]"
+                      >arrow_back_ios_new</span
+                    >
+                  </button>
+                  <div class="flex flex-col">
+                    <span
+                      class="font-label-sm text-label-sm uppercase tracking-widest text-secondary leading-none"
+                      >KATALOG</span
+                    >
+                    <span
+                      class="font-body-md text-body-md text-primary font-medium tracking-tight mt-0.5"
+                      >KOLEKSI WANITA</span
+                    >
+                  </div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button
+                    aria-label="Share"
+                    class="w-10 h-10 flex items-center justify-center text-primary hover:bg-surface-container-low transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >ios_share</span
+                    >
+                  </button>
+                  <button
+                    aria-label="Bookmark"
+                    class="w-10 h-10 flex items-center justify-center text-primary hover:bg-surface-container-low transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >bookmark_border</span
+                    >
+                  </button>
+                  <button
+                    aria-label="Shopping Bag"
+                    class="w-10 h-10 flex items-center justify-center text-primary relative hover:bg-surface-container-low transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >shopping_bag</span
+                    >
+                    <span
+                      class="absolute top-2 right-2 w-3.5 h-3.5 bg-primary text-on-primary font-label-sm text-[8px] flex items-center justify-center rounded-full"
+                      >2</span
+                    >
+                  </button>
+                </div>
+              </div>
+              <div
+                class="bg-surface-container-high px-space-md py-2 flex items-center justify-between"
+              >
+                <span
+                  class="font-label-sm text-label-sm text-secondary uppercase tracking-wider"
+                  >Hirarki Judul Dual-Level</span
+                >
+                <span
+                  class="font-label-sm text-label-sm text-primary font-medium"
+                  >Deep-link Safe State</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- State 1C: Search Active State -->
+          <div class="flex flex-col gap-2 mt-2">
+            <div class="flex items-center justify-between">
+              <span
+                class="font-label-md text-label-md uppercase tracking-wider text-primary font-semibold"
+                >1C. Search Input Expansion</span
+              >
+              <span
+                class="font-label-sm text-label-sm text-muted-gray uppercase"
+                >Input Focused</span
+              >
+            </div>
+            <div
+              class="bg-surface-container-lowest p-0 shadow-sm flex flex-col"
+            >
+              <div
+                class="h-16 px-space-md flex items-center gap-space-sm bg-surface-container-lowest"
+              >
+                <div
+                  class="flex-1 flex items-center bg-surface-container-low px-space-sm h-10 gap-2"
+                >
+                  <span
+                    class="material-symbols-outlined text-secondary text-[18px]"
+                    >search</span
+                  >
+                  <input
+                    class="w-full bg-transparent text-primary font-body-sm text-body-sm focus:outline-none placeholder:text-muted-gray cursor-default"
+                    readonly=""
+                    type="text"
+                    value="Blazer wol potongan lurus"
+                  />
+                  <button
+                    aria-label="Clear Search"
+                    class="w-6 h-6 flex items-center justify-center text-secondary hover:text-primary"
+                  >
+                    <span class="material-symbols-outlined text-[16px]"
+                      >close</span
+                    >
+                  </button>
+                </div>
+                <button
+                  class="font-label-sm text-label-sm uppercase tracking-widest text-primary px-2 py-1.5 hover:bg-surface-container-low"
+                >
+                  Batal
+                </button>
+              </div>
+              <div
+                class="bg-surface-container-high px-space-md py-2 flex items-center justify-between"
+              >
+                <span
+                  class="font-label-sm text-label-sm text-secondary uppercase tracking-wider"
+                  >Zero-Delay Typeahead</span
+                >
+                <span
+                  class="font-label-sm text-label-sm text-primary font-medium"
+                  >Clear Action &amp; Dismiss CTA</span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Section 3: Bottom Navigation Bar (Tab Bar) States -->
+        <section
+          class="px-gutter py-space-md flex flex-col gap-space-md bg-surface"
+        >
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between">
+              <span
+                class="font-label-sm text-label-sm uppercase tracking-widest text-secondary"
+                >VARIASI 02</span
+              >
+              <span
+                class="font-label-sm text-label-sm uppercase text-primary font-semibold"
+                >3 DESIGNS</span
+              >
+            </div>
+            <h2
+              class="font-headline-sm text-headline-sm text-primary font-serif"
+            >
+              Bottom Tab Bar States &amp; Floats
+            </h2>
+            <p class="font-body-sm text-body-sm text-secondary">
+              Navigasi jempol (thumb zone) dengan indikator aktif, micro-avatar,
+              dan gaya melayang ultra-modern.
+            </p>
+          </div>
+          <!-- State 2A: Default Tab Bar with Active Indicator -->
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span
+                class="font-label-md text-label-md uppercase tracking-wider text-primary font-semibold"
+                >2A. Classic Docked // Tab Beranda Aktif</span
+              >
+              <span
+                class="font-label-sm text-label-sm text-muted-gray uppercase"
+                >Solid 64px Bar</span
+              >
+            </div>
+            <div
+              class="bg-surface-container-lowest shadow-sm flex flex-col overflow-hidden"
+            >
+              <div
+                class="flex items-center justify-around h-16 px-gutter bg-surface-container-lowest"
+              >
+                <!-- Active Tab: Beranda -->
+                <div
+                  class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1 cursor-pointer"
+                >
+                  <span
+                    class="material-symbols-outlined text-[22px] text-primary"
+                    style="font-variation-settings: &quot;FILL&quot; 1"
+                    >home</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold"
+                    >Beranda</span
+                  >
+                  <span class="w-1.5 h-1 bg-primary mt-0.5"></span>
+                </div>
+                <!-- Inactive Tab: Jelajah -->
+                <div
+                  class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1 text-secondary opacity-70"
+                >
+                  <span class="material-symbols-outlined text-[22px]"
+                    >explore</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest"
+                    >Jelajah</span
+                  >
+                  <span class="w-1.5 h-1 bg-transparent mt-0.5"></span>
+                </div>
+                <!-- Inactive Tab: Wishlist -->
+                <div
+                  class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1 text-secondary opacity-70"
+                >
+                  <span class="material-symbols-outlined text-[22px]"
+                    >favorite_border</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest"
+                    >Wishlist</span
+                  >
+                  <span class="w-1.5 h-1 bg-transparent mt-0.5"></span>
+                </div>
+                <!-- Inactive Tab: Akun -->
+                <div
+                  class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1 text-secondary opacity-70"
+                >
+                  <span class="material-symbols-outlined text-[22px]"
+                    >person</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest"
+                    >Akun</span
+                  >
+                  <span class="w-1.5 h-1 bg-transparent mt-0.5"></span>
+                </div>
+              </div>
+              <div
+                class="bg-surface-container-high px-space-md py-2 flex items-center justify-between"
+              >
+                <span
+                  class="font-label-sm text-label-sm text-secondary uppercase tracking-wider"
+                  >Titik Indikator 2x6px Aktif</span
+                >
+                <span
+                  class="font-label-sm text-label-sm text-primary font-medium"
+                  >Filled Glyph vs Wireframe</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- State 2B: Notification Badging & Micro Profile -->
+          <div class="flex flex-col gap-2 mt-2">
+            <div class="flex items-center justify-between">
+              <span
+                class="font-label-md text-label-md uppercase tracking-wider text-primary font-semibold"
+                >2B. Dynamic Badges &amp; Profile Avatar</span
+              >
+              <span
+                class="font-label-sm text-label-sm text-muted-gray uppercase"
+                >Alert State</span
+              >
+            </div>
+            <div
+              class="bg-surface-container-lowest shadow-sm flex flex-col overflow-hidden"
+            >
+              <div
+                class="flex items-center justify-around h-16 px-gutter bg-surface-container-lowest"
+              >
+                <!-- Inactive Tab: Beranda -->
+                <div
+                  class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1 text-secondary opacity-70"
+                >
+                  <span class="material-symbols-outlined text-[22px]"
+                    >home</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest"
+                    >Beranda</span
+                  >
+                </div>
+                <!-- Inactive Tab: Jelajah -->
+                <div
+                  class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1 text-secondary opacity-70"
+                >
+                  <span class="material-symbols-outlined text-[22px]"
+                    >explore</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest"
+                    >Jelajah</span
+                  >
+                </div>
+                <!-- Tab Wishlist with Notification Counter -->
+                <div
+                  class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1 text-primary relative"
+                >
+                  <div class="relative">
+                    <span
+                      class="material-symbols-outlined text-[22px]"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >favorite</span
+                    >
+                    <span
+                      class="absolute -top-1 -right-2.5 bg-primary text-on-primary font-label-sm text-[8px] h-3.5 px-1 rounded-full flex items-center justify-center leading-none"
+                    >
+                      3
+                    </span>
+                  </div>
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest font-semibold"
+                    >Wishlist</span
+                  >
+                </div>
+                <!-- Tab Akun with Micro Avatar -->
+                <div
+                  class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1 text-secondary"
+                >
+                  <div
+                    class="w-6 h-6 rounded-full overflow-hidden bg-surface-container-high p-[1px]"
+                  >
+                    <div
+                      class="w-full h-full bg-primary flex items-center justify-center rounded-full text-on-primary font-label-sm text-[9px] uppercase font-bold"
+                    >
+                      M
+                    </div>
+                  </div>
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest"
+                    >Akun</span
+                  >
+                </div>
+              </div>
+              <div
+                class="bg-surface-container-high px-space-md py-2 flex items-center justify-between"
+              >
+                <span
+                  class="font-label-sm text-label-sm text-secondary uppercase tracking-wider"
+                  >Badge Numerik &amp; Avatar 24px</span
+                >
+                <span
+                  class="font-label-sm text-label-sm text-primary font-medium"
+                  >Status Personalisasi</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- State 2C: Floating Editorial Glassmorphism Pill -->
+          <div class="flex flex-col gap-2 mt-2">
+            <div class="flex items-center justify-between">
+              <span
+                class="font-label-md text-label-md uppercase tracking-wider text-primary font-semibold"
+                >2C. Floating Pill Glassmorphic Dock</span
+              >
+              <span
+                class="font-label-sm text-label-sm text-muted-gray uppercase"
+                >Modern Luxury Style</span
+              >
+            </div>
+            <div
+              class="bg-surface-container-high p-space-md flex flex-col items-center justify-center relative overflow-hidden"
+            >
+              <!-- Floating Pill Element -->
+              <div
+                class="w-full max-w-sm bg-surface-container-lowest/90 backdrop-blur-xl shadow-lg rounded-full px-space-md py-2.5 flex items-center justify-between"
+              >
+                <button
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary transition-all"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >home</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-wider font-semibold"
+                    >Home</span
+                  >
+                </button>
+                <button
+                  class="w-10 h-10 flex items-center justify-center text-secondary hover:text-primary transition-colors"
+                >
+                  <span class="material-symbols-outlined text-[20px]"
+                    >explore</span
+                  >
+                </button>
+                <button
+                  class="w-10 h-10 flex items-center justify-center text-secondary hover:text-primary transition-colors relative"
+                >
+                  <span class="material-symbols-outlined text-[20px]"
+                    >favorite_border</span
+                  >
+                  <span
+                    class="absolute top-2 right-2 w-1.5 h-1.5 bg-primary rounded-full"
+                  ></span>
+                </button>
+                <button
+                  class="w-10 h-10 flex items-center justify-center text-secondary hover:text-primary transition-colors"
+                >
+                  <span class="material-symbols-outlined text-[20px]"
+                    >person_outline</span
+                  >
+                </button>
+              </div>
+              <div class="w-full mt-3 flex items-center justify-between">
+                <span
+                  class="font-label-sm text-label-sm text-secondary uppercase tracking-wider"
+                  >Elevasi Floating 16px Offset</span
+                >
+                <span
+                  class="font-label-sm text-label-sm text-primary font-medium"
+                  >Backdrop Blur 24px Filter</span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Section 4: Anatomy, Touch Targets, & Design Specs -->
+        <section
+          class="px-gutter py-space-md flex flex-col gap-space-md bg-surface-container-low"
+        >
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-space-xs">
+              <span class="material-symbols-outlined text-[18px] text-primary"
+                >architecture</span
+              >
+              <span
+                class="font-label-sm text-label-sm uppercase tracking-widest text-secondary"
+                >SPEK TEKNIS &amp; ANATOMI</span
+              >
+            </div>
+            <h2
+              class="font-headline-sm text-headline-sm text-primary font-serif"
+            >
+              Anatomi &amp; Pedoman Ergonomi
+            </h2>
+            <p class="font-body-sm text-body-sm text-secondary">
+              Standar operasional untuk menjamin kenyamanan jari jemari
+              (ergonomic thumb zone) serta akurasi kontras visual.
+            </p>
+          </div>
+          <!-- Specs Bento Grid -->
+          <div class="flex flex-col gap-space-sm">
+            <!-- Spec Row 1: Touch Target & Heights -->
+            <div
+              class="bg-surface-container-lowest p-space-md shadow-sm flex flex-col gap-2"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold"
+                  >Touch Target &amp; Dimensi Tinggi</span
+                >
+                <span
+                  class="bg-surface-container-high px-2 py-0.5 font-label-sm text-label-sm text-secondary"
+                  >44px - 64px</span
+                >
+              </div>
+              <div class="grid grid-cols-2 gap-2 mt-1">
+                <div
+                  class="bg-surface-container p-space-sm flex flex-col gap-0.5"
+                >
+                  <span
+                    class="font-headline-sm text-headline-sm text-primary font-serif"
+                    >48×48<span class="font-body-sm text-body-sm text-secondary"
+                      >px</span
+                    ></span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase text-secondary"
+                    >Area Sentuh Minimum Ikon</span
+                  >
+                  <span
+                    class="font-body-sm text-body-sm text-muted-gray text-[11px] leading-tight mt-0.5"
+                    >Sesuai pedoman Apple HIG &amp; Android Material</span
+                  >
+                </div>
+                <div
+                  class="bg-surface-container p-space-sm flex flex-col gap-0.5"
+                >
+                  <span
+                    class="font-headline-sm text-headline-sm text-primary font-serif"
+                    >64<span class="font-body-sm text-body-sm text-secondary"
+                      >px</span
+                    ></span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase text-secondary"
+                    >Ketinggian Bar Standar</span
+                  >
+                  <span
+                    class="font-body-sm text-body-sm text-muted-gray text-[11px] leading-tight mt-0.5"
+                    >Tanpa menghitung Safe Area Inset perangkat</span
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- Spec Row 2: Typography & Contrast Scale -->
+            <div
+              class="bg-surface-container-lowest p-space-md shadow-sm flex flex-col gap-2"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold"
+                  >Tipografi Microcopy &amp; Kontras Rasio</span
+                >
+                <span
+                  class="bg-surface-container-high px-2 py-0.5 font-label-sm text-label-sm text-secondary"
+                  >AAA Level</span
+                >
+              </div>
+              <div class="flex flex-col gap-2">
+                <div
+                  class="flex items-center justify-between p-2 bg-surface-container"
+                >
+                  <div class="flex flex-col">
+                    <span
+                      class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-widest"
+                      >Inter 10px / 0.18em Tracking</span
+                    >
+                    <span class="font-body-sm text-body-sm text-secondary"
+                      >Label Tab &amp; Counter Monogram</span
+                    >
+                  </div>
+                  <span
+                    class="font-label-sm text-label-sm text-primary font-semibold"
+                    >Uppercase</span
+                  >
+                </div>
+                <div
+                  class="flex items-center justify-between p-2 bg-surface-container"
+                >
+                  <div class="flex flex-col">
+                    <span
+                      class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-widest"
+                      >Kontras 21:1 (#000000 vs #FFFFFF)</span
+                    >
+                    <span class="font-body-sm text-body-sm text-secondary"
+                      >Aksesibilitas penuh di bawah sinar matahari</span
+                    >
+                  </div>
+                  <span
+                    class="font-label-sm text-label-sm text-primary font-semibold"
+                    >High-Stark</span
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- Spec Row 3: Inset & Gesture Resilience -->
+            <div
+              class="bg-surface-container-lowest p-space-md shadow-sm flex flex-col gap-2"
+            >
+              <span
+                class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold"
+                >Safe Area Insets &amp; Haptic Timing</span
+              >
+              <div class="flex flex-col gap-2 mt-1">
+                <div class="flex items-start gap-2.5">
+                  <span
+                    class="material-symbols-outlined text-[18px] text-primary mt-0.5"
+                    >phone_iphone</span
+                  >
+                  <div class="flex flex-col">
+                    <span
+                      class="font-body-md text-body-md text-primary font-medium"
+                      >Home Indicator Clearance
+                      (env(safe-area-inset-bottom))</span
+                    >
+                    <span class="font-body-sm text-body-sm text-secondary">
+                      Padding bawah minimal 16px hingga 34px untuk mencegah
+                      konflik gestur usap layar iPhone &amp; Android.
+                    </span>
+                  </div>
+                </div>
+                <div class="flex items-start gap-2.5 pt-1">
+                  <span
+                    class="material-symbols-outlined text-[18px] text-primary mt-0.5"
+                    >vibration</span
+                  >
+                  <div class="flex flex-col">
+                    <span
+                      class="font-body-md text-body-md text-primary font-medium"
+                      >Haptic Feedback: Light Impact (15ms)</span
+                    >
+                    <span class="font-body-sm text-body-sm text-secondary">
+                      Umpan balik sentuhan mikro saat beralih tab dan klik aksi
+                      keranjang untuk sensasi premium yang taktil.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Section 5: Interactive Sandbox / Tab Switcher Simulator -->
+        <section
+          class="px-gutter py-space-lg flex flex-col gap-space-md bg-surface"
+        >
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between">
+              <span
+                class="font-label-sm text-label-sm uppercase tracking-widest text-secondary"
+                >SIMULATOR INTERAKTIF</span
+              >
+              <span
+                class="font-label-sm text-label-sm uppercase text-primary font-semibold"
+                >LIVE DEMO</span
+              >
+            </div>
+            <h2
+              class="font-headline-sm text-headline-sm text-primary font-serif"
+            >
+              Simulasi Pergantian Tab &amp; Haptic
+            </h2>
+            <p class="font-body-sm text-body-sm text-secondary">
+              Tekan tab di bawah ini untuk menguji transisi visual, perpindahan
+              status aktif, dan indikator mikro.
+            </p>
+          </div>
+          <!-- Simulator Container -->
+          <div
+            class="bg-surface-container-lowest p-space-md shadow-sm flex flex-col gap-space-md"
+          >
+            <!-- Screen Preview Box -->
+            <div
+              class="h-28 bg-surface-container flex flex-col items-center justify-center p-space-md transition-all duration-300"
+              id="demo-preview-box"
+            >
+              <span
+                class="material-symbols-outlined text-[32px] text-primary"
+                id="demo-tab-icon"
+                >home</span
+              >
+              <span
+                class="font-headline-sm text-headline-sm font-serif text-primary mt-1"
+                id="demo-tab-title"
+                >Beranda ME</span
+              >
+              <span
+                class="font-body-sm text-body-sm text-secondary text-center"
+                id="demo-tab-desc"
+                >Menampilkan kurasi busana runway terkini</span
+              >
+            </div>
+            <!-- Live Interactive Tab Bar -->
+            <div class="flex flex-col gap-1">
+              <span
+                class="font-label-sm text-label-sm uppercase tracking-widest text-secondary"
+                >TAP ITEMS DI BAWAH:</span
+              >
+              <div
+                class="flex items-center justify-around h-16 bg-surface-container-low px-space-xs"
+                id="interactive-nav"
+              >
+                <!-- Button 1 -->
+                <button
+                  class="interactive-tab-btn flex-1 flex flex-col items-center justify-center gap-1 py-1 text-primary cursor-pointer select-none"
+                  data-tab="beranda"
+                >
+                  <span
+                    class="material-symbols-outlined text-[20px] tab-icon"
+                    style="font-variation-settings: &quot;FILL&quot; 1"
+                    >home</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest tab-label font-bold"
+                    >Beranda</span
+                  >
+                  <span
+                    class="tab-indicator w-2 h-0.5 bg-primary mt-0.5"
+                  ></span>
+                </button>
+                <!-- Button 2 -->
+                <button
+                  class="interactive-tab-btn flex-1 flex flex-col items-center justify-center gap-1 py-1 text-secondary opacity-70 cursor-pointer select-none"
+                  data-tab="jelajah"
+                >
+                  <span class="material-symbols-outlined text-[20px] tab-icon"
+                    >explore</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest tab-label"
+                    >Jelajah</span
+                  >
+                  <span
+                    class="tab-indicator w-2 h-0.5 bg-transparent mt-0.5"
+                  ></span>
+                </button>
+                <!-- Button 3 -->
+                <button
+                  class="interactive-tab-btn flex-1 flex flex-col items-center justify-center gap-1 py-1 text-secondary opacity-70 cursor-pointer select-none"
+                  data-tab="wishlist"
+                >
+                  <span class="material-symbols-outlined text-[20px] tab-icon"
+                    >favorite_border</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest tab-label"
+                    >Wishlist</span
+                  >
+                  <span
+                    class="tab-indicator w-2 h-0.5 bg-transparent mt-0.5"
+                  ></span>
+                </button>
+                <!-- Button 4 -->
+                <button
+                  class="interactive-tab-btn flex-1 flex flex-col items-center justify-center gap-1 py-1 text-secondary opacity-70 cursor-pointer select-none"
+                  data-tab="akun"
+                >
+                  <span class="material-symbols-outlined text-[20px] tab-icon"
+                    >person</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-widest tab-label"
+                    >Akun</span
+                  >
+                  <span
+                    class="tab-indicator w-2 h-0.5 bg-transparent mt-0.5"
+                  ></span>
+                </button>
+              </div>
+            </div>
+            <!-- Action Toast Banner -->
+            <div
+              class="bg-primary text-on-primary px-space-md py-2 flex items-center justify-between text-body-sm"
+              id="feedback-banner"
+            >
+              <span
+                class="flex items-center gap-1.5 font-label-sm text-label-sm uppercase tracking-wider"
+              >
+                <span class="material-symbols-outlined text-[16px]"
+                  >touch_app</span
+                >
+                Tab Beranda Aktif
+              </span>
+              <span
+                class="font-label-sm text-label-sm uppercase text-secondary-fixed"
+                >Status: Default</span
+              >
+            </div>
+          </div>
+        </section>
+        <!-- Interactive JavaScript logic for Navbar demonstration -->
+        <script>
+          (function initNavbarShowcase() {
+            const tabs = document.querySelectorAll(".interactive-tab-btn");
+            const previewBox = document.getElementById("demo-preview-box");
+            const tabIcon = document.getElementById("demo-tab-icon");
+            const tabTitle = document.getElementById("demo-tab-title");
+            const tabDesc = document.getElementById("demo-tab-desc");
+            const feedbackBanner = document.getElementById("feedback-banner");
+
+            const tabData = {
+              beranda: {
+                icon: "home",
+                title: "Beranda ME",
+                desc: "Menampilkan kurasi busana runway terkini dan kampanye visual editorial.",
+                status: "Default Hero State",
+              },
+              jelajah: {
+                icon: "explore",
+                title: "Eksplorasi Katalog",
+                desc: "Indeks kategori wanita, pria, aksesori kulit, dan lookbook musim gugur.",
+                status: "Catalog Matrix",
+              },
+              wishlist: {
+                icon: "favorite",
+                title: "Daftar Disimpan (3)",
+                desc: "Koleksi busana pilihan Anda siap dipindahkan ke keranjang belanja.",
+                status: "3 Produk Tersimpan",
+              },
+              akun: {
+                icon: "person",
+                title: "Profil & Preferensi",
+                desc: "Akses riwayat pesanan haute couture, alamat, dan kurasi gaya personal.",
+                status: "Akun Terautentikasi",
+              },
+            };
+
+            tabs.forEach((btn) => {
+              btn.addEventListener("click", function () {
+                const tabKey = this.getAttribute("data-tab");
+                const data = tabData[tabKey];
+                if (!data) return;
+
+                // Update active tab buttons appearance
+                tabs.forEach((item) => {
+                  const iconSpan = item.querySelector(".tab-icon");
+                  const labelSpan = item.querySelector(".tab-label");
+                  const indicatorSpan = item.querySelector(".tab-indicator");
+
+                  item.classList.remove("text-primary");
+                  item.classList.add("text-secondary", "opacity-70");
+                  labelSpan.classList.remove("font-bold");
+                  indicatorSpan.classList.remove("bg-primary");
+                  indicatorSpan.classList.add("bg-transparent");
+
+                  if (iconSpan) {
+                    iconSpan.style.removeProperty("font-variation-settings");
+                  }
+                });
+
+                // Activate clicked tab
+                this.classList.remove("text-secondary", "opacity-70");
+                this.classList.add("text-primary");
+                const activeLabel = this.querySelector(".tab-label");
+                const activeIndicator = this.querySelector(".tab-indicator");
+                const activeIcon = this.querySelector(".tab-icon");
+
+                activeLabel.classList.add("font-bold");
+                activeIndicator.classList.remove("bg-transparent");
+                activeIndicator.classList.add("bg-primary");
+                if (activeIcon) {
+                  activeIcon.style.fontVariationSettings = "'FILL' 1";
+                }
+
+                // Animate preview box content
+                if (previewBox) {
+                  previewBox.style.opacity = "0.4";
+                  setTimeout(() => {
+                    if (tabIcon) tabIcon.textContent = data.icon;
+                    if (tabTitle) tabTitle.textContent = data.title;
+                    if (tabDesc) tabDesc.textContent = data.desc;
+                    previewBox.style.opacity = "1";
+                  }, 120);
+                }
+
+                // Update Toast message
+                if (feedbackBanner) {
+                  feedbackBanner.innerHTML = `
+              <span class="flex items-center gap-1.5 font-label-sm text-label-sm uppercase tracking-wider">
+                <span class="material-symbols-outlined text-[16px]">touch_app</span> Tab ${data.title} Aktif
+              </span>
+              <span class="font-label-sm text-label-sm uppercase text-secondary-fixed">Status: ${data.status}</span>
+            `;
+                }
+
+                // Visual haptic wave simulation
+                this.style.transform = "scale(0.94)";
+                setTimeout(() => {
+                  this.style.transform = "scale(1)";
+                }, 120);
+              });
+            });
+          })();
+        </script>
+      </div>
+    </main>
+    <nav
+      class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-1px_8px_rgba(0,0,0,0.04)]"
+      data-active-classes="text-primary font-semibold"
+    >
+      <div class="flex justify-around items-center h-16 px-gutter">
+        <a
+          aria-current="page"
+          class="flex flex-col items-center justify-center gap-space-xs min-w-[44px] min-h-[44px] px-space-sm transition-colors text-primary font-semibold"
+          data-path="beranda"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]">home</span
+          ><span class="font-label-sm text-label-sm uppercase tracking-widest"
+            >Beranda</span
+          ></a
+        ><a
+          class="flex flex-col items-center justify-center gap-space-xs min-w-[44px] min-h-[44px] px-space-sm text-secondary hover:text-primary transition-colors"
+          data-path="jelajah"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]">explore</span
+          ><span class="font-label-sm text-label-sm uppercase tracking-widest"
+            >Jelajah</span
+          ></a
+        ><a
+          class="flex flex-col items-center justify-center gap-space-xs min-w-[44px] min-h-[44px] px-space-sm text-secondary hover:text-primary transition-colors"
+          data-path="wishlist"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]"
+            >favorite_border</span
+          ><span class="font-label-sm text-label-sm uppercase tracking-widest"
+            >Wishlist</span
+          ></a
+        ><a
+          class="flex flex-col items-center justify-center gap-space-xs min-w-[44px] min-h-[44px] px-space-sm text-secondary hover:text-primary transition-colors"
+          data-path="akun"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]">person</span
+          ><span class="font-label-sm text-label-sm uppercase tracking-widest"
+            >Akun</span
+          ></a
+        >
+      </div>
+    </nav>
+  </body>
+</html>

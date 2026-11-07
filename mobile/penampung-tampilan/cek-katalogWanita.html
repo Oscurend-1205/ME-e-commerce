@@ -1,0 +1,1045 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      name="viewport"
+    />
+    <meta content="mobile_tab" name="shell-type" />
+    <title>ME Fashion Store</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-bright": "#f9f9f9",
+              secondary: "#5e5e5e",
+              "primary-container": "#1c1b1b",
+              "primary-fixed": "#e5e2e1",
+              "inverse-on-surface": "#f0f1f1",
+              "surface-dim": "#dadada",
+              "outline-variant": "#c4c7c7",
+              "surface-container": "#eeeeee",
+              "on-secondary-container": "#646464",
+              "on-primary": "#ffffff",
+              "on-error-container": "#93000a",
+              "on-tertiary-container": "#868381",
+              "on-secondary-fixed-variant": "#464747",
+              "error-container": "#ffdad6",
+              "on-primary-fixed": "#1c1b1b",
+              "primary-fixed-dim": "#c8c6c5",
+              "on-primary-fixed-variant": "#474646",
+              background: "#f9f9f9",
+              surface: "#f9f9f9",
+              "on-primary-container": "#858383",
+              "on-secondary": "#ffffff",
+              "secondary-container": "#e3e2e2",
+              "surface-container-lowest": "#ffffff",
+              "border-gray": "#E5E5E5",
+              "surface-light": "#F7F7F7",
+              primary: "#000000",
+              "on-secondary-fixed": "#1b1c1c",
+              outline: "#747878",
+              "secondary-fixed": "#e3e2e2",
+              "surface-container-highest": "#e2e2e2",
+              "on-surface-variant": "#444748",
+              "surface-tint": "#5f5e5e",
+              "on-error": "#ffffff",
+              error: "#ba1a1a",
+              "tertiary-fixed": "#e6e1df",
+              "tertiary-container": "#1d1b1a",
+              "surface-variant": "#e2e2e2",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed-variant": "#484645",
+              "surface-container-high": "#e8e8e8",
+              "on-background": "#1a1c1c",
+              tertiary: "#000000",
+              "on-tertiary-fixed": "#1d1b1a",
+              "secondary-fixed-dim": "#c7c6c6",
+              "muted-gray": "#767676",
+              "inverse-surface": "#2f3131",
+              "surface-container-low": "#f3f3f4",
+              "on-surface": "#1a1c1c",
+              "inverse-primary": "#c8c6c5",
+              "tertiary-fixed-dim": "#cac6c3",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              gutter: "1rem",
+              margin: "1rem",
+              "space-lg": "1.5rem",
+              "space-md": "1rem",
+              "space-sm": "0.5rem",
+              "margin-desktop": "3rem",
+              "space-xs": "0.25rem",
+              "gutter-desktop": "1.5rem",
+              "space-xl": "2.5rem",
+              "margin-tablet": "2rem",
+            },
+            fontFamily: {
+              "label-md": ["Inter"],
+              "headline-lg": ["Playfair Display"],
+              "label-lg": ["Inter"],
+              "body-lg": ["Inter"],
+              "headline-xl": ["Playfair Display"],
+              "headline-xl-mobile": ["Playfair Display"],
+              "label-sm": ["Inter"],
+              "body-md": ["Inter"],
+              "headline-lg-mobile": ["Playfair Display"],
+              "headline-sm": ["Playfair Display"],
+              "headline-md": ["Playfair Display"],
+              "body-sm": ["Inter"],
+            },
+            fontSize: {
+              "label-md": [
+                "11px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.16em",
+                  fontWeight: "500",
+                },
+              ],
+              "headline-lg": [
+                "40px",
+                {
+                  lineHeight: "48px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "label-lg": [
+                "13px",
+                {
+                  lineHeight: "18px",
+                  letterSpacing: "0.14em",
+                  fontWeight: "500",
+                },
+              ],
+              "body-lg": [
+                "16px",
+                {
+                  lineHeight: "26px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-xl": [
+                "56px",
+                {
+                  lineHeight: "64px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-xl-mobile": [
+                "36px",
+                {
+                  lineHeight: "44px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "label-sm": [
+                "10px",
+                {
+                  lineHeight: "14px",
+                  letterSpacing: "0.18em",
+                  fontWeight: "600",
+                },
+              ],
+              "body-md": [
+                "14px",
+                {
+                  lineHeight: "22px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-lg-mobile": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "400" },
+              ],
+              "headline-sm": [
+                "22px",
+                { lineHeight: "30px", fontWeight: "500" },
+              ],
+              "headline-md": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "400" },
+              ],
+              "body-sm": [
+                "12px",
+                {
+                  lineHeight: "18px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "400",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      @layer base {
+        html,
+        body {
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          min-height: 100%;
+        }
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .pt-safe {
+          padding-top: env(safe-area-inset-top, 0px);
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-surface-container-lowest text-on-surface antialiased flex flex-col min-h-screen"
+  >
+    <header
+      class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.03)]"
+    >
+      <div
+        class="h-16 px-margin flex items-center justify-between border-b border-border-gray"
+      >
+        <div class="flex items-center gap-2">
+          <button
+            aria-label="Kembali"
+            class="w-10 h-10 -ml-2 flex items-center justify-center text-primary transition-opacity hover:opacity-60"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[22px]"
+              >arrow_back</span
+            ></button
+          ><span
+            class="font-headline-sm text-[18px] tracking-tight text-primary font-normal"
+            >Women’s Atelier</span
+          >
+        </div>
+        <div class="flex items-center gap-space-xs">
+          <button
+            aria-label="Pencarian"
+            class="w-10 h-10 flex items-center justify-center text-primary transition-opacity hover:opacity-60"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[22px]"
+              >search</span
+            ></button
+          ><button
+            aria-label="Tas Belanja"
+            class="w-10 h-10 relative flex items-center justify-center text-primary transition-opacity hover:opacity-60"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[22px]"
+              >shopping_bag</span
+            ><span
+              class="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-on-primary font-label-sm text-[9px] leading-none flex items-center justify-center rounded-full"
+              >2</span
+            >
+          </button>
+        </div>
+      </div>
+    </header>
+    <main class="flex-1 w-full bg-surface-container-lowest pt-16 pb-20">
+      <div class="flex flex-col w-full pb-10">
+        <!-- Editorial Metadata & Header -->
+        <section class="border-b border-border-gray">
+          <div
+            class="flex items-center gap-4 overflow-x-auto px-margin no-scrollbar py-3"
+          >
+            <div
+              class="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
+            >
+              <div
+                class="w-16 h-16 rounded-full p-0.5 ring-2 ring-primary transition-transform duration-300 group-hover:scale-105"
+              >
+                <img
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-YdtEf5AFuI8KParOyu4bgmkHz31EPx_GcMkTgdCcKkFEaQ94qwcti-igJ8JdXOEwmqUxGBPqNbTGgZRzOhGgGwuNgNCMhn18Mo_srFq_aVCKGZ6v0IuUz9orKxUAdbr4mVMnD88aLP53ou7IzhtkcD9ojQ_bwwM2npQDwHhiEFuRR9dN5NvetZIu1PsmY_hFZz_CLXO3Y0Bg-NZ0oDAGUukdF9ajw518O_D4cvLA"
+                  alt="Baru Tiba"
+                  class="w-full h-full object-cover rounded-full"
+                />
+              </div>
+              <span
+                class="font-label-sm text-[10px] uppercase tracking-wider text-primary text-center font-semibold truncate max-w-[68px]"
+                >Baru Tiba</span
+              >
+            </div>
+            <div
+              class="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
+            >
+              <div
+                class="w-16 h-16 rounded-full p-0.5 ring-1 ring-border-gray transition-transform duration-300 group-hover:scale-105"
+              >
+                <img
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2p4ihT4xQuFTraI0yQBs1kNdTGg52Buov1vqEt7o3fB0Y1PsY8AdVitrO0-_a17SkYB7eY3kGd4WnrxBeM_VEEpPvboJaoTsRwgKYhadmf_aUdRhti0jPZvIxjczxk4p7r7GvYxftROmoFYOCI9BZmgPawSsU4eDaz8nnujIrnTfdXxNwP2FHkzBiHwjvNFpnqJHezREScbzrRYfeE4gOVQoTBlPiSNx2iMPmllAz"
+                  alt="Outerwear"
+                  class="w-full h-full object-cover rounded-full"
+                />
+              </div>
+              <span
+                class="font-label-sm text-[10px] uppercase tracking-wider text-secondary group-hover:text-primary transition-colors text-center font-normal truncate max-w-[68px]"
+                >Outerwear</span
+              >
+            </div>
+            <div
+              class="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
+            >
+              <div
+                class="w-16 h-16 rounded-full p-0.5 ring-1 ring-border-gray transition-transform duration-300 group-hover:scale-105"
+              >
+                <img
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw733lgOZWxaE5ifRU__pWqfjJtc8aC-M8NpMEUOLhtIopWQZNazQIeh42sTS9gU-BVkJwyFoW6QTi6Z1iVdF04O8soKmYO298t4D-6w3wH__pul5InLtRLIWNqJCW9O51Y667JYJxv9aMPHgSaqjixDQDNZEWt8QQHTON_dLtVFVMxtIY_rucoFVT7T3MVkUF-my0sNZpIvpEN1XA9iHdqdAClhyWTm8ZMEmWh3AN"
+                  alt="Gaun &amp; Sutra"
+                  class="w-full h-full object-cover rounded-full"
+                />
+              </div>
+              <span
+                class="font-label-sm text-[10px] uppercase tracking-wider text-secondary group-hover:text-primary transition-colors text-center font-normal truncate max-w-[68px]"
+                >Gaun &amp; Sutra</span
+              >
+            </div>
+            <div
+              class="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
+            >
+              <div
+                class="w-16 h-16 rounded-full p-0.5 ring-1 ring-border-gray transition-transform duration-300 group-hover:scale-105"
+              >
+                <img
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUKWoIcrCS7-ld3Kr8qbZ5xpaFgIXckT7ax__SmRi_5BULWVfWTnapM2knEa0-Moyk07dOS2-85jW7OiDsxeyE_d1PRS4GrujeLbL3dGWfeEUf70qIWEUC20gTUSdxZqz0OYy1gW1Dog_BodnB8a7sXYE8D8eO6s-5eeeKtBLADHR0XJHABsiMkIMh0LHdfNB3IouBC0N_h8LSpsATKE1COhZTu5QH06O-aMYttRa2"
+                  alt="Setelan"
+                  class="w-full h-full object-cover rounded-full"
+                />
+              </div>
+              <span
+                class="font-label-sm text-[10px] uppercase tracking-wider text-secondary group-hover:text-primary transition-colors text-center font-normal truncate max-w-[68px]"
+                >Setelan</span
+              >
+            </div>
+            <div
+              class="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
+            >
+              <div
+                class="w-16 h-16 rounded-full p-0.5 ring-1 ring-border-gray transition-transform duration-300 group-hover:scale-105"
+              >
+                <img
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuADJ0lT2dCA7A-Y3ZGV4G6OCtvhP3pk3JFKBRK0fOg6S7iYu4v93g65NOEqPzOwao5nt4Ay6H0f3E8WIMgOxaeoWNUYgpDW5ek_j-vKol7Zu7wOqdyazJ535qCNsYdEFI4EtfE21xIwoom2cc8Xj_Mz4Tdh-wDWgPS27iwuimF60kE8i8ICE_PFeOk8agSLL7U_Z3a4prFp4Ud32FT3k88hqoWMfIqdXjku5nWW2Rr4"
+                  alt="Rajut &amp; Kasmir"
+                  class="w-full h-full object-cover rounded-full"
+                />
+              </div>
+              <span
+                class="font-label-sm text-[10px] uppercase tracking-wider text-secondary group-hover:text-primary transition-colors text-center font-normal truncate max-w-[68px]"
+                >Rajut &amp; Kasmir</span
+              >
+            </div>
+            <div
+              class="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
+            >
+              <div
+                class="w-16 h-16 rounded-full p-0.5 ring-1 ring-border-gray transition-transform duration-300 group-hover:scale-105 bg-surface-container-low flex items-center justify-center"
+              >
+                <img
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAn25N2epXx8JZe6s2x-94nzF5xNTaN-vfUnRhQLWGubq1GRuVF3HmfkntTo7Ej1VQ6_qkOogEzMiji8m9kvC8elLDWbNbsFTqaHKw3nFNemVVGZoR8ATVtkutim1RHHTTWuAqvuxhZdNgyGKnblEQa8bxxeSG829C8rJo96Dkj54ROzYD00ZIVx3Ojiqqq6UNqBDiNeN2LJ4HMnDKNrjINVoenP-ovzIOLaC8vs6NH"
+                  alt="Aksesori"
+                  class="w-full h-full object-cover rounded-full"
+                />
+              </div>
+              <span
+                class="font-label-sm text-[10px] uppercase tracking-wider text-secondary group-hover:text-primary transition-colors text-center font-normal truncate max-w-[68px]"
+                >Aksesori</span
+              >
+            </div>
+          </div>
+        </section>
+        <section class="px-margin pt-4 pb-6 flex flex-col">
+          <div
+            class="flex items-center justify-between py-1 border-b border-border-gray"
+          >
+            <span
+              class="font-label-sm text-label-sm text-secondary tracking-widest uppercase"
+              >ÉDITION 2025 · CURATED</span
+            >
+            <span
+              class="font-label-sm text-label-sm text-primary font-semibold tracking-widest uppercase"
+              >24 PRODUK PILIHAN</span
+            >
+          </div>
+          <div class="mt-5">
+            <h1
+              class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight font-normal"
+            >
+              Women’s Atelier
+            </h1>
+            <p
+              class="font-body-md text-body-md text-secondary mt-2 max-w-sm leading-relaxed"
+            >
+              Siluet dekonstruksi modern, mantel wol kasmir struktural, gaun
+              sutra murni, dan setelan tailored esensial untuk wanita
+              kontemporer.
+            </p>
+          </div>
+        </section>
+        <!-- Campaign Spotlight Lookbook Card (Hero) -->
+        <section class="px-margin mb-8">
+          <div
+            class="relative w-full aspect-[4/5] bg-surface-container overflow-hidden group cursor-pointer"
+          >
+            <div
+              class="w-full h-full bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
+              data-alt="Editorial black and white haute couture fashion portrait of a female model wearing an architectural structured cashmere wool overcoat, soft natural studio light, minimal museum interior background, cinematic grain, monochrome luxury aesthetic in deep noir and pure ivory shades."
+              style="
+                background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuA2p4ihT4xQuFTraI0yQBs1kNdTGg52Buov1vqEt7o3fB0Y1PsY8AdVitrO0-_a17SkYB7eY3kGd4WnrxBeM_VEEpPvboJaoTsRwgKYhadmf_aUdRhti0jPZvIxjczxk4p7r7GvYxftROmoFYOCI9BZmgPawSsU4eDaz8nnujIrnTfdXxNwP2FHkzBiHwjvNFpnqJHezREScbzrRYfeE4gOVQoTBlPiSNx2iMPmllAz&quot;);
+              "
+            ></div>
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/25 to-transparent"
+            ></div>
+            <!-- Card Overlay Metadata -->
+            <div
+              class="absolute inset-0 p-5 flex flex-col justify-between text-on-primary"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="bg-primary/80 backdrop-blur-md px-2.5 py-1 text-on-primary font-label-sm text-[9px] uppercase tracking-widest"
+                >
+                  • KAMPANYE UTAMA
+                </span>
+                <span
+                  class="font-label-sm text-label-sm tracking-widest text-on-primary/90"
+                >
+                  02 / 04 SERIES
+                </span>
+              </div>
+              <div class="flex flex-col gap-2">
+                <h2
+                  class="font-headline-sm text-headline-sm text-on-primary font-normal tracking-tight"
+                >
+                  L’Élégance Silencieuse
+                </h2>
+                <p
+                  class="font-body-sm text-body-sm text-on-primary/80 line-clamp-2"
+                >
+                  Eksplorasi drape arsitektural &amp; palet monokrom abadi.
+                </p>
+                <div class="pt-2">
+                  <button
+                    class="inline-flex items-center gap-2 text-on-primary font-label-md text-label-md uppercase tracking-widest group-hover:underline underline-offset-4 transition-all"
+                    type="button"
+                  >
+                    <span class="">JELAJAHI SERI 02</span>
+                    <span
+                      class="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-1"
+                      >arrow_forward</span
+                    >
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Horizontal Category Filter Chips -->
+        <section class="mb-4">
+          <div
+            class="flex items-center gap-2 overflow-x-auto px-margin no-scrollbar py-1"
+          >
+            <button
+              class="category-chip shrink-0 px-4 py-2.5 bg-primary text-on-primary font-label-sm text-label-sm uppercase tracking-widest transition-all"
+              type="button"
+            >
+              SEMUA
+            </button>
+            <button
+              class="category-chip shrink-0 px-4 py-2.5 bg-surface-container-low text-secondary font-label-sm text-label-sm uppercase tracking-widest hover:text-primary transition-all"
+              type="button"
+            >
+              OUTERWEAR &amp; COAT
+            </button>
+            <button
+              class="category-chip shrink-0 px-4 py-2.5 bg-surface-container-low text-secondary font-label-sm text-label-sm uppercase tracking-widest hover:text-primary transition-all"
+              type="button"
+            >
+              SUITING &amp; TAILORED
+            </button>
+            <button
+              class="category-chip shrink-0 px-4 py-2.5 bg-surface-container-low text-secondary font-label-sm text-label-sm uppercase tracking-widest hover:text-primary transition-all"
+              type="button"
+            >
+              SILK &amp; DRESSES
+            </button>
+            <button
+              class="category-chip shrink-0 px-4 py-2.5 bg-surface-container-low text-secondary font-label-sm text-label-sm uppercase tracking-widest hover:text-primary transition-all"
+              type="button"
+            >
+              KNITWEAR KASMIR
+            </button>
+          </div>
+        </section>
+        <!-- Quick Controls Bar -->
+        <section class="px-margin mb-6">
+          <div
+            class="flex items-center justify-between py-3 border-y border-border-gray"
+          >
+            <!-- Filter Button -->
+            <button
+              class="flex items-center gap-2 text-primary hover:opacity-70 transition-opacity"
+              type="button"
+            >
+              <span
+                class="font-label-sm text-label-sm uppercase tracking-widest font-semibold"
+                >FILTER</span
+              >
+              <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              <span class="font-label-sm text-label-sm text-secondary"
+                >(3)</span
+              >
+            </button>
+            <!-- Sort Selection -->
+            <button
+              class="flex items-center gap-1.5 text-primary hover:opacity-70 transition-opacity"
+              type="button"
+            >
+              <span
+                class="font-label-sm text-label-sm uppercase tracking-wider text-secondary"
+                >URUTKAN:</span
+              >
+              <span
+                class="font-label-sm text-label-sm uppercase tracking-wider font-semibold"
+                >KURASI TERBARU</span
+              >
+              <span class="material-symbols-outlined text-[16px]"
+                >expand_more</span
+              >
+            </button>
+            <!-- View Switcher -->
+            <div class="flex items-center gap-2 pl-2">
+              <button
+                aria-label="Grid View"
+                class="text-primary hover:opacity-70"
+                id="view-grid"
+                type="button"
+              >
+                <span class="material-symbols-outlined text-[20px]"
+                  >grid_view</span
+                >
+              </button>
+              <button
+                aria-label="Editorial View"
+                class="text-secondary hover:text-primary"
+                id="view-single"
+                type="button"
+              >
+                <span class="material-symbols-outlined text-[20px]"
+                  >splitscreen</span
+                >
+              </button>
+            </div>
+          </div>
+        </section>
+        <!-- Product Catalog (2-Column Grid) -->
+        <section class="px-margin mb-12">
+          <div class="grid grid-cols-2 gap-x-3 gap-y-8" id="product-container">
+            <!-- Card 1 -->
+            <article class="flex flex-col group">
+              <div
+                class="relative w-full aspect-[3/4] bg-surface-container-low overflow-hidden cursor-pointer"
+              >
+                <img
+                  alt="Double-Breasted Wool Coat"
+                  class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  data-alt="Editorial lookbook studio photograph of a model in a charcoal black double-breasted structured wool coat, sculptural minimal lapels, styled against an off-white gallery wall in high contrast minimalist fashion lighting."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-YdtEf5AFuI8KParOyu4bgmkHz31EPx_GcMkTgdCcKkFEaQ94qwcti-igJ8JdXOEwmqUxGBPqNbTGgZRzOhGgGwuNgNCMhn18Mo_srFq_aVCKGZ6v0IuUz9orKxUAdbr4mVMnD88aLP53ou7IzhtkcD9ojQ_bwwM2npQDwHhiEFuRR9dN5NvetZIu1PsmY_hFZz_CLXO3Y0Bg-NZ0oDAGUukdF9ajw518O_D4cvLA"
+                />
+                <div
+                  class="absolute top-2 left-2 bg-surface-container-lowest/90 px-1.5 py-0.5 text-primary font-label-sm text-[8px] uppercase tracking-wider"
+                >
+                  EKSKLUSIF ATELIER
+                </div>
+                <button
+                  aria-label="Tambah ke Wishlist"
+                  class="wishlist-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-container-lowest/80 backdrop-blur-sm flex items-center justify-center text-primary transition-all hover:bg-surface-container-lowest"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >favorite</span
+                  >
+                </button>
+              </div>
+              <div class="pt-3 flex flex-col gap-1 flex-1">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span
+                    class="w-2.5 h-2.5 rounded-full bg-primary ring-1 ring-border-gray"
+                    title="Noir / Hitam"
+                  ></span>
+                  <span
+                    class="font-label-sm text-[9px] uppercase tracking-widest text-secondary truncate"
+                    >Noir / Hitam</span
+                  >
+                </div>
+                <h3
+                  class="font-headline-sm text-[16px] leading-[22px] text-primary group-hover:opacity-80 transition-opacity line-clamp-1"
+                >
+                  Double-Breasted Wool Coat
+                </h3>
+                <span
+                  class="font-body-sm text-body-sm font-semibold text-primary"
+                >
+                  Rp 2.890.000
+                </span>
+                <button
+                  class="mt-2 w-full py-2 bg-surface-container-low text-primary font-label-sm text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[14px]">add</span>
+                  <span class="">Tas Belanja</span>
+                </button>
+              </div>
+            </article>
+            <!-- Card 2 -->
+            <article class="flex flex-col group">
+              <div
+                class="relative w-full aspect-[3/4] bg-surface-container-low overflow-hidden cursor-pointer"
+              >
+                <img
+                  alt="Silk Slip Midi Dress"
+                  class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  data-alt="Editorial campaign photograph of a woman wearing a fluid cream ecru silk slip midi dress, delicate clean neckline, dramatic light and shadow play, high fashion quiet luxury minimalist style."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw733lgOZWxaE5ifRU__pWqfjJtc8aC-M8NpMEUOLhtIopWQZNazQIeh42sTS9gU-BVkJwyFoW6QTi6Z1iVdF04O8soKmYO298t4D-6w3wH__pul5InLtRLIWNqJCW9O51Y667JYJxv9aMPHgSaqjixDQDNZEWt8QQHTON_dLtVFVMxtIY_rucoFVT7T3MVkUF-my0sNZpIvpEN1XA9iHdqdAClhyWTm8ZMEmWh3AN"
+                />
+                <div
+                  class="absolute top-2 left-2 bg-surface-container-lowest/90 px-1.5 py-0.5 text-primary font-label-sm text-[8px] uppercase tracking-wider"
+                >
+                  100% SUTRA MULBEI
+                </div>
+                <button
+                  aria-label="Tambah ke Wishlist"
+                  class="wishlist-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-container-lowest/80 backdrop-blur-sm flex items-center justify-center text-primary transition-all hover:bg-surface-container-lowest"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >favorite</span
+                  >
+                </button>
+              </div>
+              <div class="pt-3 flex flex-col gap-1 flex-1">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span
+                    class="w-2.5 h-2.5 rounded-full bg-[#EAE7DC] ring-1 ring-border-gray"
+                    title="Ecru Cream"
+                  ></span>
+                  <span
+                    class="font-label-sm text-[9px] uppercase tracking-widest text-secondary truncate"
+                    >Ecru Cream</span
+                  >
+                </div>
+                <h3
+                  class="font-headline-sm text-[16px] leading-[22px] text-primary group-hover:opacity-80 transition-opacity line-clamp-1"
+                >
+                  Silk Slip Midi Dress
+                </h3>
+                <span
+                  class="font-body-sm text-body-sm font-semibold text-primary"
+                >
+                  Rp 2.450.000
+                </span>
+                <button
+                  class="mt-2 w-full py-2 bg-surface-container-low text-primary font-label-sm text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[14px]">add</span>
+                  <span class="">Tas Belanja</span>
+                </button>
+              </div>
+            </article>
+            <!-- Card 3 -->
+            <article class="flex flex-col group">
+              <div
+                class="relative w-full aspect-[3/4] bg-surface-container-low overflow-hidden cursor-pointer"
+              >
+                <img
+                  alt="Structured Tailored Blazer"
+                  class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  data-alt="Editorial lookbook photo showing a structured tailored oversized blazer in deep charcoal noir wool, sharp shoulder construction, editorial posture, Parisian contemporary tailoring minimal aesthetic."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUKWoIcrCS7-ld3Kr8qbZ5xpaFgIXckT7ax__SmRi_5BULWVfWTnapM2knEa0-Moyk07dOS2-85jW7OiDsxeyE_d1PRS4GrujeLbL3dGWfeEUf70qIWEUC20gTUSdxZqz0OYy1gW1Dog_BodnB8a7sXYE8D8eO6s-5eeeKtBLADHR0XJHABsiMkIMh0LHdfNB3IouBC0N_h8LSpsATKE1COhZTu5QH06O-aMYttRa2"
+                />
+                <div
+                  class="absolute top-2 left-2 bg-surface-container-lowest/90 px-1.5 py-0.5 text-primary font-label-sm text-[8px] uppercase tracking-wider"
+                >
+                  WOL MURNI
+                </div>
+                <button
+                  aria-label="Tambah ke Wishlist"
+                  class="wishlist-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-container-lowest/80 backdrop-blur-sm flex items-center justify-center text-primary transition-all hover:bg-surface-container-lowest"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >favorite</span
+                  >
+                </button>
+              </div>
+              <div class="pt-3 flex flex-col gap-1 flex-1">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span
+                    class="w-2.5 h-2.5 rounded-full bg-[#2B2B2A] ring-1 ring-border-gray"
+                    title="Charcoal Noir"
+                  ></span>
+                  <span
+                    class="font-label-sm text-[9px] uppercase tracking-widest text-secondary truncate"
+                    >Charcoal Noir</span
+                  >
+                </div>
+                <h3
+                  class="font-headline-sm text-[16px] leading-[22px] text-primary group-hover:opacity-80 transition-opacity line-clamp-1"
+                >
+                  Structured Tailored Blazer
+                </h3>
+                <span
+                  class="font-body-sm text-body-sm font-semibold text-primary"
+                >
+                  Rp 2.150.000
+                </span>
+                <button
+                  class="mt-2 w-full py-2 bg-surface-container-low text-primary font-label-sm text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[14px]">add</span>
+                  <span class="">Tas Belanja</span>
+                </button>
+              </div>
+            </article>
+            <!-- Card 4 -->
+            <article class="flex flex-col group">
+              <div
+                class="relative w-full aspect-[3/4] bg-surface-container-low overflow-hidden cursor-pointer"
+              >
+                <img
+                  alt="Pleated Wide Linen Trousers"
+                  class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  data-alt="Modern minimal studio catalog photograph of relaxed pleated wide linen trousers in slate grey, paired with clean leather loafers, sleek editorial composition, soft studio lighting."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAn25N2epXx8JZe6s2x-94nzF5xNTaN-vfUnRhQLWGubq1GRuVF3HmfkntTo7Ej1VQ6_qkOogEzMiji8m9kvC8elLDWbNbsFTqaHKw3nFNemVVGZoR8ATVtkutim1RHHTTWuAqvuxhZdNgyGKnblEQa8bxxeSG829C8rJo96Dkj54ROzYD00ZIVx3Ojiqqq6UNqBDiNeN2LJ4HMnDKNrjINVoenP-ovzIOLaC8vs6NH"
+                />
+                <div
+                  class="absolute top-2 left-2 bg-surface-container-lowest/90 px-1.5 py-0.5 text-primary font-label-sm text-[8px] uppercase tracking-wider"
+                >
+                  TAILORED FIT
+                </div>
+                <button
+                  aria-label="Tambah ke Wishlist"
+                  class="wishlist-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-container-lowest/80 backdrop-blur-sm flex items-center justify-center text-primary transition-all hover:bg-surface-container-lowest"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >favorite</span
+                  >
+                </button>
+              </div>
+              <div class="pt-3 flex flex-col gap-1 flex-1">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span
+                    class="w-2.5 h-2.5 rounded-full bg-[#707577] ring-1 ring-border-gray"
+                    title="Slate Grey"
+                  ></span>
+                  <span
+                    class="font-label-sm text-[9px] uppercase tracking-widest text-secondary truncate"
+                    >Slate Grey</span
+                  >
+                </div>
+                <h3
+                  class="font-headline-sm text-[16px] leading-[22px] text-primary group-hover:opacity-80 transition-opacity line-clamp-1"
+                >
+                  Pleated Wide Linen Trousers
+                </h3>
+                <span
+                  class="font-body-sm text-body-sm font-semibold text-primary"
+                >
+                  Rp 1.350.000
+                </span>
+                <button
+                  class="mt-2 w-full py-2 bg-surface-container-low text-primary font-label-sm text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[14px]">add</span>
+                  <span class="">Tas Belanja</span>
+                </button>
+              </div>
+            </article>
+            <!-- Card 5 -->
+            <article class="flex flex-col group">
+              <div
+                class="relative w-full aspect-[3/4] bg-surface-container-low overflow-hidden cursor-pointer"
+              >
+                <img
+                  alt="Fine Ribbed Cashmere Knit"
+                  class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  data-alt="Editorial lookbook closeup of a woman wearing a fine ribbed pure cashmere knit sweater in soft off-white ivory, clean mock neck collar, delicate tactile knitwear texture in soft natural sunlight."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuADJ0lT2dCA7A-Y3ZGV4G6OCtvhP3pk3JFKBRK0fOg6S7iYu4v93g65NOEqPzOwao5nt4Ay6H0f3E8WIMgOxaeoWNUYgpDW5ek_j-vKol7Zu7wOqdyazJ535qCNsYdEFI4EtfE21xIwoom2cc8Xj_Mz4Tdh-wDWgPS27iwuimF60kE8i8ICE_PFeOk8agSLL7U_Z3a4prFp4Ud32FT3k88hqoWMfIqdXjku5nWW2Rr4"
+                />
+                <div
+                  class="absolute top-2 left-2 bg-surface-container-lowest/90 px-1.5 py-0.5 text-primary font-label-sm text-[8px] uppercase tracking-wider"
+                >
+                  KASMIR MURNI
+                </div>
+                <button
+                  aria-label="Tambah ke Wishlist"
+                  class="wishlist-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-container-lowest/80 backdrop-blur-sm flex items-center justify-center text-primary transition-all hover:bg-surface-container-lowest"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >favorite</span
+                  >
+                </button>
+              </div>
+              <div class="pt-3 flex flex-col gap-1 flex-1">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span
+                    class="w-2.5 h-2.5 rounded-full bg-[#F4F4F2] ring-1 ring-border-gray"
+                    title="Off-White"
+                  ></span>
+                  <span
+                    class="font-label-sm text-[9px] uppercase tracking-widest text-secondary truncate"
+                    >Off-White</span
+                  >
+                </div>
+                <h3
+                  class="font-headline-sm text-[16px] leading-[22px] text-primary group-hover:opacity-80 transition-opacity line-clamp-1"
+                >
+                  Fine Ribbed Cashmere Knit
+                </h3>
+                <span
+                  class="font-body-sm text-body-sm font-semibold text-primary"
+                >
+                  Rp 1.490.000
+                </span>
+                <button
+                  class="mt-2 w-full py-2 bg-surface-container-low text-primary font-label-sm text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[14px]">add</span>
+                  <span class="">Tas Belanja</span>
+                </button>
+              </div>
+            </article>
+            <!-- Card 6 -->
+            <article class="flex flex-col group">
+              <div
+                class="relative w-full aspect-[3/4] bg-surface-container-low overflow-hidden cursor-pointer"
+              >
+                <img
+                  alt="Asymmetric Draped Midi Dress"
+                  class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  data-alt="Full length editorial shot of a woman in an asymmetric draped midi dress in obsidian black, dynamic architectural silhouette, clean modernist lines, high fashion avant-garde minimal aesthetic."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6EwAWfNfzBukbhF72xcoJsPOofPSdNtuSf9h9e35Y2pKZjkdn50Uvso2DYzwaFHXHp8mfkZmTx0HSKVXfa0l97jItYPFFSs9DzG1uxbSKv4iiy82E2vcosiQSzmBjz1GLty42a7BmdU2Kiu5xvnbsnaJ0v_oCdS12D71G6d_MirwgoK1h_ixfFcZ5W8NplReyZ43GhuhGb4yUJK6wReSSG7gg-ebdzD2kWxzqrte1"
+                />
+                <div
+                  class="absolute top-2 left-2 bg-surface-container-lowest/90 px-1.5 py-0.5 text-primary font-label-sm text-[8px] uppercase tracking-wider"
+                >
+                  STOK TERBATAS
+                </div>
+                <button
+                  aria-label="Tambah ke Wishlist"
+                  class="wishlist-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-container-lowest/80 backdrop-blur-sm flex items-center justify-center text-primary transition-all hover:bg-surface-container-lowest"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >favorite</span
+                  >
+                </button>
+              </div>
+              <div class="pt-3 flex flex-col gap-1 flex-1">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span
+                    class="w-2.5 h-2.5 rounded-full bg-[#1A1A1A] ring-1 ring-border-gray"
+                    title="Obsidian"
+                  ></span>
+                  <span
+                    class="font-label-sm text-[9px] uppercase tracking-widest text-secondary truncate"
+                    >Obsidian</span
+                  >
+                </div>
+                <h3
+                  class="font-headline-sm text-[16px] leading-[22px] text-primary group-hover:opacity-80 transition-opacity line-clamp-1"
+                >
+                  Asymmetric Draped Midi Dress
+                </h3>
+                <span
+                  class="font-body-sm text-body-sm font-semibold text-primary"
+                >
+                  Rp 1.850.000
+                </span>
+                <button
+                  class="mt-2 w-full py-2 bg-surface-container-low text-primary font-label-sm text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[14px]">add</span>
+                  <span class="">Tas Belanja</span>
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
+        <!-- Kutipan Filosofi Desain -->
+        <section class="px-margin mb-12"></section>
+        <!-- Paginasi / Load More -->
+      </div>
+      <script>
+        // Wishlist toggle interaction
+        document.querySelectorAll(".wishlist-btn").forEach((button) => {
+          button.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const icon = button.querySelector(".material-symbols-outlined");
+            const isFilled =
+              icon.style.fontVariationSettings &&
+              icon.style.fontVariationSettings.includes("'FILL' 1");
+            if (isFilled) {
+              icon.style.fontVariationSettings = "'FILL' 0";
+              icon.classList.remove("text-error");
+            } else {
+              icon.style.fontVariationSettings = "'FILL' 1";
+              icon.classList.add("text-error");
+            }
+          });
+        });
+
+        // Filter Chip active toggle
+        const chips = document.querySelectorAll(".category-chip");
+        chips.forEach((chip) => {
+          chip.addEventListener("click", () => {
+            chips.forEach((c) => {
+              c.className =
+                "category-chip shrink-0 px-4 py-2.5 bg-surface-container-low text-secondary font-label-sm text-label-sm uppercase tracking-widest hover:text-primary transition-all";
+            });
+            chip.className =
+              "category-chip shrink-0 px-4 py-2.5 bg-primary text-on-primary font-label-sm text-label-sm uppercase tracking-widest transition-all";
+          });
+        });
+
+        // View toggle simulation
+        const gridBtn = document.getElementById("view-grid");
+        const singleBtn = document.getElementById("view-single");
+        const productContainer = document.getElementById("product-container");
+
+        if (gridBtn && singleBtn && productContainer) {
+          gridBtn.addEventListener("click", () => {
+            productContainer.className = "grid grid-cols-2 gap-x-3 gap-y-8";
+            gridBtn.classList.replace("text-secondary", "text-primary");
+            singleBtn.classList.replace("text-primary", "text-secondary");
+          });
+
+          singleBtn.addEventListener("click", () => {
+            productContainer.className = "grid grid-cols-1 gap-y-10";
+            singleBtn.classList.replace("text-secondary", "text-primary");
+            gridBtn.classList.replace("text-primary", "text-secondary");
+          });
+        }
+      </script>
+    </main>
+    <nav
+      class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_-1px_8px_rgba(0,0,0,0.03)]"
+      data-active-classes="text-primary font-semibold"
+    >
+      <div
+        class="flex justify-around items-center h-16 px-space-xs border-t border-border-gray"
+      >
+        <a
+          class="flex-1 flex flex-col items-center justify-center h-full text-secondary transition-colors hover:text-primary"
+          data-path="beranda"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]">home</span
+          ><span class="font-label-sm text-[10px] tracking-wider mt-1 uppercase"
+            >Beranda</span
+          ></a
+        ><a
+          class="flex-1 flex flex-col items-center justify-center h-full text-primary font-semibold relative transition-colors"
+          data-path="jelajah"
+          href="#"
+          ><span
+            class="material-symbols-outlined text-[22px]"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >grid_view</span
+          ><span
+            class="font-label-sm text-[10px] tracking-wider mt-1 uppercase text-primary font-semibold"
+            >Jelajah</span
+          ><span class="w-1 h-1 rounded-full bg-primary mt-0.5"></span></a
+        ><a
+          class="flex-1 flex flex-col items-center justify-center h-full text-secondary transition-colors hover:text-primary"
+          data-path="wishlist"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]">favorite</span
+          ><span class="font-label-sm text-[10px] tracking-wider mt-1 uppercase"
+            >Wishlist</span
+          ></a
+        ><a
+          class="flex-1 flex flex-col items-center justify-center h-full text-secondary transition-colors hover:text-primary"
+          data-path="akun"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]">person</span
+          ><span class="font-label-sm text-[10px] tracking-wider mt-1 uppercase"
+            >Akun</span
+          ></a
+        >
+      </div>
+    </nav>
+  </body>
+</html>
