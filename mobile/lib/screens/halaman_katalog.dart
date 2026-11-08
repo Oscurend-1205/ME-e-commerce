@@ -7,8 +7,9 @@ import '../theme.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/kartu_produk.dart';
+import '../widgets/modal_pilih_varian.dart';
 import '../widgets/widget_keadaan.dart';
-import 'halaman_kelola_produk.dart';
+import 'halaman_akun.dart';
 import 'halaman_keranjang.dart';
 import 'halaman_rincian_produk.dart';
 
@@ -228,81 +229,58 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   }
 
   Future<void> _tambahItemKeKeranjang(Produk produk) async {
-    // Ambil ID varian pertama yang tersedia atau null
-    int? varianId;
-    if (produk.varian != null && produk.varian!.isNotEmpty) {
-      final varianTersedia = produk.varian!.firstWhere(
-        (v) => v.stok > 0,
-        orElse: () => produk.varian!.first,
-      );
-      varianId = varianTersedia.id;
-    } else {
-      // Ambil rincian produk untuk mendapatkan varian ID jika belum termuat
-      final detail = await LayananApi.ambilRincianProduk(produk.id);
-      if (detail.berhasil && detail.data != null) {
-        final p = Produk.fromJson(detail.data as Map<String, dynamic>);
-        if (p.varian != null && p.varian!.isNotEmpty) {
-          final v = p.varian!.firstWhere(
-            (x) => x.stok > 0,
-            orElse: () => p.varian!.first,
+    // Tampilkan overlay pemilihan ukuran, warna, dan kuantitas sebelum masuk ke keranjang
+    await ModalPilihVarian.tampilkanTambah(
+      context,
+      produk: produk,
+      onKonfirmasi: (varian, jumlah) async {
+        final respon = await LayananApi.tambahKeKeranjang(
+          produkId: produk.id,
+          varianId: varian.id,
+          jumlah: jumlah,
+        );
+
+        if (!mounted) return false;
+
+        if (respon.berhasil) {
+          await _muatJumlahKeranjang();
+          if (!mounted) return true;
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${produk.nama} (${varian.ukuran}, ${varian.warna}) x$jumlah berhasil ditambahkan ke Tas Belanja.',
+              ),
+              duration: const Duration(milliseconds: 2000),
+              action: SnackBarAction(
+                label: 'LIHAT',
+                textColor: Colors.white,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HalamanKeranjang()),
+                  ).then((_) => _muatJumlahKeranjang());
+                },
+              ),
+              backgroundColor: TemaAplikasi.primary,
+              behavior: SnackBarBehavior.floating,
+            ),
           );
-          varianId = v.id;
+          return true;
+        } else {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(respon.message),
+              duration: const Duration(milliseconds: 2000),
+              backgroundColor: TemaAplikasi.errorColor,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return false;
         }
-      }
-    }
-
-    if (varianId == null) {
-      if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HalamanRincianProduk(produkId: produk.id),
-        ),
-      ).then((_) => _muatJumlahKeranjang());
-      return;
-    }
-
-    final respon = await LayananApi.tambahKeKeranjang(
-      produkId: produk.id,
-      varianId: varianId,
-      jumlah: 1,
+      },
     );
-
-    if (!mounted) return;
-
-    if (respon.berhasil) {
-      await _muatJumlahKeranjang();
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${produk.nama} berhasil ditambahkan ke Tas Belanja.'),
-          duration: const Duration(milliseconds: 1500),
-          action: SnackBarAction(
-            label: 'LIHAT',
-            textColor: Colors.white,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HalamanKeranjang()),
-              ).then((_) => _muatJumlahKeranjang());
-            },
-          ),
-          backgroundColor: TemaAplikasi.primary,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(respon.message),
-          duration: const Duration(milliseconds: 1500),
-          backgroundColor: TemaAplikasi.errorColor,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
   }
 
   void _daftarVipNewsletter() {
@@ -527,7 +505,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const HalamanKelolaProduk()),
+                MaterialPageRoute(builder: (context) => const HalamanAkun()),
               );
             },
             borderRadius: BorderRadius.circular(16),

@@ -1,0 +1,285 @@
+<!DOCTYPE html><html class="light" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><meta content="mobile_tab" name="shell-type"><title>ME Fashion Store</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-bright": "#f9f9f9", "secondary": "#5e5e5e", "primary-container": "#1c1b1b", "primary-fixed": "#e5e2e1", "inverse-on-surface": "#f0f1f1", "surface-dim": "#dadada", "outline-variant": "#c4c7c7", "surface-container": "#eeeeee", "on-secondary-container": "#646464", "on-primary": "#ffffff", "on-error-container": "#93000a", "on-tertiary-container": "#868381", "on-secondary-fixed-variant": "#464747", "error-container": "#ffdad6", "on-primary-fixed": "#1c1b1b", "primary-fixed-dim": "#c8c6c5", "on-primary-fixed-variant": "#474646", "background": "#f9f9f9", "surface": "#f9f9f9", "on-primary-container": "#858383", "on-secondary": "#ffffff", "secondary-container": "#e3e2e2", "surface-container-lowest": "#ffffff", "border-gray": "#E5E5E5", "surface-light": "#F7F7F7", "primary": "#000000", "on-secondary-fixed": "#1b1c1c", "outline": "#747878", "secondary-fixed": "#e3e2e2", "surface-container-highest": "#e2e2e2", "on-surface-variant": "#444748", "surface-tint": "#5f5e5e", "on-error": "#ffffff", "error": "#ba1a1a", "tertiary-fixed": "#e6e1df", "tertiary-container": "#1d1b1a", "surface-variant": "#e2e2e2", "on-tertiary": "#ffffff", "on-tertiary-fixed-variant": "#484645", "surface-container-high": "#e8e8e8", "on-background": "#1a1c1c", "tertiary": "#000000", "on-tertiary-fixed": "#1d1b1a", "secondary-fixed-dim": "#c7c6c6", "muted-gray": "#767676", "inverse-surface": "#2f3131", "surface-container-low": "#f3f3f4", "on-surface": "#1a1c1c", "inverse-primary": "#c8c6c5", "tertiary-fixed-dim": "#cac6c3" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "gutter": "1rem", "margin": "1rem", "space-lg": "1.5rem", "space-md": "1rem", "space-sm": "0.5rem", "margin-desktop": "3rem", "space-xs": "0.25rem", "gutter-desktop": "1.5rem", "space-xl": "2.5rem", "margin-tablet": "2rem" }, fontFamily: { "label-md": ["Inter"], "headline-lg": ["Playfair Display"], "label-lg": ["Inter"], "body-lg": ["Inter"], "headline-xl": ["Playfair Display"], "headline-xl-mobile": ["Playfair Display"], "label-sm": ["Inter"], "body-md": ["Inter"], "headline-lg-mobile": ["Playfair Display"], "headline-sm": ["Playfair Display"], "headline-md": ["Playfair Display"], "body-sm": ["Inter"] }, fontSize: { "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.16em", "fontWeight": "500" }], "headline-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.14em", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0.01em", "fontWeight": "400" }], "headline-xl": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "400" }], "headline-xl-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.18em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0.01em", "fontWeight": "400" }], "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "400" }], "headline-sm": ["22px", { "lineHeight": "30px", "fontWeight": "500" }], "headline-md": ["28px", { "lineHeight": "36px", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "400" }] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;min-height:100%;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-surface-container-lowest text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.03)]"><div class="h-14 px-margin flex items-center justify-between border-b border-surface-container bg-surface-container-lowest/95 backdrop-blur-xl"><div class="flex items-center"><button aria-label="Kembali" class="w-10 h-10 -ml-2 flex items-center justify-center text-primary transition-opacity hover:opacity-60 active:scale-95" type="button"><span class="material-symbols-outlined text-[22px]">arrow_back</span></button></div><div class="flex-1 text-center px-space-xs"><h1 class="font-headline-sm text-[16px] text-primary tracking-widest uppercase font-medium line-clamp-1">Profil &amp; Pengaturan</h1></div><div class="flex items-center gap-1"><button aria-label="Pencarian" class="w-10 h-10 flex items-center justify-center text-primary transition-opacity hover:opacity-60" type="button"><span class="material-symbols-outlined text-[20px]">search</span></button><button aria-label="Tas Belanja" class="w-10 h-10 relative flex items-center justify-center text-primary transition-opacity hover:opacity-60" type="button"><span class="material-symbols-outlined text-[20px]">shopping_bag</span><span class="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-on-primary text-[9px] font-medium rounded-full flex items-center justify-center leading-none">2</span></button></div></div></header><main class="flex-1 w-full bg-surface-container-lowest pt-16 pb-20"><div class="flex flex-col w-full">
+<!-- Profile Editorial Summary -->
+<section class="w-full bg-surface-container-low px-margin py-space-lg flex flex-col items-center text-center relative overflow-hidden">
+<!-- Subtle editorial watermarked label -->
+<span class="absolute top-2 right-4 font-headline-xl text-surface-container-highest/40 select-none pointer-events-none italic">ME</span>
+<!-- Avatar Container -->
+<div class="relative mb-space-md">
+<div class="w-24 h-24 rounded-full p-1 bg-surface-container-highest shadow-sm">
+<img alt="Clarissa Vance" class="w-full h-full rounded-full object-cover object-center grayscale contrast-125" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmEE8fZojE8HVVd8RLdXGGXnq1xqmDKS1U3N2_XYmizomQMfevr7qC5vjtvqt_m0N20CY5FxeAU0b8wq4k-5NlJ-_faoYAyPf6WzEBERg6NOIOmmC6SHPTvWYpJDjm2BxPmi5N95eDbDGdZuK9BroYRuBFF73k5Z0EQhphRgzCi_zGVfI0oLdHF6s3IuhFdcBG--qGzwA5qMi62RMHZiGAW06QCumfrSQ6RCNHRwSY">
+</div>
+<button aria-label="Ganti Foto Profil" class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[15px]">photo_camera</span>
+</button>
+</div>
+<!-- Member Name & Privé Badge -->
+<h1 class="font-headline-sm text-headline-sm text-on-surface tracking-tight mb-space-xs font-normal">Clarissa Vance</h1>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 bg-primary text-on-primary rounded-full mb-space-xs shadow-sm">
+<span class="material-symbols-outlined text-[13px] text-primary-fixed">diamond</span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary-fixed">ME PRIVÉ • NOIR MEMBER</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary mb-space-md">
+      Anggota sejak 2023 • <span class="text-on-surface font-medium">1.450 Poin Atelier</span>
+</p>
+<!-- Quick CTA -->
+<button class="px-5 py-2 bg-surface-container-lowest text-primary font-label-md text-label-md uppercase tracking-widest shadow-sm hover:bg-surface-container transition-colors active:scale-95" type="button">
+      Edit Profil
+    </button>
+</section>
+<!-- Quick Stats / Order Activity Bar -->
+<section class="w-full px-margin -mt-3 z-10">
+<div class="w-full bg-surface-container-lowest rounded-none p-space-sm shadow-md grid grid-cols-4 gap-0 divide-x divide-surface-container">
+<button class="flex flex-col items-center text-center p-space-xs group" type="button">
+<span class="font-headline-sm text-headline-sm text-primary group-hover:opacity-70 transition-opacity">3</span>
+<span class="font-label-sm text-label-sm text-secondary uppercase mt-0.5 leading-tight text-[9px]">Menunggu Bayar</span>
+</button>
+<button class="flex flex-col items-center text-center p-space-xs group" type="button">
+<span class="font-headline-sm text-headline-sm text-primary group-hover:opacity-70 transition-opacity">1</span>
+<span class="font-label-sm text-label-sm text-secondary uppercase mt-0.5 leading-tight text-[9px]">Sedang Dikirim</span>
+</button>
+<button class="flex flex-col items-center text-center p-space-xs group" type="button">
+<span class="font-headline-sm text-headline-sm text-primary group-hover:opacity-70 transition-opacity">12</span>
+<span class="font-label-sm text-label-sm text-secondary uppercase mt-0.5 leading-tight text-[9px]">Riwayat Pesanan</span>
+</button>
+<button class="flex flex-col items-center text-center p-space-xs group" type="button">
+<span class="font-headline-sm text-headline-sm text-primary group-hover:opacity-70 transition-opacity">8</span>
+<span class="font-label-sm text-label-sm text-secondary uppercase mt-0.5 leading-tight text-[9px]">Wishlist</span>
+</button>
+</div>
+</section>
+<!-- ME Privé Exclusive Tier Benefit Card -->
+<section class="w-full px-margin pt-space-lg">
+<div class="w-full bg-primary-container text-on-primary rounded-none p-space-lg relative overflow-hidden shadow-lg">
+<div class="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-surface-tint/20 blur-2xl pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm tracking-widest text-primary-fixed uppercase flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed">verified</span>
+          Keanggotaan Eksklusif
+        </span>
+<span class="font-label-sm text-label-sm text-on-primary-container uppercase tracking-wider">Tingkat Tertinggi</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-primary font-normal tracking-tight mb-space-sm">
+        Hak Istimewa ME Privé Noir
+      </h2>
+<!-- Tag chips -->
+<div class="flex flex-wrap gap-2 mb-space-md">
+<span class="px-2.5 py-1 bg-surface-container-highest/20 text-on-primary font-body-sm text-[11px] tracking-wide">
+          Akses Pratinjau Koleksi
+        </span>
+<span class="px-2.5 py-1 bg-surface-container-highest/20 text-on-primary font-body-sm text-[11px] tracking-wide">
+          Gratis Pengiriman Express Selamanya
+        </span>
+<span class="px-2.5 py-1 bg-surface-container-highest/20 text-on-primary font-body-sm text-[11px] tracking-wide">
+          Personal Atelier Stylist
+        </span>
+</div>
+<a class="inline-flex items-center gap-1.5 font-label-md text-label-md uppercase tracking-widest text-primary-fixed hover:text-on-primary transition-colors" href="#">
+<span class="">Lihat Detail Keanggotaan</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</section>
+<!-- Group: PESANAN & TRANSAKSI -->
+<section class="w-full px-margin pt-space-xl">
+<h3 class="font-label-sm text-label-sm text-secondary uppercase tracking-widest mb-space-xs px-1">
+      Pesanan &amp; Transaksi
+    </h3>
+<div class="w-full bg-surface-container-lowest shadow-sm flex flex-col">
+<a class="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[22px]">local_mall</span>
+<span class="font-body-md text-body-md text-on-surface">Riwayat Pesanan &amp; Pelacakan</span>
+</div>
+<div class="flex items-center gap-1 text-secondary">
+<span class="px-2 py-0.5 bg-surface-container-high text-on-surface font-label-sm text-[10px]">1 Aktif</span>
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</div>
+</a>
+<div class="w-full h-px bg-surface-container"></div>
+<a class="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[22px]">assignment_return</span>
+<span class="font-body-md text-body-md text-on-surface">Pengembalian &amp; Penukaran Barang</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">chevron_right</span>
+</a>
+<div class="w-full h-px bg-surface-container"></div>
+<a class="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[22px]">receipt_long</span>
+<span class="font-body-md text-body-md text-on-surface">Faktur &amp; Bukti Transaksi</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- Group: PREFERENSI & PENGATURAN -->
+<section class="w-full px-margin pt-space-lg">
+<h3 class="font-label-sm text-label-sm text-secondary uppercase tracking-widest mb-space-xs px-1">
+      Preferensi &amp; Pengaturan
+    </h3>
+<div class="w-full bg-surface-container-lowest shadow-sm flex flex-col">
+<a class="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3 min-w-0">
+<span class="material-symbols-outlined text-secondary text-[22px]">pin_drop</span>
+<span class="font-body-md text-body-md text-on-surface truncate">Buku Alamat Pengiriman</span>
+</div>
+<div class="flex items-center gap-1 text-secondary shrink-0">
+<span class="font-body-sm text-body-sm text-secondary hidden sm:inline">3 Tersimpan</span>
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</div>
+</a>
+<div class="w-full h-px bg-surface-container"></div>
+<a class="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3 min-w-0">
+<span class="material-symbols-outlined text-secondary text-[22px]">credit_card</span>
+<span class="font-body-md text-body-md text-on-surface truncate">Metode Pembayaran</span>
+</div>
+<div class="flex items-center gap-1 text-secondary shrink-0">
+<span class="font-body-sm text-body-sm text-secondary hidden sm:inline">BCA &amp; CC</span>
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</div>
+</a>
+<div class="w-full h-px bg-surface-container"></div>
+<!-- Toggle: Notifikasi & Pengingat Koleksi -->
+<div class="flex items-center justify-between p-space-md">
+<div class="flex items-center gap-3 min-w-0 pr-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">campaign</span>
+<span class="font-body-md text-body-md text-on-surface">Notifikasi &amp; Pengingat Koleksi</span>
+</div>
+<button aria-pressed="true" class="w-11 h-6 bg-primary rounded-full relative p-0.5 transition-colors shrink-0" id="notif-toggle" type="button">
+<span class="w-5 h-5 bg-on-primary rounded-full block transform translate-x-5 transition-transform" id="notif-knob"></span>
+</button>
+</div>
+<div class="w-full h-px bg-surface-container"></div>
+<a class="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[22px]">language</span>
+<span class="font-body-md text-body-md text-on-surface">Bahasa</span>
+</div>
+<div class="flex items-center gap-1 text-secondary">
+<span class="font-body-sm text-body-sm text-secondary">Bahasa Indonesia (ID)</span>
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</div>
+</a>
+<div class="w-full h-px bg-surface-container"></div>
+<a class="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[22px]">currency_exchange</span>
+<span class="font-body-md text-body-md text-on-surface">Satuan Mata Uang</span>
+</div>
+<div class="flex items-center gap-1 text-secondary">
+<span class="font-body-sm text-body-sm text-secondary">IDR (Rp)</span>
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</div>
+</a>
+</div>
+</section>
+<!-- Group: KEAMANAN & PRIVASI -->
+<section class="w-full px-margin pt-space-lg">
+<h3 class="font-label-sm text-label-sm text-secondary uppercase tracking-widest mb-space-xs px-1">
+      Keamanan &amp; Privasi
+    </h3>
+<div class="w-full bg-surface-container-lowest shadow-sm flex flex-col">
+<a class="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[22px]">lock_reset</span>
+<span class="font-body-md text-body-md text-on-surface">Ganti Kata Sandi</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">chevron_right</span>
+</a>
+<div class="w-full h-px bg-surface-container"></div>
+<!-- Toggle: Biometrik / Face ID -->
+
+<div class="w-full h-px bg-surface-container"></div>
+<a class="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[22px]">shield</span>
+<span class="font-body-md text-body-md text-on-surface">Kebijakan Privasi &amp; Data Atelier</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- Group: BANTUAN & DUKUNGAN -->
+<section class="w-full px-margin pt-space-lg">
+<h3 class="font-label-sm text-label-sm text-secondary uppercase tracking-widest mb-space-xs px-1">
+      Bantuan &amp; Dukungan
+    </h3>
+<div class="w-full bg-surface-container-lowest shadow-sm flex flex-col">
+<a class="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[22px]">forum</span>
+<div>
+<span class="font-body-md text-body-md text-on-surface block">Hubungi Concierge Atelier</span>
+<span class="font-body-sm text-body-sm text-secondary block">24/7 Priority VIP Concierge</span>
+</div>
+</div>
+<span class="px-2 py-0.5 bg-primary text-on-primary font-label-sm text-[9px] uppercase tracking-wider">Online</span>
+</a>
+<div class="w-full h-px bg-surface-container"></div>
+<a class="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[22px]">help_outline</span>
+<span class="font-body-md text-body-md text-on-surface">FAQ &amp; Panduan Ukuran Busana</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- Action Footer -->
+<footer class="w-full px-margin pt-space-xl pb-space-lg flex flex-col items-center">
+<button class="w-full py-3.5 bg-surface-container-low text-error hover:bg-error-container hover:text-on-error-container font-label-md text-label-md uppercase tracking-widest flex items-center justify-center gap-2 transition-colors active:scale-[0.99] shadow-sm" id="logout-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span class="">Keluar dari Akun</span>
+</button>
+<div class="mt-space-lg text-center">
+<p class="font-headline-sm text-surface-container-highest tracking-widest font-normal uppercase mb-1">ME ATELIER</p>
+<p class="font-body-sm text-body-sm text-secondary">
+        ME Atelier Mobile App v2.4.0 • Paris &amp; Jakarta
+      </p>
+<p class="font-label-sm text-[9px] text-outline uppercase tracking-widest mt-1">
+        Haute Couture &amp; Ready-to-Wear
+      </p>
+</div>
+</footer>
+</div>
+<script>
+  // Simple interactive micro-interactions for toggles
+  function setupToggle(buttonId, knobId) {
+    const btn = document.getElementById(buttonId);
+    const knob = document.getElementById(knobId);
+    if (!btn || !knob) return;
+    
+    btn.addEventListener('click', () => {
+      const isPressed = btn.getAttribute('aria-pressed') === 'true';
+      const newState = !isPressed;
+      btn.setAttribute('aria-pressed', String(newState));
+      
+      if (newState) {
+        btn.classList.remove('bg-surface-container-highest');
+        btn.classList.add('bg-primary');
+        knob.classList.remove('translate-x-0.5');
+        knob.classList.add('translate-x-5');
+      } else {
+        btn.classList.remove('bg-primary');
+        btn.classList.add('bg-surface-container-highest');
+        knob.classList.remove('translate-x-5');
+        knob.classList.add('translate-x-0.5');
+      }
+    });
+  }
+
+  setupToggle('notif-toggle', 'notif-knob');
+  setupToggle('bio-toggle', 'bio-knob');
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_-1px_8px_rgba(0,0,0,0.03)]" data-active-classes="text-primary font-semibold"><div class="flex justify-around items-center h-16 px-space-xs border-t border-surface-container bg-surface-container-lowest/95 backdrop-blur-xl"><a class="flex-1 flex flex-col items-center justify-center h-full text-secondary hover:text-primary transition-colors" data-path="beranda" href="#"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-sm text-[10px] uppercase tracking-wider mt-1">Beranda</span></a><a class="flex-1 flex flex-col items-center justify-center h-full text-secondary hover:text-primary transition-colors" data-path="jelajah" href="#"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="font-label-sm text-[10px] uppercase tracking-wider mt-1">Jelajah</span></a><a class="flex-1 flex flex-col items-center justify-center h-full text-secondary hover:text-primary transition-colors" data-path="wishlist" href="#"><span class="material-symbols-outlined text-[22px]">favorite</span><span class="font-label-sm text-[10px] uppercase tracking-wider mt-1">Wishlist</span></a><a aria-current="page" class="flex-1 flex flex-col items-center justify-center h-full text-primary font-semibold relative transition-colors" data-path="akun" href="#"><span class="material-symbols-outlined text-[22px] [font-variation-settings:'FILL'_1]">person</span><span class="font-label-sm text-[10px] uppercase tracking-wider mt-1 text-primary font-semibold">Akun</span><span class="w-1 h-1 rounded-full bg-primary absolute bottom-1.5"></span></a></div></nav>
+
+
+
+</body></html>

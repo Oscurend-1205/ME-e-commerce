@@ -125,7 +125,7 @@ class KeranjangController extends Controller
     }
 
     /**
-     * PUT /api/keranjang/{id} — Ubah jumlah item
+     * PUT /api/keranjang/{id} — Ubah jumlah atau varian item keranjang
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -137,31 +137,63 @@ class KeranjangController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'jumlah' => 'required|integer|min:1',
+            'jumlah' => 'sometimes|integer|min:1',
+            'varian_id' => 'sometimes|integer|exists:varian_produk,id',
         ], [
-            'jumlah.required' => 'Jumlah item wajib diisi.',
+            'jumlah.integer' => 'Jumlah item harus berupa angka.',
             'jumlah.min' => 'Jumlah item harus minimal 1.',
+            'varian_id.exists' => 'Varian produk tidak valid.',
         ]);
 
         if ($validator->fails()) {
-            return $this->gagal('Jumlah item tidak valid.', 422, $validator->errors());
+            return $this->gagal('Data tidak valid.', 422, $validator->errors());
         }
 
-        $jumlahBaru = (int) $request->input('jumlah');
-        $varian = VarianProduk::find($item->varian_id);
+        $jumlahBaru = $request->has('jumlah') ? (int) $request->input('jumlah') : $item->jumlah;
+        $varianIdBaru = $request->has('varian_id') ? (int) $request->input('varian_id') : $item->varian_id;
 
-        if ($varian && $jumlahBaru > $varian->stok) {
+        $varian = VarianProduk::find($varianIdBaru);
+        if (!$varian || $varian->produk_id !== $item->produk_id) {
+            return $this->gagal('Varian tidak sesuai dengan produk ini.', 422);
+        }
+
+        if ($varian->stok <= 0) {
+            return $this->gagal("Stok ukuran {$varian->ukuran} warna {$varian->warna} habis.", 409);
+        }
+
+        if ($jumlahBaru > $varian->stok) {
             return $this->gagal(
                 "Stok varian {$varian->ukuran} - {$varian->warna} tidak mencukupi (tersedia {$varian->stok}).",
                 409
             );
         }
 
+        // Jika mengubah varian, cek apakah varian tujuan sudah ada di item keranjang lain (merge)
+        if ($varianIdBaru !== $item->varian_id) {
+            $itemLain = Keranjang::where('pelanggan_id', $pelangganId)
+                ->where('varian_id', $varianIdBaru)
+                ->where('id', '!=', $item->id)
+                ->first();
+
+            if ($itemLain) {
+                $totalGabung = $itemLain->jumlah + $jumlahBaru;
+                if ($totalGabung > $varian->stok) {
+                    $totalGabung = $varian->stok;
+                }
+                $itemLain->jumlah = $totalGabung;
+                $itemLain->save();
+                $item->delete();
+                $itemLain->load(['produk', 'varian']);
+                return $this->sukses($itemLain->formatItem(), 'Varian berhasil diperbarui dan digabungkan di keranjang', 200);
+            }
+        }
+
         $item->jumlah = $jumlahBaru;
+        $item->varian_id = $varianIdBaru;
         $item->save();
         $item->load(['produk', 'varian']);
 
-        return $this->sukses($item->formatItem(), 'Jumlah item keranjang berhasil diperbarui', 200);
+        return $this->sukses($item->formatItem(), 'Item keranjang berhasil diperbarui', 200);
     }
 
     /**
