@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import 'halaman_metode_pembayaran.dart';
+import 'halaman_riwayat_pesanan.dart';
 
 class HalamanAkun extends StatefulWidget {
   const HalamanAkun({super.key});
@@ -63,6 +65,14 @@ class _HalamanAkunState extends State<HalamanAkun> {
                   icon: Icons.local_mall_outlined,
                   label: 'Riwayat Pesanan & Pelacakan',
                   badge: '1 Aktif',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => HalamanRiwayatPesanan(),
+                      ),
+                    );
+                  },
                 ),
                 _bangunItemDaftar(
                   icon: Icons.assignment_return_outlined,
@@ -83,9 +93,18 @@ class _HalamanAkunState extends State<HalamanAkun> {
                   trailingText: '3 Tersimpan',
                 ),
                 _bangunItemDaftar(
+                  key: const ValueKey('metode_pembayaran_item'),
                   icon: Icons.credit_card_outlined,
                   label: 'Metode Pembayaran',
                   trailingText: 'BCA & CC',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const HalamanMetodePembayaran(),
+                      ),
+                    );
+                  },
                 ),
                 _bangunToggleItem(
                   icon: Icons.campaign_outlined,
@@ -478,17 +497,20 @@ class _HalamanAkunState extends State<HalamanAkun> {
   }
 
   Widget _bangunItemDaftar({
+    Key? key,
     required IconData icon,
     required String label,
     String subtitle = '',
     String badge = '',
     String trailingText = '',
     Color badgeColor = TemaAplikasi.surfaceContainerHigh,
+    VoidCallback? onTap,
   }) {
     return Material(
+      key: key,
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {},
+        onTap: onTap ?? () {},
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
