@@ -8,14 +8,14 @@ import '../widgets/format_rupiah.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/kartu_produk.dart';
 import '../widgets/widget_keadaan.dart';
-import 'halaman_kelola_produk.dart';
 import 'halaman_keranjang.dart';
 import 'halaman_rincian_produk.dart';
 
 class HalamanKatalog extends StatefulWidget {
   final bool modeJelajah;
+  final VoidCallback? onBukaAkun;
 
-  const HalamanKatalog({super.key, this.modeJelajah = false});
+  const HalamanKatalog({super.key, this.modeJelajah = false, this.onBukaAkun});
 
   @override
   State<HalamanKatalog> createState() => _HalamanKatalogState();
@@ -524,12 +524,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
         Padding(
           padding: const EdgeInsets.only(left: 4, right: 14),
           child: InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HalamanKelolaProduk()),
-              );
-            },
+            onTap: widget.onBukaAkun,
             borderRadius: BorderRadius.circular(16),
             child: Container(
               width: 30,

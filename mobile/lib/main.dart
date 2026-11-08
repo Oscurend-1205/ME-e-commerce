@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'screens/halaman_akun.dart';
 import 'screens/halaman_katalog.dart';
-import 'screens/halaman_kelola_produk.dart';
 import 'screens/halaman_riwayat_pesanan.dart';
 import 'theme.dart';
 
@@ -35,20 +34,23 @@ class HalamanUtamaNavigasi extends StatefulWidget {
 class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
   int _indeksAktif = 0;
 
-  final List<Widget> _daftarHalaman = const [
-    HalamanKatalog(),
-    HalamanKatalog(modeJelajah: true),
-    HalamanRiwayatPesanan(),
-    HalamanAkun(),
-    HalamanKelolaProduk(),
-  ];
+  void _bukaAkun() {
+    setState(() {
+      _indeksAktif = 3;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _indeksAktif,
-        children: _daftarHalaman,
+        children: [
+          HalamanKatalog(onBukaAkun: _bukaAkun),
+          HalamanKatalog(modeJelajah: true, onBukaAkun: _bukaAkun),
+          const HalamanRiwayatPesanan(),
+          const HalamanAkun(),
+        ],
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
@@ -93,12 +95,6 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
                   ikonAktif: Icons.person,
                   ikonTidakAktif: Icons.person_outline,
                   label: 'AKUN',
-                ),
-                _bangunItemTab(
-                  indeks: 4,
-                  ikonAktif: Icons.manage_accounts,
-                  ikonTidakAktif: Icons.manage_accounts_outlined,
-                  label: 'KELOLA',
                   pakaiAvatar: true,
                 ),
               ],
