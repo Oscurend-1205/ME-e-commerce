@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/produk.dart';
 import '../theme.dart';
 
@@ -7,7 +8,7 @@ import '../theme.dart';
 class PemilihVarian extends StatefulWidget {
   final List<Varian> daftarVarian;
   final Varian? varianTerpilih;
-  final ValueChanged<Varian> onPilih;
+  final ValueChanged<Varian?> onPilih;
 
   const PemilihVarian({
     super.key,
@@ -71,8 +72,9 @@ class _PemilihVarianState extends State<PemilihVarian> {
 
   bool _warnaHabis(String warna) {
     final sumber = _ukuranTerpilih != null
-        ? widget.daftarVarian
-            .where((v) => v.ukuran == _ukuranTerpilih && v.warna == warna)
+        ? widget.daftarVarian.where(
+            (v) => v.ukuran == _ukuranTerpilih && v.warna == warna,
+          )
         : widget.daftarVarian.where((v) => v.warna == warna);
     if (sumber.isEmpty) return true;
     return sumber.every((v) => v.stok == 0);
@@ -112,10 +114,7 @@ class _PemilihVarianState extends State<PemilihVarian> {
   }
 
   void _cekDanPanggil() {
-    final varian = _varianCocok;
-    if (varian != null) {
-      widget.onPilih(varian);
-    }
+    widget.onPilih(_varianCocok);
   }
 
   @override
@@ -154,8 +153,8 @@ class _PemilihVarianState extends State<PemilihVarian> {
                 color: habis
                     ? TemaAplikasi.mutedGray
                     : dipilih
-                        ? TemaAplikasi.onPrimary
-                        : TemaAplikasi.primary,
+                    ? TemaAplikasi.onPrimary
+                    : TemaAplikasi.primary,
                 fontSize: 12,
                 fontWeight: dipilih ? FontWeight.w700 : FontWeight.w500,
               ),
@@ -163,8 +162,8 @@ class _PemilihVarianState extends State<PemilihVarian> {
                 color: habis
                     ? TemaAplikasi.borderGray
                     : dipilih
-                        ? TemaAplikasi.primary
-                        : TemaAplikasi.borderGray,
+                    ? TemaAplikasi.primary
+                    : TemaAplikasi.borderGray,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(2),
@@ -206,8 +205,8 @@ class _PemilihVarianState extends State<PemilihVarian> {
                 color: habis
                     ? TemaAplikasi.mutedGray
                     : dipilih
-                        ? TemaAplikasi.onPrimary
-                        : TemaAplikasi.primary,
+                    ? TemaAplikasi.onPrimary
+                    : TemaAplikasi.primary,
                 fontSize: 12,
                 fontWeight: dipilih ? FontWeight.w700 : FontWeight.w500,
               ),
@@ -215,8 +214,8 @@ class _PemilihVarianState extends State<PemilihVarian> {
                 color: habis
                     ? TemaAplikasi.borderGray
                     : dipilih
-                        ? TemaAplikasi.primary
-                        : TemaAplikasi.borderGray,
+                    ? TemaAplikasi.primary
+                    : TemaAplikasi.borderGray,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(2),
