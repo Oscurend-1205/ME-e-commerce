@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../services/state_pengguna.dart';
 import '../theme.dart';
+import '../widgets/foto_dummy.dart';
+import '../widgets/komponen_header.dart';
 import 'halaman_metode_pembayaran.dart';
 import 'halaman_riwayat_pesanan.dart';
 import 'halaman_tambah_alamat.dart';
@@ -76,10 +79,6 @@ class _HalamanAkunState extends State<HalamanAkun> {
                   },
                 ),
                 _bangunItemDaftar(
-                  icon: Icons.assignment_return_outlined,
-                  label: 'Pengembalian & Penukaran Barang',
-                ),
-                _bangunItemDaftar(
                   icon: Icons.receipt_long_outlined,
                   label: 'Faktur & Bukti Transaksi',
                 ),
@@ -113,26 +112,6 @@ class _HalamanAkunState extends State<HalamanAkun> {
                         builder: (_) => const HalamanMetodePembayaran(),
                       ),
                     );
-                  },
-                ),
-                _bangunToggleItem(
-                  icon: Icons.campaign_outlined,
-                  label: 'Notifikasi & Pengingat Koleksi',
-                  value: _notifikasiAktif,
-                  onChanged: (value) {
-                    setState(() {
-                      _notifikasiAktif = value;
-                    });
-                  },
-                ),
-                _bangunToggleItem(
-                  icon: Icons.fingerprint,
-                  label: 'Kunci Aplikasi dengan Biometrik',
-                  value: _biometrikAktif,
-                  onChanged: (value) {
-                    setState(() {
-                      _biometrikAktif = value;
-                    });
                   },
                 ),
               ],
@@ -271,36 +250,7 @@ class _HalamanAkunState extends State<HalamanAkun> {
               letterSpacing: 0.2,
               color: TemaAplikasi.primary,
             ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: const BoxDecoration(
-              color: TemaAplikasi.primary,
-              borderRadius: BorderRadius.all(Radius.circular(999)),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.diamond_outlined, size: 13, color: TemaAplikasi.onPrimary),
-                SizedBox(width: 6),
-                Text(
-                  'ME PRIVÉ • NOIR MEMBER',
-                  style: TextStyle(
-                    fontSize: 9,
-                    letterSpacing: 1.5,
-                    fontWeight: FontWeight.w700,
-                    color: TemaAplikasi.onPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Anggota sejak 2023 • 1.450 Poin Atelier',
-            style: TextStyle(fontSize: 12, color: TemaAplikasi.secondary),
-          ),
+         ),
           const SizedBox(height: 18),
           TextButton(
             onPressed: () {},

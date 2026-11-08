@@ -54,7 +54,7 @@ class ProdukController extends Controller
     {
         $produk = Produk::with(['kategori', 'varian'])->find($id);
 
-        if (!$produk) {
+        if (! $produk) {
             return $this->gagal('Produk tidak ditemukan.', 404);
         }
 
@@ -118,7 +118,6 @@ class ProdukController extends Controller
                     'ukuran' => $v['ukuran'],
                     'warna' => $v['warna'],
                     'stok' => (int) $v['stok'],
-                    'sku' => strtoupper(substr($produk->merek, 0, 3)) . '-' . $produk->id . '-' . strtoupper(substr($v['ukuran'], 0, 2)) . '-' . strtoupper(substr($v['warna'], 0, 3)),
                 ]);
             }
 
@@ -135,7 +134,7 @@ class ProdukController extends Controller
     {
         $produk = Produk::with('varian')->find($id);
 
-        if (!$produk) {
+        if (! $produk) {
             return $this->gagal('Produk tidak ditemukan.', 404);
         }
 
@@ -167,13 +166,27 @@ class ProdukController extends Controller
                 $produk->kategori_id = $kategori->id;
             }
 
-            if ($request->has('nama')) $produk->nama = $request->input('nama');
-            if ($request->has('harga')) $produk->harga = (int) $request->input('harga');
-            if ($request->has('tersedia')) $produk->tersedia = $request->boolean('tersedia');
-            if ($request->has('deskripsi')) $produk->deskripsi = $request->input('deskripsi');
-            if ($request->has('bahan')) $produk->bahan = $request->input('bahan');
-            if ($request->has('merek')) $produk->merek = $request->input('merek');
-            if ($request->has('gambar')) $produk->gambar = $request->input('gambar');
+            if ($request->has('nama')) {
+                $produk->nama = $request->input('nama');
+            }
+            if ($request->has('harga')) {
+                $produk->harga = (int) $request->input('harga');
+            }
+            if ($request->has('tersedia')) {
+                $produk->tersedia = $request->boolean('tersedia');
+            }
+            if ($request->has('deskripsi')) {
+                $produk->deskripsi = $request->input('deskripsi');
+            }
+            if ($request->has('bahan')) {
+                $produk->bahan = $request->input('bahan');
+            }
+            if ($request->has('merek')) {
+                $produk->merek = $request->input('merek');
+            }
+            if ($request->has('gambar')) {
+                $produk->gambar = $request->input('gambar');
+            }
             $produk->save();
 
             // Pembaruan varian jika dikirim
@@ -190,6 +203,7 @@ class ProdukController extends Controller
                                 'stok' => (int) $v['stok'],
                             ]);
                             $idVarianTersedia[] = $varianLama->id;
+
                             continue;
                         }
                     }
@@ -200,13 +214,12 @@ class ProdukController extends Controller
                         'ukuran' => $v['ukuran'],
                         'warna' => $v['warna'],
                         'stok' => (int) $v['stok'],
-                        'sku' => strtoupper(substr($produk->merek, 0, 3)) . '-' . $produk->id . '-' . strtoupper(substr($v['ukuran'], 0, 2)) . '-' . strtoupper(substr($v['warna'], 0, 3)),
                     ]);
                     $idVarianTersedia[] = $varianBaru->id;
                 }
 
                 // Hapus varian yang dihilangkan
-                if (!empty($idVarianTersedia)) {
+                if (! empty($idVarianTersedia)) {
                     VarianProduk::where('produk_id', $produk->id)
                         ->whereNotIn('id', $idVarianTersedia)
                         ->delete();
@@ -226,7 +239,7 @@ class ProdukController extends Controller
     {
         $produk = Produk::find($id);
 
-        if (!$produk) {
+        if (! $produk) {
             return $this->gagal('Produk tidak ditemukan.', 404);
         }
 
@@ -246,4 +259,3 @@ class ProdukController extends Controller
         return $this->sukses(null, 'Produk berhasil dihapus', 200);
     }
 }
-
