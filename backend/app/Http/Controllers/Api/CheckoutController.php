@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\KonflikCheckoutException;
 use App\Http\Controllers\Controller;
 use App\Models\DetailPesanan;
 use App\Models\Keranjang;
@@ -10,6 +11,7 @@ use App\Models\MetodePembayaran;
 use App\Models\Pesanan;
 use App\Models\VarianProduk;
 use App\Traits\ApiResponse;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +22,8 @@ class CheckoutController extends Controller
 {
     use ApiResponse;
 
+    private const PESAN_GALAT_SERVER = 'Terjadi kesalahan pada server. Silakan coba lagi.';
+
     protected function getPelangganId(Request $request): int
     {
         $id = $request->header('X-Pelanggan-Id');
@@ -29,8 +33,25 @@ class CheckoutController extends Controller
         return 1;
     }
 
+    protected function cariPesananDenganKunci(int $pelangganId, string $kunciIdempoten): ?Pesanan
+    {
+        return Pesanan::with(['kurir', 'metodePembayaran', 'detail'])
+            ->where('pelanggan_id', $pelangganId)
+            ->where('kunci_idempoten', $kunciIdempoten)
+            ->first();
+    }
+
+    protected function balasUlangIdempoten(Pesanan $pesanan): JsonResponse
+    {
+        return $this->sukses(
+            $pesanan->formatLengkap(),
+            'Pesanan telah berhasil diproses sebelumnya (Idempotent replay)',
+            200
+        );
+    }
+
     /**
-     * POST /api/checkout — Transaksi checkout atomik dengan Idempotency Key
+     * POST /api/checkout - Transaksi checkout atomik dengan Idempotency Key
      */
     public function store(Request $request): JsonResponse
     {
@@ -42,18 +63,10 @@ class CheckoutController extends Controller
 
         $pelangganId = $this->getPelangganId($request);
 
-        // 2. Cek Idempotensi: Jika kunci idempoten sudah pernah diproses untuk pelanggan ini, kembalikan pesanan yang sudah ada
-        $pesananEksis = Pesanan::with(['kurir', 'metodePembayaran', 'detail'])
-            ->where('pelanggan_id', $pelangganId)
-            ->where('kunci_idempoten', $kunciIdempoten)
-            ->first();
-
+        // 2. Cek Idempotensi: kunci yang sama untuk pelanggan ini => kembalikan pesanan yang sudah ada
+        $pesananEksis = $this->cariPesananDenganKunci($pelangganId, $kunciIdempoten);
         if ($pesananEksis) {
-            return $this->sukses(
-                $pesananEksis->formatLengkap(),
-                'Pesanan telah berhasil diproses sebelumnya (Idempotent replay)',
-                200
-            );
+            return $this->balasUlangIdempoten($pesananEksis);
         }
 
         // 3. Validasi payload formulir
@@ -75,21 +88,30 @@ class CheckoutController extends Controller
             return $this->gagal('Validasi formulir checkout gagal.', 422, $validator->errors());
         }
 
-        // Ambil item keranjang pelanggan
-        $itemsKeranjang = Keranjang::with('produk')
-            ->where('pelanggan_id', $pelangganId)
-            ->get();
-
-        if ($itemsKeranjang->isEmpty()) {
-            return $this->gagal('Keranjang belanja Anda kosong.', 409);
-        }
-
         $kurir = Kurir::findOrFail($request->input('kurir_id'));
         $metode = MetodePembayaran::findOrFail($request->input('metode_pembayaran_id'));
 
         try {
-            // 4. Memulai DB Transaction untuk memastikan atomic checkout (Kriteria 5 Sistem Terdistribusi)
-            $pesananBaru = DB::transaction(function () use ($request, $pelangganId, $kunciIdempoten, $itemsKeranjang, $kurir, $metode) {
+            // 4. Satu DB Transaction: baca keranjang, kunci stok, simpan pesanan, kurangi stok, kosongkan keranjang
+            $pesananBaru = DB::transaction(function () use ($request, $pelangganId, $kunciIdempoten, $kurir, $metode) {
+                // Keranjang dibaca DI DALAM transaksi dan dikunci, supaya dua checkout bersamaan
+                // dari pelanggan yang sama tidak membuat dua pesanan dari isi keranjang yang sama.
+                $itemsKeranjang = Keranjang::with('produk')
+                    ->where('pelanggan_id', $pelangganId)
+                    ->orderBy('id', 'asc')
+                    ->lockForUpdate()
+                    ->get();
+
+                // Permintaan dengan kunci sama yang menunggu kunci di atas: pesanan sudah dibuat pemenangnya
+                $sudahAda = $this->cariPesananDenganKunci($pelangganId, $kunciIdempoten);
+                if ($sudahAda) {
+                    return $sudahAda;
+                }
+
+                if ($itemsKeranjang->isEmpty()) {
+                    throw new KonflikCheckoutException('Keranjang belanja Anda kosong.');
+                }
+
                 $varianIds = $itemsKeranjang->pluck('varian_id')->unique()->all();
 
                 // Kunci baris varian dengan lockForUpdate() dan urutkan berdasarkan id untuk cegah deadlock
@@ -107,13 +129,12 @@ class CheckoutController extends Controller
                     $varian = $varians->get($item->varian_id);
 
                     if (!$varian) {
-                        throw new \Exception("Varian produk dengan ID {$item->varian_id} tidak ditemukan.");
+                        throw new KonflikCheckoutException("Varian produk dengan ID {$item->varian_id} tidak ditemukan.");
                     }
 
                     if ($varian->stok < $item->jumlah) {
                         $namaProduk = $item->produk ? $item->produk->nama : 'Produk';
-                        // Lempar exception khusus untuk di-catch dan dijadikan respon 409
-                        throw new \RuntimeException(
+                        throw new KonflikCheckoutException(
                             "Stok untuk {$namaProduk} ukuran {$varian->ukuran} warna {$varian->warna} tidak mencukupi (tersedia: {$varian->stok}, diminta: {$item->jumlah})."
                         );
                     }
@@ -174,18 +195,31 @@ class CheckoutController extends Controller
 
             $pesananBaru->load(['kurir', 'metodePembayaran', 'detail']);
 
+            // Bukan hasil create() di atas = pesanan dari permintaan lain dengan kunci yang sama
+            if (!$pesananBaru->wasRecentlyCreated) {
+                return $this->balasUlangIdempoten($pesananBaru);
+            }
+
             return $this->sukses(
                 $pesananBaru->formatLengkap(),
                 'Pesanan berhasil dibuat',
                 201
             );
-        } catch (\RuntimeException $re) {
-            // Galat stok habis / bentrok keadaan data (409)
-            return $this->gagal($re->getMessage(), 409);
+        } catch (KonflikCheckoutException $e) {
+            // Stok habis / keranjang kosong: bentrok keadaan data (409). Pesannya aman ditampilkan.
+            return $this->gagal($e->getMessage(), 409);
+        } catch (QueryException $e) {
+            // Dua permintaan dengan kunci sama bersamaan: unique index menolak yang kedua
+            $pesananEksis = $this->cariPesananDenganKunci($pelangganId, $kunciIdempoten);
+            if ($pesananEksis) {
+                return $this->balasUlangIdempoten($pesananEksis);
+            }
+            report($e);
+            return $this->gagal(self::PESAN_GALAT_SERVER, 500);
         } catch (\Throwable $th) {
-            // Galat server umum (500)
-            return $this->gagal('Gagal memproses pesanan: ' . $th->getMessage(), 500);
+            // Galat server umum (500): detail dicatat di log, TIDAK dikirim ke klien
+            report($th);
+            return $this->gagal(self::PESAN_GALAT_SERVER, 500);
         }
     }
 }
-
