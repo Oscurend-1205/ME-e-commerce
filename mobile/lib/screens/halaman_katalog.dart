@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import '../enums.dart';
 import '../models/produk.dart';
 import '../services/layanan_api.dart';
+import '../services/state_pengguna.dart';
 import '../theme.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/kartu_produk.dart';
+import '../widgets/komponen_header.dart';
 import '../widgets/modal_pilih_varian.dart';
 import '../widgets/widget_keadaan.dart';
-import 'halaman_akun.dart';
 import 'halaman_keranjang.dart';
 import 'halaman_rincian_produk.dart';
 
@@ -34,7 +35,6 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   final TextEditingController _emailVipController = TextEditingController();
   final Set<int> _wishlistIds = {};
   bool _tampilkanPencarian = false;
-  int _jumlahItemKeranjang = 0;
 
   // Mode Tampilan: true = 2-Kolom Grid, false = 1-Kolom Lookbook Editorial
   bool _modeGrid = true;
@@ -162,9 +162,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
         final j = item['jumlah'];
         return sum + (j is int ? j : int.tryParse(j.toString()) ?? 1);
       });
-      setState(() {
-        _jumlahItemKeranjang = totalItem;
-      });
+      StatePengguna.perbaruiJumlahKeranjang(totalItem);
     }
   }
 
@@ -465,25 +463,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       elevation: 0,
       title: Row(
         children: const [
-          Text(
-            'ME',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              letterSpacing: 1.5,
-              fontSize: 22,
-              color: TemaAplikasi.primary,
-            ),
-          ),
-          SizedBox(width: 8),
-          Text(
-            'STUDIO',
-            style: TextStyle(
-              fontSize: 9,
-              letterSpacing: 2.5,
-              fontWeight: FontWeight.w600,
-              color: TemaAplikasi.secondary,
-            ),
-          ),
+          LogoBrandHeader(),
           Spacer(),
           Text(
             'BERANDA',
@@ -499,44 +479,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       ),
       actions: [
         ..._bangunHeaderActions(),
-        Padding(
-          padding: const EdgeInsets.only(left: 4, right: 14),
-          child: InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HalamanAkun()),
-              );
-            },
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: TemaAplikasi.borderGray),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: FotoDummy.bangunGambar(
-                url: FotoDummy.avatar,
-                fit: BoxFit.cover,
-                fallbackWidget: Container(
-                  color: TemaAplikasi.primary,
-                  child: const Center(
-                    child: Text(
-                      'M',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+        const AvatarHeaderUser(),
       ],
     );
   }
@@ -552,44 +495,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
           });
         },
       ),
-      Stack(
-        alignment: Alignment.center,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.shopping_bag_outlined, size: 22),
-            tooltip: 'Tas Belanja',
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HalamanKeranjang()),
-              );
-              _muatJumlahKeranjang();
-            },
-          ),
-          if (_jumlahItemKeranjang > 0)
-            Positioned(
-              right: 7,
-              top: 7,
-              child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: const BoxDecoration(
-                  color: TemaAplikasi.primary,
-                  shape: BoxShape.circle,
-                ),
-                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                child: Text(
-                  '$_jumlahItemKeranjang',
-                  style: const TextStyle(
-                    color: TemaAplikasi.onPrimary,
-                    fontSize: 8.5,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-        ],
-      ),
+      const TombolTasHeader(),
     ];
   }
 

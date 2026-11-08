@@ -196,7 +196,9 @@ class _HalamanMetodePembayaranState extends State<HalamanMetodePembayaran> {
                                 children: [
                                   Radio<int>(
                                     value: index,
+                                    // ignore: deprecated_member_use
                                     groupValue: _metodeDipilih,
+                                    // ignore: deprecated_member_use
                                     onChanged: (value) => setState(() => _metodeDipilih = value ?? 0),
                                     activeColor: TemaAplikasi.primary,
                                   ),

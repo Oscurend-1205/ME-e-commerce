@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/keranjang.dart';
 import '../models/produk.dart';
 import '../services/layanan_api.dart';
+import '../services/state_pengguna.dart';
 import '../theme.dart';
 import 'format_rupiah.dart';
 import 'foto_dummy.dart';
@@ -310,6 +311,7 @@ class _ModalPilihVarianState extends State<ModalPilihVarian> {
     });
 
     if (berhasil) {
+      StatePengguna.sinkronkanKeranjang();
       Navigator.of(context).pop(true);
     }
   }

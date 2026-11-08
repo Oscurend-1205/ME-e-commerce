@@ -11,6 +11,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\BaseFileUpload;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -150,6 +151,15 @@ class ProdukResource extends Resource
                                 $component->state(filled($state) ? 'produk/'.basename($state) : null);
                             })
                             ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? basename($state) : null)
+                            ->getUploadedFileUsing(function (BaseFileUpload $component, string $file, string|array|null $storedFileNames): ?array {
+                                $uploaded = $component->getUploadedFile($file, $storedFileNames);
+
+                                if ($uploaded !== null) {
+                                    $uploaded['url'] = url('storage/'.ltrim($file, '/'));
+                                }
+
+                                return $uploaded;
+                            })
                             ->columnSpanFull(),
                     ]),
             ]);

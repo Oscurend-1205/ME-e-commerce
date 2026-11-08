@@ -39,21 +39,17 @@ class _HalamanAkunState extends State<HalamanAkun> {
           ),
         ),
         leading: IconButton(
-          onPressed: () => Navigator.maybePop(context),
+          onPressed: () => NavigasiUniversal.kembali(context),
           tooltip: 'Kembali',
           icon: const Icon(Icons.arrow_back_rounded),
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () => NavigasiUniversal.kePencarian(context),
             tooltip: 'Pencarian',
             icon: const Icon(Icons.search_rounded, size: 22),
           ),
-          IconButton(
-            onPressed: () {},
-            tooltip: 'Tas belanja',
-            icon: const Icon(Icons.shopping_bag_outlined, size: 22),
-          ),
+          const TombolTasHeader(),
         ],
       ),
       body: SingleChildScrollView(
@@ -112,6 +108,26 @@ class _HalamanAkunState extends State<HalamanAkun> {
                         builder: (_) => const HalamanMetodePembayaran(),
                       ),
                     );
+                  },
+                ),
+                _bangunToggleItem(
+                  icon: Icons.notifications_none_rounded,
+                  label: 'Notifikasi Eksklusif ME',
+                  value: _notifikasiAktif,
+                  onChanged: (val) {
+                    setState(() {
+                      _notifikasiAktif = val;
+                    });
+                  },
+                ),
+                _bangunToggleItem(
+                  icon: Icons.fingerprint_rounded,
+                  label: 'Keamanan Biometrik & FaceID',
+                  value: _biometrikAktif,
+                  onChanged: (val) {
+                    setState(() {
+                      _biometrikAktif = val;
+                    });
                   },
                 ),
               ],
@@ -185,75 +201,105 @@ class _HalamanAkunState extends State<HalamanAkun> {
       ),
       child: Column(
         children: [
-          Stack(
-            children: [
-              Container(
-                width: 96,
-                height: 96,
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: TemaAplikasi.surfaceContainerHigh,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(18),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: ClipOval(
-                  child: Image.network(
-                    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
-                      color: const Color(0xFF1D1D1D),
-                      child: const Center(
-                        child: Text(
-                          'C',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 38,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  width: 30,
-                  height: 30,
-                  decoration: const BoxDecoration(
-                    color: TemaAplikasi.primary,
+          GestureDetector(
+            onTap: () => _tampilkanPemilihAvatar(context),
+            child: Stack(
+              children: [
+                Container(
+                  width: 96,
+                  height: 96,
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: TemaAplikasi.surfaceContainerHigh,
                     shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(18),
+                        blurRadius: 12,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
                   ),
-                  child: const Icon(
-                    Icons.photo_camera_rounded,
-                    size: 16,
-                    color: TemaAplikasi.onPrimary,
+                  child: ClipOval(
+                    child: ValueListenableBuilder<String>(
+                      valueListenable: StatePengguna.fotoProfilNotifier,
+                      builder: (context, fotoUrl, _) {
+                        return FotoDummy.bangunGambar(
+                          url: fotoUrl,
+                          fit: BoxFit.cover,
+                          fallbackWidget: Container(
+                            color: const Color(0xFF1D1D1D),
+                            child: Center(
+                              child: Text(
+                                StatePengguna.namaUserNotifier.value.isNotEmpty
+                                    ? StatePengguna.namaUserNotifier.value[0].toUpperCase()
+                                    : 'C',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 38,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: TemaAplikasi.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.photo_camera_rounded,
+                      size: 16,
+                      color: TemaAplikasi.onPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 14),
-          const Text(
-            'Clarissa Vance',
-            style: TextStyle(
-              fontSize: 23,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.2,
-              color: TemaAplikasi.primary,
-            ),
-         ),
+          ValueListenableBuilder<String>(
+            valueListenable: StatePengguna.namaUserNotifier,
+            builder: (context, nama, _) {
+              return Text(
+                nama,
+                style: const TextStyle(
+                  fontSize: 23,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.2,
+                  color: TemaAplikasi.primary,
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 4),
+          ValueListenableBuilder<String>(
+            valueListenable: StatePengguna.emailUserNotifier,
+            builder: (context, email, _) {
+              return Text(
+                email,
+                style: const TextStyle(
+                  fontSize: 12,
+                  letterSpacing: 0.5,
+                  color: TemaAplikasi.secondary,
+                ),
+              );
+            },
+          ),
           const SizedBox(height: 18),
           TextButton(
-            onPressed: () {},
+            onPressed: () => _tampilkanEditProfil(context),
             style: TextButton.styleFrom(
               backgroundColor: TemaAplikasi.surfaceWhite,
               foregroundColor: TemaAplikasi.primary,
@@ -271,6 +317,461 @@ class _HalamanAkunState extends State<HalamanAkun> {
           ),
         ],
       ),
+    );
+  }
+
+  void _tampilkanPemilihAvatar(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: TemaAplikasi.surfaceWhite,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        final urlKustomController = TextEditingController();
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: TemaAplikasi.borderGray,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'PILIH AVATAR EDITORIAL',
+                        style: TextStyle(
+                          fontSize: 13,
+                          letterSpacing: 1.8,
+                          fontWeight: FontWeight.w700,
+                          color: TemaAplikasi.primary,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Kurasi identitas visual studio ME Atelier',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: TemaAplikasi.secondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              const Divider(height: 1, color: TemaAplikasi.borderGray),
+              const SizedBox(height: 16),
+              ValueListenableBuilder<String>(
+                valueListenable: StatePengguna.fotoProfilNotifier,
+                builder: (context, currentFoto, _) {
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 14,
+                      childAspectRatio: 0.82,
+                    ),
+                    itemCount: StatePengguna.daftarPresetAvatar.length,
+                    itemBuilder: (context, idx) {
+                      final preset = StatePengguna.daftarPresetAvatar[idx];
+                      final isSelected = currentFoto == preset['url'];
+
+                      return InkWell(
+                        onTap: () {
+                          StatePengguna.perbaruiFotoProfil(preset['url']!);
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Avatar diubah: ${preset['label']}'),
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: isSelected
+                                  ? TemaAplikasi.primary
+                                  : TemaAplikasi.borderGray,
+                              width: isSelected ? 2 : 1,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                            color: isSelected
+                                ? TemaAplikasi.surfaceContainerLow
+                                : Colors.transparent,
+                          ),
+                          padding: const EdgeInsets.all(6),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Stack(
+                                children: [
+                                  ClipOval(
+                                    child: SizedBox(
+                                      width: 54,
+                                      height: 54,
+                                      child: FotoDummy.bangunGambar(
+                                        url: preset['url']!,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  if (isSelected)
+                                    Positioned(
+                                      right: 0,
+                                      bottom: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(2),
+                                        decoration: const BoxDecoration(
+                                          color: TemaAplikasi.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.check,
+                                          size: 12,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                preset['label'] ?? '',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: TemaAplikasi.primary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                preset['tipe'] ?? '',
+                                style: const TextStyle(
+                                  fontSize: 8.5,
+                                  color: TemaAplikasi.secondary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              const Divider(height: 1, color: TemaAplikasi.borderGray),
+              const SizedBox(height: 14),
+              const Text(
+                'ATAU GUNAKAN URL FOTO LAIN',
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.5,
+                  fontWeight: FontWeight.w700,
+                  color: TemaAplikasi.secondary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: urlKustomController,
+                      style: const TextStyle(fontSize: 12),
+                      decoration: const InputDecoration(
+                        hintText: 'https://images.unsplash.com/...',
+                        hintStyle: TextStyle(fontSize: 11, color: TemaAplikasi.mutedGray),
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: TemaAplikasi.borderGray),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: TemaAplikasi.primary),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      final url = urlKustomController.text.trim();
+                      if (url.isNotEmpty) {
+                        StatePengguna.perbaruiFotoProfil(url);
+                        Navigator.pop(ctx);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Foto profil kustom berhasil diterapkan.'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: TemaAplikasi.primary,
+                      foregroundColor: TemaAplikasi.onPrimary,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'TERAPKAN',
+                      style: TextStyle(
+                        fontSize: 10,
+                        letterSpacing: 1.2,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _tampilkanEditProfil(BuildContext context) {
+    final namaController = TextEditingController(text: StatePengguna.namaUserNotifier.value);
+    final emailController = TextEditingController(text: StatePengguna.emailUserNotifier.value);
+    final fotoController = TextEditingController(text: StatePengguna.fotoProfilNotifier.value);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: TemaAplikasi.surfaceWhite,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: TemaAplikasi.borderGray,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'EDIT PROFIL ME ATELIER',
+                    style: TextStyle(
+                      fontSize: 13,
+                      letterSpacing: 1.8,
+                      fontWeight: FontWeight.w700,
+                      color: TemaAplikasi.primary,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'NAMA LENGKAP',
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                  color: TemaAplikasi.secondary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              TextField(
+                controller: namaController,
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                decoration: const InputDecoration(
+                  hintText: 'Nama lengkap Anda',
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: TemaAplikasi.borderGray),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: TemaAplikasi.primary),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'ALAMAT EMAIL',
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                  color: TemaAplikasi.secondary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                style: const TextStyle(fontSize: 13),
+                decoration: const InputDecoration(
+                  hintText: 'nama@domain.com',
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: TemaAplikasi.borderGray),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: TemaAplikasi.primary),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'URL FOTO PROFIL',
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                  color: TemaAplikasi.secondary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              TextField(
+                controller: fotoController,
+                style: const TextStyle(fontSize: 12),
+                decoration: const InputDecoration(
+                  hintText: 'https://...',
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: TemaAplikasi.borderGray),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: TemaAplikasi.primary),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 22),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: const BorderSide(color: TemaAplikasi.borderGray),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                      ),
+                      child: const Text(
+                        'BATAL',
+                        style: TextStyle(
+                          fontSize: 11,
+                          letterSpacing: 1.5,
+                          fontWeight: FontWeight.w600,
+                          color: TemaAplikasi.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final nama = namaController.text.trim();
+                        final email = emailController.text.trim();
+                        final foto = fotoController.text.trim();
+
+                        if (nama.isNotEmpty) {
+                          StatePengguna.perbaruiNama(nama);
+                        }
+                        if (email.isNotEmpty) {
+                          StatePengguna.emailUserNotifier.value = email;
+                        }
+                        if (foto.isNotEmpty) {
+                          StatePengguna.perbaruiFotoProfil(foto);
+                        }
+
+                        Navigator.pop(ctx);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Profil berhasil diperbarui.'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: TemaAplikasi.primary,
+                        foregroundColor: TemaAplikasi.onPrimary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'SIMPAN',
+                        style: TextStyle(
+                          fontSize: 11,
+                          letterSpacing: 1.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

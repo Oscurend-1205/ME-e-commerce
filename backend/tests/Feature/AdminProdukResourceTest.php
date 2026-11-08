@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Produks\Pages\EditProduk;
 use App\Models\Kategori;
 use App\Models\Produk;
 use App\Models\User;
 use App\Models\VarianProduk;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class AdminProdukResourceTest extends TestCase
@@ -77,5 +79,35 @@ class AdminProdukResourceTest extends TestCase
         ]);
 
         $this->assertSame('MES-'.$produk->id.'-L-MER', $varian->sku);
+    }
+
+    public function test_preview_gambar_memakai_url_storage(): void
+    {
+        $user = User::factory()->create();
+        $kategori = Kategori::create(['nama' => 'Pakaian']);
+        $produk = Produk::create([
+            'kategori_id' => $kategori->id,
+            'nama' => 'Kaos Polos',
+            'harga' => 89000,
+            'tersedia' => true,
+            'bahan' => 'Katun Combed',
+            'merek' => 'ME Basics',
+            'gambar' => '1.jpg',
+        ]);
+        VarianProduk::create([
+            'produk_id' => $produk->id,
+            'ukuran' => 'M',
+            'warna' => 'Hitam',
+            'stok' => 10,
+        ]);
+
+        $this->actingAs($user);
+
+        $component = Livewire::test(EditProduk::class, ['record' => $produk->id]);
+        $fileUpload = $component->instance()->getSchema('form')->getComponent('gambar');
+        $files = $fileUpload->getUploadedFiles();
+
+        $this->assertNotEmpty($files);
+        $this->assertStringEndsWith('/storage/produk/1.jpg', $files[array_key_first($files)]['url']);
     }
 }

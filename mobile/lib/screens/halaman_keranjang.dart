@@ -5,10 +5,12 @@ import '../enums.dart';
 import '../models/keranjang.dart';
 import '../models/produk.dart';
 import '../services/layanan_api.dart';
+import '../services/state_pengguna.dart';
 import '../theme.dart';
 import '../widgets/dialog_konfirmasi.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/foto_dummy.dart';
+import '../widgets/komponen_header.dart';
 import '../widgets/modal_pilih_varian.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_checkout.dart';
@@ -45,6 +47,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
 
     if (respon.berhasil && respon.data != null) {
       final data = DataKeranjang.fromJson(respon.data as Map<String, dynamic>);
+      final total = data.items.fold<int>(0, (sum, i) => sum + i.jumlah);
+      StatePengguna.perbaruiJumlahKeranjang(total);
       setState(() {
         _dataKeranjang = data;
         _keadaan = data.items.isEmpty
@@ -283,31 +287,13 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
           size: 22,
           color: TemaAplikasi.primary,
         ),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () => NavigasiUniversal.kembali(context),
       ),
       title: Row(
-        children: [
-          const Text(
-            'ME',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 1.5,
-              color: TemaAplikasi.primary,
-            ),
-          ),
-          const SizedBox(width: 6),
-          const Text(
-            'STUDIO',
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 2.0,
-              color: TemaAplikasi.secondary,
-            ),
-          ),
-          const Spacer(),
-          const Text(
+        children: const [
+          LogoBrandHeader(),
+          Spacer(),
+          Text(
             'TAS BELANJA',
             style: TextStyle(
               fontSize: 11,
@@ -316,13 +302,13 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
               color: TemaAplikasi.primary,
             ),
           ),
-          const Spacer(),
+          Spacer(),
         ],
       ),
       actions: [
         IconButton(
           icon: const Icon(Icons.search_outlined, size: 22),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => NavigasiUniversal.kePencarian(context),
         ),
         IconButton(
           icon: const Icon(Icons.favorite_border, size: 22),
@@ -336,40 +322,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
             );
           },
         ),
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.shopping_bag, size: 22),
-              onPressed: () {},
-            ),
-            if (totalItem > 0)
-              Positioned(
-                right: 7,
-                top: 7,
-                child: Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    color: TemaAplikasi.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
-                  child: Text(
-                    '$totalItem',
-                    style: const TextStyle(
-                      color: TemaAplikasi.onPrimary,
-                      fontSize: 8.5,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-          ],
-        ),
+        TombolTasHeader(onTap: () {}),
         const SizedBox(width: 4),
       ],
     );
