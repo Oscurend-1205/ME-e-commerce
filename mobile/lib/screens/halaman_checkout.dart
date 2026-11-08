@@ -293,8 +293,8 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
               decoration: InputDecoration(
                 labelText: 'Nama Lengkap Penerima',
                 hintText: 'Misal: Budi Santoso',
-                errorText: _galatValidasi422?['nama_penerima'] is List
-                    ? (_galatValidasi422!['nama_penerima'] as List).first.toString()
+                errorText: _galatValidasi422?['nama'] is List
+                    ? (_galatValidasi422!['nama'] as List).first.toString()
                     : null,
               ),
               validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama penerima wajib diisi' : null,
@@ -307,8 +307,8 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
               decoration: InputDecoration(
                 labelText: 'Alamat Pengiriman Lengkap',
                 hintText: 'Jalan, nomor rumah, RT/RW, kecamatan, kota',
-                errorText: _galatValidasi422?['alamat_pengiriman'] is List
-                    ? (_galatValidasi422!['alamat_pengiriman'] as List).first.toString()
+                errorText: _galatValidasi422?['alamat'] is List
+                    ? (_galatValidasi422!['alamat'] as List).first.toString()
                     : null,
               ),
               validator: (v) => (v == null || v.trim().isEmpty) ? 'Alamat pengiriman wajib diisi' : null,
