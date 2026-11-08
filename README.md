@@ -153,4 +153,5 @@ flutter run
   - Implementasi alur penanganan 5 jenis galat teknis pada UI Flutter.
   - Pustaka pihak ketiga: `http`, `uuid`, `intl` pada Flutter; `laravel/framework` pada Backend.
   - merapikan file & penambahan button
+  - add AI assistance section to README
     
