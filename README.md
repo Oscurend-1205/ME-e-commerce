@@ -31,7 +31,7 @@ Sesuai panduan Bagian 10 PRD:
 me-app/
 |-- backend/          (Proyek Laravel 12 REST API)
 |   |-- app/
-|   |   |-- Http/Controllers/Api/   (14 Endpoint Controller)
+|   |   |-- Http/Controllers/Api/   (Controller endpoint REST)
 |   |   |-- Models/                 (Produk, Varian, Keranjang, Pesanan, dll.)
 |   |   `-- Traits/                 (ApiResponse standard wrapper)
 |   |-- database/
@@ -96,15 +96,12 @@ flutter run
 ---
 
 ## 6. Alamat Server & Konfigurasi Emulator
-- **Alamat Server Default:** `http://10.0.2.2:8000/api`
+- **Alamat Server Default:** Android Emulator memakai `http://10.0.2.2:8000/api`; Web/desktop memakai `http://127.0.0.1:8000/api`.
 - **Lokasi Konfigurasi di Flutter:**
-  [`mobile/lib/constants.dart`](file:///mobile/lib/constants.dart)
+  [`mobile/lib/constants.dart`](mobile/lib/constants.dart)
   ```dart
-  class Konstan {
-    static const String baseUrl = 'http://10.0.2.2:8000/api';
-    static const int pelangganId = 1;
-    static const Duration batasWaktu = Duration(seconds: 10);
-  }
+  // Konstan.baseUrl memilih alamat emulator Android atau localhost secara otomatis.
+  // Atur Konstan.customHost untuk perangkat fisik atau host lain.
   ```
 - **Alasan Penggunaan `10.0.2.2`:** Merupakan alias alamat IP khusus pada Android Emulator untuk mengakses `localhost` / `127.0.0.1` pada komputer host development.
 
@@ -118,7 +115,9 @@ flutter run
 
 ---
 
-## 8. Ringkasan 14 Endpoint Backend
+## 8. Ringkasan Endpoint Backend
+
+Dokumentasi detail endpoint dan koleksi Postman: [api-docs (1).md](api-docs%20(1).md) dan [ME-Kelompok02.postman_collection.json](docs/ME-Kelompok02.postman_collection.json).
 
 | No | Metode & Jalur | Kegunaan | Status Sukses |
 |---|---|---|---|
@@ -137,6 +136,7 @@ flutter run
 | 13 | `GET /api/pesanan` | Riwayat pesanan (terbaru dulu) | `200 OK` |
 | 14 | `GET /api/pesanan/{id}` | Rincian pesanan & snapshot harga pembelian | `200 OK` |
 | 15 | `PATCH /api/pesanan/{id}/status` | Ubah status pesanan (409 bila transisi tidak sah) | `200 OK` |
+| 16 | `GET /api/gambar/{filename}` | Ambil gambar produk dari storage | `200 OK` |
 
 ---
 

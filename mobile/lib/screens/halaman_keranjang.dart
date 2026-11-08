@@ -26,27 +26,10 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
   DataKeranjang? _dataKeranjang;
   bool _sedangMemperbarui = false;
 
-  // State Pilihan Item (Checkbox per item & Pilih Semua)
-  final Set<int> _itemTerpilihIds = {};
-
-  // State Voucher Promo
-  final TextEditingController _voucherController = TextEditingController(text: 'MEVIP-150');
-  bool _voucherDiterapkan = true;
-  final int _potonganVoucher = 150000;
-
-  // Ambang batas Bebas Ongkir Kilat Atelier (Rp 1.500.000)
-  static const int _ambangBebasOngkir = 1500000;
-
   @override
   void initState() {
     super.initState();
     _muatKeranjang();
-  }
-
-  @override
-  void dispose() {
-    _voucherController.dispose();
-    super.dispose();
   }
 
   Future<void> _muatKeranjang() async {
@@ -62,12 +45,9 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
       final data = DataKeranjang.fromJson(respon.data as Map<String, dynamic>);
       setState(() {
         _dataKeranjang = data;
-        _keadaan = data.items.isEmpty ? KeadaanMuat.kosong : KeadaanMuat.berhasil;
-        // Default: semua item otomatis terpilih saat pertama dimuat
-        _itemTerpilihIds.clear();
-        for (final item in data.items) {
-          _itemTerpilihIds.add(item.id);
-        }
+        _keadaan = data.items.isEmpty
+            ? KeadaanMuat.kosong
+            : KeadaanMuat.berhasil;
       });
     } else {
       setState(() {
@@ -112,7 +92,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     final konfirmasi = await tampilkanDialogKonfirmasi(
       context,
       judul: 'Hapus Item',
-      pesan: 'Apakah Anda yakin ingin menghapus "${item.namaProduk}" (${item.ukuran}, ${item.warna}) dari tas belanja?',
+      pesan:
+          'Apakah Anda yakin ingin menghapus "${item.namaProduk}" (${item.ukuran}, ${item.warna}) dari tas belanja?',
       teksKonfirmasi: 'HAPUS',
       warnaKonfirmasi: TemaAplikasi.errorColor,
     );
@@ -193,7 +174,9 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
           children: [
             const Icon(Icons.favorite, color: Colors.white, size: 16),
             const SizedBox(width: 8),
-            Expanded(child: Text('${item.namaProduk} dipindahkan ke Wishlist.')),
+            Expanded(
+              child: Text('${item.namaProduk} dipindahkan ke Wishlist.'),
+            ),
           ],
         ),
         duration: const Duration(milliseconds: 1500),
@@ -203,65 +186,11 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     );
   }
 
-  void _terapkanVoucher() {
-    final kode = _voucherController.text.trim();
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    if (kode.isEmpty) {
-      setState(() {
-        _voucherDiterapkan = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Voucher dibatalkan.'),
-          duration: Duration(milliseconds: 1500),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
+  int get _subtotal => _dataKeranjang?.subtotal ?? 0;
 
-    setState(() {
-      _voucherDiterapkan = true;
-    });
-    FocusScope.of(context).unfocus();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Kode promo MEVIP-150 berhasil diterapkan! Potongan Rp 150.000.'),
-        duration: Duration(milliseconds: 1500),
-        backgroundColor: TemaAplikasi.primary,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  // Perhitungan Subtotal dan Diskon
-  int get _subtotalTerpilih {
+  int get _jumlahItem {
     if (_dataKeranjang == null) return 0;
-    return _dataKeranjang!.items
-        .where((i) => _itemTerpilihIds.contains(i.id))
-        .fold<int>(0, (sum, i) => sum + i.subtotalItem);
-  }
-
-  int get _jumlahItemTerpilih {
-    if (_dataKeranjang == null) return 0;
-    return _dataKeranjang!.items
-        .where((i) => _itemTerpilihIds.contains(i.id))
-        .fold<int>(0, (sum, i) => sum + i.jumlah);
-  }
-
-  int get _diskonAktif {
-    if (!_voucherDiterapkan || _subtotalTerpilih == 0) return 0;
-    return _subtotalTerpilih > _potonganVoucher ? _potonganVoucher : _subtotalTerpilih;
-  }
-
-  int get _totalEstimasi {
-    final total = _subtotalTerpilih - _diskonAktif;
-    return total > 0 ? total : 0;
-  }
-
-  double get _persentaseBebasOngkir {
-    if (_subtotalTerpilih >= _ambangBebasOngkir) return 1.0;
-    return (_subtotalTerpilih / _ambangBebasOngkir).clamp(0.0, 1.0);
+    return _dataKeranjang!.items.fold<int>(0, (sum, i) => sum + i.jumlah);
   }
 
   @override
@@ -287,7 +216,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
             ),
         ],
       ),
-      bottomNavigationBar: _keadaan == KeadaanMuat.berhasil &&
+      bottomNavigationBar:
+          _keadaan == KeadaanMuat.berhasil &&
               _dataKeranjang != null &&
               _dataKeranjang!.items.isNotEmpty
           ? _bangunStickyBottomBar()
@@ -302,7 +232,11 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, size: 22, color: TemaAplikasi.primary),
+        icon: const Icon(
+          Icons.arrow_back,
+          size: 22,
+          color: TemaAplikasi.primary,
+        ),
         onPressed: () => Navigator.pop(context),
       ),
       title: Row(
@@ -373,7 +307,10 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                     color: TemaAplikasi.primary,
                     shape: BoxShape.circle,
                   ),
-                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
                   child: Text(
                     '$totalItem',
                     style: const TextStyle(
@@ -411,8 +348,6 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
         );
       case KeadaanMuat.berhasil:
         final items = _dataKeranjang!.items;
-        final semuaTerpilih = items.isNotEmpty && _itemTerpilihIds.length == items.length;
-
         return SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.only(bottom: 24),
@@ -454,10 +389,17 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                       onTap: _kosongkanKeranjang,
                       borderRadius: BorderRadius.circular(2),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 4,
+                        ),
                         child: Row(
                           children: const [
-                            Icon(Icons.delete_sweep_outlined, size: 16, color: TemaAplikasi.secondary),
+                            Icon(
+                              Icons.delete_sweep_outlined,
+                              size: 16,
+                              color: TemaAplikasi.secondary,
+                            ),
                             SizedBox(width: 4),
                             Text(
                               'KOSONGKAN',
@@ -476,67 +418,31 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                 ),
               ),
 
-              // Indikator Bebas Ongkir Kilat Atelier (cek-keranjangBelanja.html)
+              // Ongkir ditentukan server setelah kurir dipilih saat checkout.
               _bangunNotifikasiBebasOngkir(),
 
-              // Batch Controls (Pilih Semua & Kirim Hari Ini) (cek-keranjangBelanja.html)
+              // Checkout memproses seluruh item di keranjang.
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          if (semuaTerpilih) {
-                            _itemTerpilihIds.clear();
-                          } else {
-                            _itemTerpilihIds.clear();
-                            for (final item in items) {
-                              _itemTerpilihIds.add(item.id);
-                            }
-                          }
-                        });
-                      },
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Checkbox(
-                              value: semuaTerpilih,
-                              activeColor: TemaAplikasi.primary,
-                              checkColor: Colors.white,
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              onChanged: (val) {
-                                setState(() {
-                                  if (val == true) {
-                                    for (final item in items) {
-                                      _itemTerpilihIds.add(item.id);
-                                    }
-                                  } else {
-                                    _itemTerpilihIds.clear();
-                                  }
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'PILIH SEMUA (${items.length})',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.0,
-                              color: TemaAplikasi.primary,
-                            ),
-                          ),
-                        ],
+                    Text(
+                      'SEMUA ITEM (${items.length})',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.0,
+                        color: TemaAplikasi.primary,
                       ),
                     ),
                     Row(
                       children: const [
-                        Icon(Icons.schedule, size: 15, color: TemaAplikasi.secondary),
+                        Icon(
+                          Icons.schedule,
+                          size: 15,
+                          color: TemaAplikasi.secondary,
+                        ),
                         SizedBox(width: 4),
                         Text(
                           'Kirim Hari Ini',
@@ -555,17 +461,18 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
               ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 itemCount: items.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (context, index) => _bangunKartuItem(items[index]),
               ),
 
               // Cross-sell Carousel: Sempurnakan Tampilan (cek-keranjangBelanja.html)
               _bangunCrossSellCarousel(),
-
-              // Voucher & Kode Promosi (cek-keranjangBelanja.html)
-              _bangunVoucherInput(),
 
               // Ringkasan Pesanan (cek-keranjangBelanja.html)
               _bangunRingkasanPesanan(),
@@ -582,10 +489,6 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
 
   // 2. Indikator Bebas Ongkir Kilat Atelier
   Widget _bangunNotifikasiBebasOngkir() {
-    final kekurangan = _ambangBebasOngkir - _subtotalTerpilih;
-    final tercapai = _persentaseBebasOngkir >= 1.0;
-    final persenTeks = '${(_persentaseBebasOngkir * 100).toInt()}%';
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(14),
@@ -597,54 +500,24 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: const [
-                  Icon(Icons.local_shipping_outlined, size: 18, color: TemaAplikasi.primary),
-                  SizedBox(width: 8),
-                  Text(
-                    'Bebas Ongkir Kilat Atelier',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                      color: TemaAplikasi.primary,
-                    ),
-                  ),
-                ],
+              const Icon(
+                Icons.local_shipping_outlined,
+                size: 18,
+                color: TemaAplikasi.primary,
               ),
-              Text(
-                persenTeks,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.0,
-                  color: TemaAplikasi.secondary,
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Ongkos kirim mengikuti tarif kurir dan dihitung server saat checkout.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: TemaAplikasi.primary,
+                  ),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            tercapai
-                ? 'Kualifikasi kurir prioritas tanpa biaya telah terpenuhi.'
-                : 'Tambahkan ${formatRupiah(kekurangan)} lagi untuk kualifikasi kurir prioritas tanpa biaya.',
-            style: const TextStyle(
-              fontSize: 11.5,
-              color: TemaAplikasi.secondary,
-              height: 1.3,
-            ),
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(1),
-            child: LinearProgressIndicator(
-              value: _persentaseBebasOngkir,
-              backgroundColor: TemaAplikasi.surfaceContainerHigh,
-              valueColor: const AlwaysStoppedAnimation<Color>(TemaAplikasi.primary),
-              minHeight: 4,
-            ),
           ),
         ],
       ),
@@ -653,8 +526,6 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
 
   // 3. Kartu Item Keranjang (cek-keranjangBelanja.html)
   Widget _bangunKartuItem(ItemKeranjang item) {
-    final isTerpilih = _itemTerpilihIds.contains(item.id);
-
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -667,30 +538,6 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Checkbox Item
-              Padding(
-                padding: const EdgeInsets.only(top: 2, right: 8),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: Checkbox(
-                    value: isTerpilih,
-                    activeColor: TemaAplikasi.primary,
-                    checkColor: Colors.white,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onChanged: (val) {
-                      setState(() {
-                        if (val == true) {
-                          _itemTerpilihIds.add(item.id);
-                        } else {
-                          _itemTerpilihIds.remove(item.id);
-                        }
-                      });
-                    },
-                  ),
-                ),
-              ),
-
               // Foto Item Rasio 3:4 dari Backend Storage
               Container(
                 width: 82,
@@ -813,7 +660,9 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                                     ? () => _ubahJumlah(item, item.jumlah - 1)
                                     : null,
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 7),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                  ),
                                   child: Icon(
                                     Icons.remove,
                                     size: 13,
@@ -824,7 +673,9 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                ),
                                 child: Text(
                                   '${item.jumlah}',
                                   style: const TextStyle(
@@ -837,7 +688,9 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                               InkWell(
                                 onTap: () => _ubahJumlah(item, item.jumlah + 1),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 7),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                  ),
                                   child: const Icon(
                                     Icons.add,
                                     size: 13,
@@ -864,10 +717,17 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
               InkWell(
                 onTap: () => _pindahKeWishlist(item),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 4,
+                  ),
                   child: Row(
                     children: const [
-                      Icon(Icons.favorite_border, size: 14, color: TemaAplikasi.secondary),
+                      Icon(
+                        Icons.favorite_border,
+                        size: 14,
+                        color: TemaAplikasi.secondary,
+                      ),
                       SizedBox(width: 4),
                       Text(
                         'PINDAH KE WISHLIST',
@@ -1008,7 +868,10 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                   top: 6,
                   left: 6,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     color: TemaAplikasi.primary,
                     child: Text(
                       tag,
@@ -1049,7 +912,9 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
             height: 32,
             child: ElevatedButton.icon(
               onPressed: () async {
-                final responDetail = await LayananApi.ambilRincianProduk(produkId);
+                final responDetail = await LayananApi.ambilRincianProduk(
+                  produkId,
+                );
                 int? varianId;
                 if (responDetail.berhasil && responDetail.data != null) {
                   final p = responDetail.data as Map<String, dynamic>;
@@ -1069,7 +934,9 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('$nama berhasil ditambahkan ke tas belanja!'),
+                      content: Text(
+                        '$nama berhasil ditambahkan ke tas belanja!',
+                      ),
                       duration: const Duration(milliseconds: 1500),
                       backgroundColor: TemaAplikasi.primary,
                       behavior: SnackBarBehavior.floating,
@@ -1102,138 +969,6 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     );
   }
 
-  // 5. Voucher & Privilege Code Input (cek-keranjangBelanja.html)
-  Widget _bangunVoucherInput() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: TemaAplikasi.surfaceWhite,
-        borderRadius: BorderRadius.circular(2),
-        border: Border.all(color: TemaAplikasi.borderGray),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text(
-                'KODE PROMO / HAK ISTIMEWA',
-                style: TextStyle(
-                  fontSize: 10,
-                  letterSpacing: 1.5,
-                  fontWeight: FontWeight.w600,
-                  color: TemaAplikasi.primary,
-                ),
-              ),
-              Row(
-                children: [
-                  Icon(Icons.verified, size: 14, color: TemaAplikasi.primary),
-                  SizedBox(width: 4),
-                  Text(
-                    'ME Club Terpasang',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: TemaAplikasi.secondary,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 42,
-                  child: TextField(
-                    controller: _voucherController,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1.5,
-                      color: TemaAplikasi.primary,
-                    ),
-                    textCapitalization: TextCapitalization.characters,
-                    decoration: InputDecoration(
-                      hintText: 'MASUKKAN KODE...',
-                      hintStyle: const TextStyle(
-                        fontSize: 11,
-                        letterSpacing: 1.0,
-                        color: TemaAplikasi.mutedGray,
-                      ),
-                      fillColor: TemaAplikasi.surfaceLight,
-                      filled: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(2),
-                        borderSide: BorderSide.none,
-                      ),
-                      suffixIcon: _voucherDiterapkan
-                          ? const Icon(Icons.check_circle, size: 16, color: TemaAplikasi.primary)
-                          : null,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              SizedBox(
-                height: 42,
-                child: ElevatedButton(
-                  onPressed: _terapkanVoucher,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: TemaAplikasi.primary,
-                    foregroundColor: TemaAplikasi.onPrimary,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                  ),
-                  child: const Text(
-                    'TERAPKAN',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (_voucherDiterapkan) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Container(
-                  width: 5,
-                  height: 5,
-                  decoration: const BoxDecoration(
-                    color: TemaAplikasi.primary,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                const Expanded(
-                  child: Text(
-                    'Diskon keanggotaan ME VIP senilai Rp 150.000 berhasil digunakan.',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: TemaAplikasi.secondary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
   // 6. Ringkasan Pesanan (cek-keranjangBelanja.html)
   Widget _bangunRingkasanPesanan() {
     return Container(
@@ -1258,25 +993,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
           ),
           const SizedBox(height: 12),
           _bangunBarisRingkasan(
-            label: 'Total Barang ($_jumlahItemTerpilih item)',
-            nilai: formatRupiah(_subtotalTerpilih),
-          ),
-          const SizedBox(height: 8),
-          _bangunBarisRingkasan(
-            label: 'ME Club Privilege Benefit',
-            nilai: _diskonAktif > 0 ? '-${formatRupiah(_diskonAktif)}' : 'Rp 0',
-            isDiskon: _diskonAktif > 0,
-          ),
-          const SizedBox(height: 8),
-          _bangunBarisRingkasan(
-            label: 'Estimasi Pajak Pertambahan Nilai (PPN 11%)',
-            nilai: 'Termasuk',
-          ),
-          const SizedBox(height: 8),
-          _bangunBarisRingkasan(
-            label: 'Pengiriman Ekspres Terpilih',
-            nilai: 'GRATIS',
-            isBebasOngkir: true,
+            label: 'Subtotal ($_jumlahItem item)',
+            nilai: formatRupiah(_subtotal),
           ),
           const SizedBox(height: 12),
           const Divider(color: TemaAplikasi.borderGray),
@@ -1294,7 +1012,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text(
-                      'TOTAL ESTIMASI',
+                      'SUBTOTAL DARI SERVER',
                       style: TextStyle(
                         fontSize: 10,
                         letterSpacing: 1.5,
@@ -1304,7 +1022,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      'Sudah termasuk potongan membership',
+                      'Ongkir dihitung setelah memilih kurir',
                       style: TextStyle(
                         fontSize: 10,
                         color: TemaAplikasi.secondary,
@@ -1313,7 +1031,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                   ],
                 ),
                 Text(
-                  formatRupiah(_totalEstimasi),
+                  formatRupiah(_subtotal),
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
@@ -1329,30 +1047,20 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     );
   }
 
-  Widget _bangunBarisRingkasan({
-    required String label,
-    required String nilai,
-    bool isDiskon = false,
-    bool isBebasOngkir = false,
-  }) {
+  Widget _bangunBarisRingkasan({required String label, required String nilai}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: TemaAplikasi.secondary,
-          ),
+          style: const TextStyle(fontSize: 12, color: TemaAplikasi.secondary),
         ),
         Text(
           nilai,
           style: TextStyle(
             fontSize: 12,
-            fontWeight: isBebasOngkir || isDiskon ? FontWeight.w600 : FontWeight.w500,
-            color: isDiskon
-                ? TemaAplikasi.primary
-                : (isBebasOngkir ? TemaAplikasi.primary : TemaAplikasi.primary),
+            fontWeight: FontWeight.w500,
+            color: TemaAplikasi.primary,
           ),
         ),
       ],
@@ -1368,14 +1076,15 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
         children: [
           Row(
             children: const [
-              Icon(Icons.verified_user_outlined, size: 15, color: TemaAplikasi.secondary),
+              Icon(
+                Icons.verified_user_outlined,
+                size: 15,
+                color: TemaAplikasi.secondary,
+              ),
               SizedBox(width: 5),
               Text(
                 'Keaslian Dijamin 100%',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: TemaAplikasi.secondary,
-                ),
+                style: TextStyle(fontSize: 11, color: TemaAplikasi.secondary),
               ),
             ],
           ),
@@ -1395,10 +1104,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
               SizedBox(width: 5),
               Text(
                 'Pengembalian 14 Hari',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: TemaAplikasi.secondary,
-                ),
+                style: TextStyle(fontSize: 11, color: TemaAplikasi.secondary),
               ),
             ],
           ),
@@ -1409,7 +1115,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
 
   // 8. Sticky Bottom Floating Action Bar untuk Checkout (cek-keranjangBelanja.html)
   Widget _bangunStickyBottomBar() {
-    final adaItemTerpilih = _itemTerpilihIds.isNotEmpty;
+    final adaItem = _dataKeranjang?.items.isNotEmpty ?? false;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -1433,7 +1139,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'TOTAL PEMBAYARAN',
+                  'SUBTOTAL',
                   style: TextStyle(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w600,
@@ -1443,7 +1149,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  formatRupiah(_totalEstimasi),
+                  formatRupiah(_subtotal),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -1456,14 +1162,12 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
             SizedBox(
               height: 46,
               child: ElevatedButton.icon(
-                onPressed: adaItemTerpilih
+                onPressed: adaItem
                     ? () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => HalamanCheckout(
-                              subtotalAwal: _totalEstimasi,
-                            ),
+                            builder: (context) => const HalamanCheckout(),
                           ),
                         ).then((_) => _muatKeranjang());
                       }
@@ -1478,7 +1182,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                 ),
                 icon: Text(
-                  'CHECKOUT ($_jumlahItemTerpilih)',
+                  'CHECKOUT ($_jumlahItem)',
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,

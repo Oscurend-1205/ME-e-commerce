@@ -26,14 +26,20 @@ class LayananApi {
   // =====================================================================
 
   /// GET /api/produk — Ambil daftar produk (opsional: filter kategori, cari)
-  static Future<ApiResponse> ambilProduk({String? kategori, String? cari}) async {
+  static Future<ApiResponse> ambilProduk({
+    String? kategori,
+    String? cari,
+  }) async {
     try {
       final params = <String, String>{};
-      if (kategori != null && kategori.isNotEmpty) params['kategori'] = kategori;
+      if (kategori != null && kategori.isNotEmpty) {
+        params['kategori'] = kategori;
+      }
       if (cari != null && cari.isNotEmpty) params['cari'] = cari;
 
-      final uri = Uri.parse('${Konstan.baseUrl}/produk')
-          .replace(queryParameters: params.isNotEmpty ? params : null);
+      final uri = Uri.parse(
+        '${Konstan.baseUrl}/produk',
+      ).replace(queryParameters: params.isNotEmpty ? params : null);
 
       final respons = await http
           .get(uri, headers: _headers())
@@ -76,7 +82,10 @@ class LayananApi {
   }
 
   /// PUT /api/produk/{id} — Ubah produk
-  static Future<ApiResponse> ubahProduk(int id, Map<String, dynamic> data) async {
+  static Future<ApiResponse> ubahProduk(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/produk/$id');
 
@@ -330,8 +339,9 @@ class LayananApi {
     if (e is SocketException) {
       return ApiResponse(
         status: 'gagal',
-        code: 'NETWORK',
-        message: 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',
+        code: 'NO_CONNECTION',
+        message:
+            'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',
       );
     }
 

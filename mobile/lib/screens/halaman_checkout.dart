@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 import '../enums.dart';
+import '../models/keranjang.dart';
 import '../models/kurir.dart';
 import '../models/metode_pembayaran.dart';
 import '../services/layanan_api.dart';
@@ -11,9 +12,7 @@ import '../widgets/widget_keadaan.dart';
 import 'halaman_rincian_pesanan.dart';
 
 class HalamanCheckout extends StatefulWidget {
-  final int subtotalAwal;
-
-  const HalamanCheckout({super.key, required this.subtotalAwal});
+  const HalamanCheckout({super.key});
 
   @override
   State<HalamanCheckout> createState() => _HalamanCheckoutState();
@@ -30,6 +29,7 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
 
   List<Kurir> _daftarKurir = [];
   List<MetodePembayaran> _daftarMetode = [];
+  DataKeranjang? _dataKeranjang;
 
   Kurir? _kurirTerpilih;
   MetodePembayaran? _metodeTerpilih;
@@ -59,43 +59,68 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
 
     final responKurir = await LayananApi.ambilKurir();
     final responMetode = await LayananApi.ambilMetodePembayaran();
+    final responKeranjang = await LayananApi.ambilKeranjang();
 
     if (!mounted) return;
 
-    if (responKurir.berhasil) {
-      final List kurirRaw = responKurir.data is List ? responKurir.data as List : [];
-      final kurirList = kurirRaw
-          .map((k) => Kurir.fromJson(k as Map<String, dynamic>))
-          .toList();
+    final responGagal = [
+      responKurir,
+      responMetode,
+      responKeranjang,
+    ].where((respon) => !respon.berhasil);
 
-      List<MetodePembayaran> metodeList = [];
-      if (responMetode.berhasil && responMetode.data is List) {
-        metodeList = (responMetode.data as List)
-            .map((m) => MetodePembayaran.fromJson(m as Map<String, dynamic>))
-            .toList();
-      }
-
-      if (metodeList.isEmpty) {
-        metodeList = [
-          MetodePembayaran(id: 1, kode: 'transfer_manual', nama: 'Transfer Bank Manual'),
-          MetodePembayaran(id: 2, kode: 'tunai_di_tempat', nama: 'Tunai di Tempat (COD)'),
-        ];
-      }
-
-      setState(() {
-        _daftarKurir = kurirList;
-        _daftarMetode = metodeList;
-        if (kurirList.isNotEmpty) _kurirTerpilih = kurirList.first;
-        if (metodeList.isNotEmpty) _metodeTerpilih = metodeList.first;
-        _keadaan = KeadaanMuat.berhasil;
-      });
-    } else {
+    if (responGagal.isNotEmpty) {
+      final respon = responGagal.first;
       setState(() {
         _keadaan = KeadaanMuat.galat;
-        _jenisGalat = tentukanJenisGalat(responKurir.code);
-        _pesanGalat = responKurir.message;
+        _jenisGalat = tentukanJenisGalat(respon.code);
+        _pesanGalat = respon.message;
       });
+      return;
     }
+
+    final List kurirRaw = responKurir.data is List
+        ? responKurir.data as List
+        : [];
+    final List metodeRaw = responMetode.data is List
+        ? responMetode.data as List
+        : [];
+    final dataKeranjang = DataKeranjang.fromJson(
+      responKeranjang.data as Map<String, dynamic>,
+    );
+
+    if (kurirRaw.isEmpty || metodeRaw.isEmpty) {
+      setState(() {
+        _keadaan = KeadaanMuat.galat;
+        _jenisGalat = JenisGalat.tidakDiketahui;
+        _pesanGalat = 'Data kurir atau metode pembayaran belum tersedia.';
+      });
+      return;
+    }
+
+    if (dataKeranjang.items.isEmpty) {
+      setState(() {
+        _dataKeranjang = dataKeranjang;
+        _keadaan = KeadaanMuat.kosong;
+      });
+      return;
+    }
+
+    final kurirList = kurirRaw
+        .map((k) => Kurir.fromJson(k as Map<String, dynamic>))
+        .toList();
+    final metodeList = metodeRaw
+        .map((m) => MetodePembayaran.fromJson(m as Map<String, dynamic>))
+        .toList();
+
+    setState(() {
+      _dataKeranjang = dataKeranjang;
+      _daftarKurir = kurirList;
+      _daftarMetode = metodeList;
+      _kurirTerpilih = kurirList.first;
+      _metodeTerpilih = metodeList.first;
+      _keadaan = KeadaanMuat.berhasil;
+    });
   }
 
   Future<void> _kirimPesanan() async {
@@ -160,7 +185,9 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
           context: context,
           builder: (ctx) => AlertDialog(
             backgroundColor: TemaAplikasi.surfaceWhite,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(2),
+            ),
             title: const Text(
               'Stok Tidak Mencukupi',
               style: TextStyle(
@@ -171,15 +198,23 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
             ),
             content: Text(
               respon.message,
-              style: const TextStyle(color: TemaAplikasi.secondary, height: 1.5),
+              style: const TextStyle(
+                color: TemaAplikasi.secondary,
+                height: 1.5,
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(ctx);
-                  Navigator.pop(context); // Kembali ke keranjang untuk menyesuaikan
                 },
-                child: const Text('KEMBALI KE KERANJANG', style: TextStyle(color: TemaAplikasi.primary, fontWeight: FontWeight.w700)),
+                child: const Text(
+                  'MENGERTI',
+                  style: TextStyle(
+                    color: TemaAplikasi.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ],
           ),
@@ -228,19 +263,28 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
       body: _keadaan == KeadaanMuat.memuat
           ? const WidgetMemuat()
           : _keadaan == KeadaanMuat.galat
-              ? WidgetGalat(
-                  jenisGalat: _jenisGalat,
-                  pesan: _pesanGalat,
-                  onCobaLagi: _muatDataReferensi,
-                )
-              : _bangunFormulir(),
-      bottomNavigationBar: _keadaan == KeadaanMuat.berhasil ? _bangunBilahBawah() : null,
+          ? WidgetGalat(
+              jenisGalat: _jenisGalat,
+              pesan: _pesanGalat,
+              onCobaLagi: _muatDataReferensi,
+            )
+          : _keadaan == KeadaanMuat.kosong
+          ? WidgetKosong(
+              ikon: Icons.shopping_bag_outlined,
+              pesan: 'Keranjang kosong. Tambahkan produk sebelum checkout.',
+              saranAksi: 'KEMBALI',
+              onAksi: () => Navigator.pop(context),
+            )
+          : _bangunFormulir(),
+      bottomNavigationBar: _keadaan == KeadaanMuat.berhasil
+          ? _bangunBilahBawah()
+          : null,
     );
   }
 
   Widget _bangunFormulir() {
     final ongkir = _kurirTerpilih?.tarif ?? 0;
-    final totalPerkiraan = widget.subtotalAwal + ongkir;
+    final subtotal = _dataKeranjang!.subtotal;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -259,7 +303,11 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.shield_outlined, size: 16, color: TemaAplikasi.secondary),
+                  const Icon(
+                    Icons.shield_outlined,
+                    size: 16,
+                    color: TemaAplikasi.secondary,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -297,7 +345,9 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
                     ? (_galatValidasi422!['nama'] as List).first.toString()
                     : null,
               ),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama penerima wajib diisi' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? 'Nama penerima wajib diisi'
+                  : null,
             ),
             const SizedBox(height: 14),
 
@@ -311,7 +361,9 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
                     ? (_galatValidasi422!['alamat'] as List).first.toString()
                     : null,
               ),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Alamat pengiriman wajib diisi' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? 'Alamat pengiriman wajib diisi'
+                  : null,
             ),
             const SizedBox(height: 28),
 
@@ -337,11 +389,18 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
                 },
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
-                    color: terpilih ? TemaAplikasi.surfaceBright : TemaAplikasi.surfaceWhite,
+                    color: terpilih
+                        ? TemaAplikasi.surfaceBright
+                        : TemaAplikasi.surfaceWhite,
                     border: Border.all(
-                      color: terpilih ? TemaAplikasi.primary : TemaAplikasi.borderGray,
+                      color: terpilih
+                          ? TemaAplikasi.primary
+                          : TemaAplikasi.borderGray,
                       width: terpilih ? 1.5 : 1.0,
                     ),
                     borderRadius: BorderRadius.circular(2),
@@ -349,8 +408,12 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
                   child: Row(
                     children: [
                       Icon(
-                        terpilih ? Icons.radio_button_checked : Icons.radio_button_off,
-                        color: terpilih ? TemaAplikasi.primary : TemaAplikasi.mutedGray,
+                        terpilih
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_off,
+                        color: terpilih
+                            ? TemaAplikasi.primary
+                            : TemaAplikasi.mutedGray,
                         size: 18,
                       ),
                       const SizedBox(width: 12),
@@ -367,7 +430,9 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
                               ),
                             ),
                             Text(
-                              kurir.wilayah.isNotEmpty ? 'Wilayah: ${kurir.wilayah}' : 'Standar',
+                              kurir.wilayah.isNotEmpty
+                                  ? 'Wilayah: ${kurir.wilayah}'
+                                  : 'Standar',
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: TemaAplikasi.mutedGray,
@@ -413,11 +478,18 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
                 },
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
-                    color: terpilih ? TemaAplikasi.surfaceBright : TemaAplikasi.surfaceWhite,
+                    color: terpilih
+                        ? TemaAplikasi.surfaceBright
+                        : TemaAplikasi.surfaceWhite,
                     border: Border.all(
-                      color: terpilih ? TemaAplikasi.primary : TemaAplikasi.borderGray,
+                      color: terpilih
+                          ? TemaAplikasi.primary
+                          : TemaAplikasi.borderGray,
                       width: terpilih ? 1.5 : 1.0,
                     ),
                     borderRadius: BorderRadius.circular(2),
@@ -425,8 +497,12 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
                   child: Row(
                     children: [
                       Icon(
-                        terpilih ? Icons.radio_button_checked : Icons.radio_button_off,
-                        color: terpilih ? TemaAplikasi.primary : TemaAplikasi.mutedGray,
+                        terpilih
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_off,
+                        color: terpilih
+                            ? TemaAplikasi.primary
+                            : TemaAplikasi.mutedGray,
                         size: 18,
                       ),
                       const SizedBox(width: 12),
@@ -480,11 +556,17 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
                     children: [
                       const Text(
                         'Subtotal Belanja',
-                        style: TextStyle(fontSize: 12, color: TemaAplikasi.secondary),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: TemaAplikasi.secondary,
+                        ),
                       ),
                       Text(
-                        formatRupiah(widget.subtotalAwal),
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        formatRupiah(subtotal),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -494,11 +576,17 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
                     children: [
                       const Text(
                         'Ongkos Kirim',
-                        style: TextStyle(fontSize: 12, color: TemaAplikasi.secondary),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: TemaAplikasi.secondary,
+                        ),
                       ),
                       Text(
                         formatRupiah(ongkir),
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -509,21 +597,14 @@ class _HalamanCheckoutState extends State<HalamanCheckout> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'TOTAL AKHIR',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.0,
-                          color: TemaAplikasi.primary,
-                        ),
-                      ),
-                      Text(
-                        formatRupiah(totalPerkiraan),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: TemaAplikasi.primary,
+                      const Expanded(
+                        child: Text(
+                          'Total akhir dihitung oleh server setelah checkout.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: TemaAplikasi.primary,
+                          ),
                         ),
                       ),
                     ],

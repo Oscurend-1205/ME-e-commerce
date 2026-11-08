@@ -13,6 +13,7 @@ enum JenisGalat {
 JenisGalat tentukanJenisGalat(String? kode) {
   switch (kode) {
     case 'NO_CONNECTION':
+    case 'NETWORK':
       return JenisGalat.tidakAdaSambungan;
     case 'TIMEOUT':
       return JenisGalat.batasWaktu;
