@@ -996,37 +996,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
             height: 32,
             child: ElevatedButton.icon(
               onPressed: () async {
-<<<<<<< HEAD
-                final responDetail = await LayananApi.ambilRincianProduk(
-                  produkId,
-                );
-                int? varianId;
-                if (responDetail.berhasil && responDetail.data != null) {
-                  final p = responDetail.data as Map<String, dynamic>;
-                  final listVarian = p['varians'] as List?;
-                  if (listVarian != null && listVarian.isNotEmpty) {
-                    varianId = listVarian.first['id'] as int?;
-                  }
-                }
-                if (varianId != null) {
-                  await LayananApi.tambahKeKeranjang(
-                    produkId: produkId,
-                    varianId: varianId,
-                    jumlah: 1,
-                  );
-                  _muatKeranjang();
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        '$nama berhasil ditambahkan ke tas belanja!',
-                      ),
-                      duration: const Duration(milliseconds: 1500),
-                      backgroundColor: TemaAplikasi.primary,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-=======
+
                 final detail = await LayananApi.ambilRincianProduk(produkId);
                 if (!mounted) return;
                 if (detail.berhasil && detail.data != null) {
@@ -1068,7 +1038,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                         return false;
                       }
                     },
->>>>>>> 6e268d8b436f513ae176363225b1aa7399c5e768
+
                   );
                 }
               },
