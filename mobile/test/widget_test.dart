@@ -8,6 +8,7 @@ void main() {
     expect(find.text('BERANDA'), findsAtLeastNWidgets(1));
     expect(find.text('JELAJAH'), findsOneWidget);
     expect(find.text('PESANAN'), findsOneWidget);
+    expect(find.text('AKUN'), findsOneWidget);
     expect(find.text('KELOLA'), findsOneWidget);
   });
 }
