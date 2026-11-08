@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme.dart';
 import 'halaman_metode_pembayaran.dart';
 import 'halaman_riwayat_pesanan.dart';
+import 'halaman_tambah_alamat.dart';
 
 class HalamanAkun extends StatefulWidget {
   const HalamanAkun({super.key});
@@ -91,6 +92,14 @@ class _HalamanAkunState extends State<HalamanAkun> {
                   icon: Icons.location_on_outlined,
                   label: 'Alamat Pengiriman',
                   trailingText: '3 Tersimpan',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const HalamanTambahAlamat(),
+                      ),
+                    );
+                  },
                 ),
                 _bangunItemDaftar(
                   key: const ValueKey('metode_pembayaran_item'),

@@ -996,28 +996,57 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
             height: 32,
             child: ElevatedButton.icon(
               onPressed: () async {
-
                 final detail = await LayananApi.ambilRincianProduk(produkId);
                 if (!mounted) return;
+
                 if (detail.berhasil && detail.data != null) {
-                  final p = Produk.fromJson(detail.data as Map<String, dynamic>);
+                  final produk = Produk.fromJson(detail.data as Map<String, dynamic>);
+                  final varianList = produk.varian ?? const <Varian>[];
+
+                  if (varianList.isEmpty) {
+                    final respon = await LayananApi.tambahKeKeranjang(
+                      produkId: produk.id,
+                      varianId: 0,
+                      jumlah: 1,
+                    );
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          respon.berhasil
+                              ? '$nama berhasil ditambahkan ke tas belanja!'
+                              : respon.message,
+                        ),
+                        duration: const Duration(milliseconds: 1500),
+                        backgroundColor: respon.berhasil ? TemaAplikasi.primary : TemaAplikasi.errorColor,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    if (respon.berhasil) {
+                      _muatKeranjang();
+                    }
+                    return;
+                  }
+
                   await ModalPilihVarian.tampilkanTambah(
                     context,
-                    produk: p,
+                    produk: produk,
                     onKonfirmasi: (varian, jumlah) async {
                       final respon = await LayananApi.tambahKeKeranjang(
-                        produkId: p.id,
+                        produkId: produk.id,
                         varianId: varian.id,
                         jumlah: jumlah,
                       );
                       if (!mounted) return false;
+
                       if (respon.berhasil) {
                         _muatKeranjang();
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              '${p.nama} (${varian.ukuran}, ${varian.warna}) x$jumlah berhasil ditambahkan!',
+                              '${produk.nama} (${varian.ukuran}, ${varian.warna}) x$jumlah berhasil ditambahkan!',
                             ),
                             duration: const Duration(milliseconds: 1500),
                             backgroundColor: TemaAplikasi.primary,
@@ -1025,20 +1054,19 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                           ),
                         );
                         return true;
-                      } else {
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(respon.message),
-                            duration: const Duration(milliseconds: 1500),
-                            backgroundColor: TemaAplikasi.errorColor,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                        return false;
                       }
-                    },
 
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(respon.message),
+                          duration: const Duration(milliseconds: 1500),
+                          backgroundColor: TemaAplikasi.errorColor,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                      return false;
+                    },
                   );
                 }
               },
