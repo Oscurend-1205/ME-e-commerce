@@ -7,10 +7,13 @@ Proyek Tugas Pengganti UTS Berkelompok untuk mata kuliah **Pengembangan Aplikasi
 ## 1. Identitas Kelompok
 - **Nama Kelompok:** Kelompok 2
 - **Anggota Kelompok:**
-  - Auril Aditya (NIM: Disepakati Kelompok) — *Fullstack Lead (Backend Skema & Flutter)*
-  - Melany Kresna 24102015 — *Backend: Alur Transaksi, Checkout Atomik & Idempotensi*
-  - (Nama Anggota 3 & NIM) — *Flutter: UI Katalog, Rincian Produk, Keranjang*
-  - (Nama Anggota 4 & NIM) — *Flutter: Penanganan 5 Galat, Dokumentasi & Video Demo*
+  - Auril Aditya 24102018 — Full Stack Developer (Backend Skema & Flutter)
+  - Melany Kresna 24102015 — Backend, Project Manager / Project Leader
+  - Devia Amanda Prameswari 24102007 — UI/UX Designer
+  - Viqro Tunada Hanunnisa 24102022 — UI/UX Designer & Database Support
+  - Audina Ike Wati 24102028 - API Developer & Technical Documentation
+  - Syani Carissa Syawaluna 24102038 - Application Developer & Documentation
+  - Fichri Aditya Nugraha 24102010 - Database Developer
 
 ---
 
