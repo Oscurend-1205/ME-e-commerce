@@ -155,4 +155,5 @@ flutter run
   - merapikan file & penambahan button
   - add AI assistance section to README
   - add AI contributions for database migration and UI error handling
+  - update README.md
     
