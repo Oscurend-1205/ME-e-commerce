@@ -1,6 +1,6 @@
 # ME — Toko Online Pakaian & Aksesori (Kelompok 2)
 
-Proyek Tugas Pengganti UTS Berkelompok untuk mata kuliah **Pengembangan Aplikasi Perangkat Bergerak (PAPB)** dan **Sistem Terdistribusi**.
+Proyek Tugas Pengganti UTS Berkelompok untuk mata kuliah **Pemrograman Aplikasi Perangkat Bergerak (PAPB)** dan **Sistem Terdistribusi**.
 
 ---
 
@@ -147,8 +147,7 @@ flutter run
 
 ---
 
-## 9. Tautan Video Demo & Bantuan AI
-- **Tautan Video Demo:** *(Akan ditautkan sebelum pengumpulan LMS Pertemuan 8)*
+## 9. Bantuan AI
 - **Bagian Kode yang Dibantu AI:**
   - Pembuatan boilerplate model Eloquent & migrasi database.
   - Implementasi alur penanganan 5 jenis galat teknis pada UI Flutter.
