@@ -79,7 +79,7 @@ class _HalamanAkunState extends State<HalamanAkun> {
               [
                 _bangunItemDaftar(
                   icon: Icons.location_on_outlined,
-                  label: 'Buku Alamat Pengiriman',
+                  label: 'Alamat Pengiriman',
                   trailingText: '3 Tersimpan',
                 ),
                 _bangunItemDaftar(
