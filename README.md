@@ -152,3 +152,4 @@ flutter run
   - Pembuatan boilerplate model Eloquent & migrasi database.
   - Implementasi alur penanganan 5 jenis galat teknis pada UI Flutter.
   - Pustaka pihak ketiga: `http`, `uuid`, `intl` pada Flutter; `laravel/framework` pada Backend.
+  - merapukan file
