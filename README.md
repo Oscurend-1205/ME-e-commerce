@@ -8,9 +8,9 @@ Proyek Tugas Pengganti UTS Berkelompok untuk mata kuliah **Pemrograman Aplikasi 
 - **Nama Kelompok:** Kelompok 2
 - **Anggota Kelompok:**
   - Auril Aditya 24102018 — Full Stack Developer (Backend Skema & Flutter)
-  - Melany Kresna 24102015 — Backend, Project Manager / Project Leader
+  - Melany Kresna 24102015 — Frontend, Project Manager / Project Leader
   - Devia Amanda Prameswari 24102007 — UI/UX Designer
-  - Viqro Tunada Hanunnisa 24102022 — UI/UX Designer & Database Support
+  - Viqro Tunada Hanunnisa 24102022 — Database Developer
   - Audina Ike Wati 24102028 - API Developer & Technical Documentation
   - Syani Carissa Syawaluna 24102038 - Application Developer & Documentation
   - Fichri Aditya Nugraha 24102010 - Database Developer
