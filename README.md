@@ -1,16 +1,19 @@
 # ME — Toko Online Pakaian & Aksesori (Kelompok 2)
 
-Proyek Tugas Pengganti UTS Berkelompok untuk mata kuliah **Pengembangan Aplikasi Perangkat Bergerak (PAPB)** dan **Sistem Terdistribusi**.
+Proyek Tugas Pengganti UTS Berkelompok untuk mata kuliah **Pemrograman Aplikasi Perangkat Bergerak (PAPB)** dan **Sistem Terdistribusi**.
 
 ---
 
 ## 1. Identitas Kelompok
 - **Nama Kelompok:** Kelompok 2
 - **Anggota Kelompok:**
-  - Auril Aditya (NIM: Disepakati Kelompok) — *Fullstack Lead (Backend Skema & Flutter)*
-  - Melany Kresna 24102015 — *Backend: Alur Transaksi, Checkout Atomik & Idempotensi*
-  - (Nama Anggota 3 & NIM) — *Flutter: UI Katalog, Rincian Produk, Keranjang*
-  - (Nama Anggota 4 & NIM) — *Flutter: Penanganan 5 Galat, Dokumentasi & Video Demo*
+  - Auril Aditya 24102018 — Full Stack Developer (Backend Skema & Flutter)
+  - Melany Kresna 24102015 — Frontend, Project Manager / Project Leader
+  - Devia Amanda Prameswari 24102007 — UI/UX Designer
+  - Viqro Tunada Hanunnisa 24102022 — Database Developer
+  - Audina Ike Wati 24102028 - API Developer & Technical Documentation
+  - Syani Carissa Syawaluna 24102038 - Application Developer & Documentation
+  - Fichri Aditya Nugraha 24102010 - Database Developer
 
 ---
 
@@ -20,6 +23,38 @@ Aplikasi e-commerce pakaian & aksesori modern terinspirasi gaya editorial minima
 - **Aturan Bisnis:** Penambahan ke keranjang dan checkout otomatis ditolak dengan kode status **`409 Conflict`** jika stok varian yang dipilih habis, meskipun varian lain pada produk tersebut masih tersedia.
 - **Server-side Truth:** Server Laravel menjadi satu-satunya sumber kebenaran untuk harga, ketersediaan, subtotal, ongkos kirim, dan total belanja.
 
+### Objek Produk dan Tabel Basis Data
+
+**Kunci wajib pada objek produk** (`GET /api/produk` dan `GET /api/produk/{id}`):
+
+| Kunci JSON | Tipe | Asal di basis data |
+|---|---|---|
+| `id` | integer | `produk.id` |
+| `nama` | string | `produk.nama` |
+| `harga` | integer (rupiah) | `produk.harga` |
+| `kategori` | string | `kategori.nama` lewat `produk.kategori_id` |
+| `stok` | integer | jumlah `varian_produk.stok` seluruh varian produk |
+| `tersedia` | boolean | `produk.tersedia` |
+| `deskripsi` | string atau `null` | `produk.deskripsi` |
+
+Kunci tambahan khas domain: `bahan` dan `merek` (kolom `produk`), serta `ukuran` dan `warna` pada setiap varian (`varian_produk`). Stok tidak disimpan pada produk, melainkan per varian.
+
+**Tabel basis data (9 tabel):**
+
+| Tabel | Isi | Kolom penting |
+|---|---|---|
+| `kategori` | Kategori produk | `id`, `nama` |
+| `produk` | Data produk | `kategori_id`, `nama`, `harga`, `tersedia`, `deskripsi`, `bahan`, `merek`, `gambar` |
+| `varian_produk` | Stok per ukuran dan warna | `produk_id`, `ukuran`, `warna`, `stok`, `sku` |
+| `pelanggan` | Pelanggan pengujian | `id`, `nama` |
+| `keranjang` | Item keranjang | `pelanggan_id`, `produk_id`, `varian_id`, `jumlah` |
+| `kurir` | Kurir dan tarif wilayah | `nama`, `wilayah`, `tarif` |
+| `metode_pembayaran` | Metode pembayaran | `kode`, `nama` |
+| `pesanan` | Pesanan dan total | `nomor_pesanan`, `pelanggan_id`, `kurir_id`, `metode_pembayaran_id`, `nama_penerima`, `alamat`, `subtotal`, `ongkir`, `total`, `status`, `kunci_idempoten` |
+| `detail_pesanan` | Item pesanan (salinan harga saat beli) | `pesanan_id`, `produk_id`, `varian_id`, `nama_produk`, `ukuran`, `warna`, `harga_satuan`, `jumlah`, `subtotal` |
+
+
+Diagram relasi lengkap ada di [docs/api-docs.md](docs/api-docs.md).
 ---
 
 ## 3. Struktur Repositori
@@ -144,9 +179,13 @@ flutter run
 
 ---
 
-## 9. Tautan Video Demo & Bantuan AI
-- **Tautan Video Demo:** *(Akan ditautkan sebelum pengumpulan LMS Pertemuan 8)*
+## 9. Bantuan AI
 - **Bagian Kode yang Dibantu AI:**
   - Pembuatan boilerplate model Eloquent & migrasi database.
   - Implementasi alur penanganan 5 jenis galat teknis pada UI Flutter.
   - Pustaka pihak ketiga: `http`, `uuid`, `intl` pada Flutter; `laravel/framework` pada Backend.
+  - merapikan file & penambahan button
+  - add AI assistance section to README
+  - add AI contributions for database migration and UI error handling
+  - update README.md
+    
