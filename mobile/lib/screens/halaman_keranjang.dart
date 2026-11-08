@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../enums.dart';
 import '../models/keranjang.dart';
+import '../models/produk.dart';
 import '../services/layanan_api.dart';
 import '../theme.dart';
 import '../widgets/dialog_konfirmasi.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/foto_dummy.dart';
+import '../widgets/modal_pilih_varian.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_checkout.dart';
 
@@ -106,6 +108,50 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
         ),
       );
     }
+  }
+
+  /// Ubah varian (ukuran, warna, jumlah) item yang ada di keranjang (CRUD Edit)
+  Future<void> _ubahVarianItem(ItemKeranjang item) async {
+    await ModalPilihVarian.tampilkanUbah(
+      context,
+      item: item,
+      onKonfirmasi: (varianBaru, jumlahBaru) async {
+        final respon = await LayananApi.ubahItemKeranjang(
+          item.id,
+          varianId: varianBaru.id,
+          jumlah: jumlahBaru,
+        );
+
+        if (!mounted) return false;
+
+        if (respon.berhasil) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Varian ${item.namaProduk} berhasil diubah ke ${varianBaru.ukuran} - ${varianBaru.warna} (x$jumlahBaru).',
+              ),
+              duration: const Duration(milliseconds: 1800),
+              backgroundColor: TemaAplikasi.primary,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          _muatKeranjang();
+          return true;
+        } else {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(respon.message),
+              duration: const Duration(milliseconds: 2000),
+              backgroundColor: TemaAplikasi.errorColor,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return false;
+        }
+      },
+    );
   }
 
   Future<void> _hapusItem(ItemKeranjang item) async {
@@ -753,31 +799,69 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                     ),
                     const SizedBox(height: 4),
 
-                    // Varian: Warna & Ukuran
+                    // Varian: Warna & Ukuran + Tombol Ubah (CRUD Edit Varian)
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          item.warna,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: TemaAplikasi.secondary,
+                        InkWell(
+                          onTap: () => _ubahVarianItem(item),
+                          borderRadius: BorderRadius.circular(2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                item.warna,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: TemaAplikasi.secondary,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                width: 3,
+                                height: 3,
+                                decoration: const BoxDecoration(
+                                  color: TemaAplikasi.secondary,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Size ${item.ukuran}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: TemaAplikasi.secondary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 6),
-                        Container(
-                          width: 3,
-                          height: 3,
-                          decoration: const BoxDecoration(
-                            color: TemaAplikasi.secondary,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Size ${item.ukuran}',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: TemaAplikasi.secondary,
+                        InkWell(
+                          onTap: () => _ubahVarianItem(item),
+                          borderRadius: BorderRadius.circular(2),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                            decoration: BoxDecoration(
+                              color: TemaAplikasi.surfaceLight,
+                              borderRadius: BorderRadius.circular(2),
+                              border: Border.all(color: TemaAplikasi.borderGray, width: 0.8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(Icons.edit_outlined, size: 11, color: TemaAplikasi.primary),
+                                SizedBox(width: 3),
+                                Text(
+                                  'UBAH',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    letterSpacing: 1.0,
+                                    fontWeight: FontWeight.w700,
+                                    color: TemaAplikasi.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -1049,31 +1133,47 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
             height: 32,
             child: ElevatedButton.icon(
               onPressed: () async {
-                final responDetail = await LayananApi.ambilRincianProduk(produkId);
-                int? varianId;
-                if (responDetail.berhasil && responDetail.data != null) {
-                  final p = responDetail.data as Map<String, dynamic>;
-                  final listVarian = p['varians'] as List?;
-                  if (listVarian != null && listVarian.isNotEmpty) {
-                    varianId = listVarian.first['id'] as int?;
-                  }
-                }
-                if (varianId != null) {
-                  await LayananApi.tambahKeKeranjang(
-                    produkId: produkId,
-                    varianId: varianId,
-                    jumlah: 1,
-                  );
-                  _muatKeranjang();
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('$nama berhasil ditambahkan ke tas belanja!'),
-                      duration: const Duration(milliseconds: 1500),
-                      backgroundColor: TemaAplikasi.primary,
-                      behavior: SnackBarBehavior.floating,
-                    ),
+                final detail = await LayananApi.ambilRincianProduk(produkId);
+                if (!mounted) return;
+                if (detail.berhasil && detail.data != null) {
+                  final p = Produk.fromJson(detail.data as Map<String, dynamic>);
+                  await ModalPilihVarian.tampilkanTambah(
+                    context,
+                    produk: p,
+                    onKonfirmasi: (varian, jumlah) async {
+                      final respon = await LayananApi.tambahKeKeranjang(
+                        produkId: p.id,
+                        varianId: varian.id,
+                        jumlah: jumlah,
+                      );
+                      if (!mounted) return false;
+                      if (respon.berhasil) {
+                        _muatKeranjang();
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${p.nama} (${varian.ukuran}, ${varian.warna}) x$jumlah berhasil ditambahkan!',
+                            ),
+                            duration: const Duration(milliseconds: 1500),
+                            backgroundColor: TemaAplikasi.primary,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                        return true;
+                      } else {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(respon.message),
+                            duration: const Duration(milliseconds: 1500),
+                            backgroundColor: TemaAplikasi.errorColor,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                        return false;
+                      }
+                    },
                   );
                 }
               },

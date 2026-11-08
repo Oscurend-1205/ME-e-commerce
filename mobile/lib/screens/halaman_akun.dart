@@ -97,6 +97,16 @@ class _HalamanAkunState extends State<HalamanAkun> {
                     });
                   },
                 ),
+                _bangunToggleItem(
+                  icon: Icons.fingerprint,
+                  label: 'Kunci Aplikasi dengan Biometrik',
+                  value: _biometrikAktif,
+                  onChanged: (value) {
+                    setState(() {
+                      _biometrikAktif = value;
+                    });
+                  },
+                ),
               ],
             ),
             Padding(
@@ -189,7 +199,7 @@ class _HalamanAkunState extends State<HalamanAkun> {
                   child: Image.network(
                     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (_, _, _) => Container(
                       color: const Color(0xFF1D1D1D),
                       child: const Center(
                         child: Text(
@@ -579,7 +589,7 @@ class _HalamanAkunState extends State<HalamanAkun> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: TemaAplikasi.primary,
+            activeTrackColor: TemaAplikasi.primary,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ],

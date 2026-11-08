@@ -149,12 +149,18 @@ class LayananApi {
     }
   }
 
-  /// PUT /api/keranjang/{id} — Ubah jumlah item keranjang
-  static Future<ApiResponse> ubahJumlahKeranjang(int id, int jumlah) async {
+  /// PUT /api/keranjang/{id} — Ubah item keranjang (jumlah dan/atau varian)
+  static Future<ApiResponse> ubahItemKeranjang(
+    int id, {
+    int? jumlah,
+    int? varianId,
+  }) async {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/keranjang/$id');
 
-      final body = {'jumlah': jumlah};
+      final body = <String, dynamic>{};
+      if (jumlah != null) body['jumlah'] = jumlah;
+      if (varianId != null) body['varian_id'] = varianId;
 
       final respons = await http
           .put(uri, headers: _headers(), body: jsonEncode(body))
@@ -164,6 +170,11 @@ class LayananApi {
     } catch (e) {
       return _tanganiGalat(e);
     }
+  }
+
+  /// PUT /api/keranjang/{id} — Ubah jumlah item keranjang
+  static Future<ApiResponse> ubahJumlahKeranjang(int id, int jumlah) {
+    return ubahItemKeranjang(id, jumlah: jumlah);
   }
 
   /// DELETE /api/keranjang/{id} — Hapus item dari keranjang
