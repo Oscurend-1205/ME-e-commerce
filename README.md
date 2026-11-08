@@ -154,4 +154,5 @@ flutter run
   - Pustaka pihak ketiga: `http`, `uuid`, `intl` pada Flutter; `laravel/framework` pada Backend.
   - merapikan file & penambahan button
   - add AI assistance section to README
+  - add AI contributions for database migration and UI error handling
     
