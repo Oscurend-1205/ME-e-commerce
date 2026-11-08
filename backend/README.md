@@ -1,4 +1,24 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Backend Laravel ME
+
+REST API toko online ME menggunakan Laravel 12, PHP 8.2+, dan SQLite secara default. MySQL juga dapat digunakan dengan mengganti konfigurasi database di `.env`.
+
+Pastikan ekstensi PHP `pdo_sqlite`, `pdo_mysql`, `mbstring`, `openssl`, `intl`, dan `zip` aktif. Di XAMPP, aktifkan `extension=intl` dan `extension=zip` pada `C:\xampp\php\php.ini` lalu buka ulang terminal.
+
+## Menjalankan di Windows PowerShell
+
+Dari folder `backend`, jalankan:
+
+```powershell
+composer run setup
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+Setup memasang dependency, membuat `.env` dan database SQLite jika belum ada, membuat application key, lalu menjalankan migrasi dan seeder. API tersedia di `http://127.0.0.1:8000/api`, dan endpoint kesehatan ada di `http://127.0.0.1:8000/up`.
+
+Untuk tes jalankan `php artisan test`. Panel admin tersedia di `/admin` setelah migrasi dan seeder selesai. Akun pengujian: `admin@toko-me.test` / `password`.
+
+Untuk memakai MySQL, buat database `me_store`, ubah variabel `DB_*` di `.env`, lalu jalankan `php artisan migrate --seed`.
+
 
 <p align="center">
 <a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>

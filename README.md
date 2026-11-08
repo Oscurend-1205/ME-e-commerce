@@ -29,7 +29,7 @@ Aplikasi e-commerce pakaian & aksesori modern terinspirasi gaya editorial minima
 Sesuai panduan Bagian 10 PRD:
 ```text
 me-app/
-|-- backend/          (Proyek Laravel 11/12/13 REST API)
+|-- backend/          (Proyek Laravel 12 REST API)
 |   |-- app/
 |   |   |-- Http/Controllers/Api/   (14 Endpoint Controller)
 |   |   |-- Models/                 (Produk, Varian, Keranjang, Pesanan, dll.)
@@ -55,7 +55,7 @@ me-app/
 ## 4. Cara Menjalankan Backend (Laravel)
 
 ### Prasyarat:
-- PHP >= 8.2 (dengan ekstensi `pdo`, `pdo_mysql` / `pdo_sqlite`, `mbstring`, `openssl`)
+- PHP >= 8.2 (dengan ekstensi `pdo_sqlite`, `pdo_mysql`, `mbstring`, `openssl`, `intl`, `zip`)
 - Composer >= 2.x
 - MySQL (Laragon / XAMPP) atau SQLite bawaan
 
@@ -64,21 +64,14 @@ me-app/
 # 1. Masuk ke folder backend
 cd backend
 
-# 2. Pasang dependensi PHP
-composer install
+# 2. Siapkan dependency, konfigurasi SQLite, application key, migrasi, dan data contoh
+composer run setup
 
-# 3. Salin berkas lingkungan
-cp .env.example .env
-
-# 4. Generate Application Key
-php artisan key:generate
-
-# 5. Jalankan migrasi dan seeder data contoh
-php artisan migrate --seed
-
-# 6. Jalankan server Laravel
+# 3. Jalankan server Laravel
 php artisan serve --host=0.0.0.0 --port=8000
 ```
+
+SQLite dipakai secara default agar backend dapat dicoba tanpa memasang MySQL. Untuk memakai MySQL, sesuaikan `DB_CONNECTION` dan variabel `DB_*` di `backend/.env`, buat database `me_store`, lalu jalankan `php artisan migrate --seed`.
 
 ---
 
