@@ -9,6 +9,5 @@ void main() {
     expect(find.text('JELAJAH'), findsOneWidget);
     expect(find.text('PESANAN'), findsOneWidget);
     expect(find.text('AKUN'), findsOneWidget);
-    expect(find.text('KELOLA'), findsOneWidget);
   });
 }

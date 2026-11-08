@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'screens/halaman_akun.dart';
 import 'screens/halaman_katalog.dart';
-import 'screens/halaman_kelola_produk.dart';
 import 'screens/halaman_riwayat_pesanan.dart';
 import 'theme.dart';
 
@@ -40,7 +39,6 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
     HalamanKatalog(modeJelajah: true),
     HalamanRiwayatPesanan(),
     HalamanAkun(),
-    HalamanKelolaProduk(),
   ];
 
   @override
@@ -93,13 +91,6 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
                   ikonAktif: Icons.person,
                   ikonTidakAktif: Icons.person_outline,
                   label: 'AKUN',
-                ),
-                _bangunItemTab(
-                  indeks: 4,
-                  ikonAktif: Icons.manage_accounts,
-                  ikonTidakAktif: Icons.manage_accounts_outlined,
-                  label: 'KELOLA',
-                  pakaiAvatar: true,
                 ),
               ],
             ),

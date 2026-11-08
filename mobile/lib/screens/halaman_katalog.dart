@@ -8,7 +8,7 @@ import '../widgets/format_rupiah.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/kartu_produk.dart';
 import '../widgets/widget_keadaan.dart';
-import 'halaman_kelola_produk.dart';
+import 'halaman_akun.dart';
 import 'halaman_keranjang.dart';
 import 'halaman_rincian_produk.dart';
 
@@ -527,7 +527,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const HalamanKelolaProduk()),
+                MaterialPageRoute(builder: (context) => const HalamanAkun()),
               );
             },
             borderRadius: BorderRadius.circular(16),
