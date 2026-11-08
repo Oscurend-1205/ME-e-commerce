@@ -37,7 +37,6 @@ Aplikasi e-commerce pakaian & aksesori modern terinspirasi gaya editorial minima
 | `tersedia` | boolean | `produk.tersedia` |
 | `deskripsi` | string atau `null` | `produk.deskripsi` |
 
-Kunci tambahan khas domain: `bahan` dan `merek` (kolom `produk`), serta `ukuran` dan `warna` pada setiap varian (`varian_produk`). Stok tidak disimpan pada produk, melainkan per varian.
 
 **Tabel basis data (9 tabel):**
 
