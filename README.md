@@ -15,7 +15,7 @@ Proyek Tugas Pengganti UTS Berkelompok untuk mata kuliah **Pemrograman Aplikasi 
   - Syani Carissa Syawaluna 24102038 - Application Developer & Documentation
   - Fichri Aditya Nugraha 24102010 - Database Developer
 
----
+------
 
 ## 2. Domain Bisnis & Aturan Khas
 Aplikasi e-commerce pakaian & aksesori modern terinspirasi gaya editorial minimalis **ZARA**.

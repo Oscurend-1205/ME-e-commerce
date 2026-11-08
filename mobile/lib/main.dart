@@ -34,23 +34,19 @@ class HalamanUtamaNavigasi extends StatefulWidget {
 class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
   int _indeksAktif = 0;
 
-  void _bukaAkun() {
-    setState(() {
-      _indeksAktif = 3;
-    });
-  }
+  final List<Widget> _daftarHalaman = const [
+    HalamanKatalog(),
+    HalamanKatalog(modeJelajah: true),
+    HalamanRiwayatPesanan(),
+    HalamanAkun(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _indeksAktif,
-        children: [
-          HalamanKatalog(onBukaAkun: _bukaAkun),
-          HalamanKatalog(modeJelajah: true, onBukaAkun: _bukaAkun),
-          const HalamanRiwayatPesanan(),
-          const HalamanAkun(),
-        ],
+        children: _daftarHalaman,
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
@@ -95,7 +91,6 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
                   ikonAktif: Icons.person,
                   ikonTidakAktif: Icons.person_outline,
                   label: 'AKUN',
-                  pakaiAvatar: true,
                 ),
               ],
             ),

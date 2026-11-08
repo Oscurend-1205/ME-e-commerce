@@ -79,7 +79,7 @@ class _HalamanAkunState extends State<HalamanAkun> {
               [
                 _bangunItemDaftar(
                   icon: Icons.location_on_outlined,
-                  label: 'Buku Alamat Pengiriman',
+                  label: 'Alamat Pengiriman',
                   trailingText: '3 Tersimpan',
                 ),
                 _bangunItemDaftar(
@@ -96,55 +96,6 @@ class _HalamanAkunState extends State<HalamanAkun> {
                       _notifikasiAktif = value;
                     });
                   },
-                ),
-                _bangunItemDaftar(
-                  icon: Icons.language_outlined,
-                  label: 'Bahasa',
-                  trailingText: 'Bahasa Indonesia (ID)',
-                ),
-                _bangunItemDaftar(
-                  icon: Icons.currency_exchange_outlined,
-                  label: 'Satuan Mata Uang',
-                  trailingText: 'IDR (Rp)',
-                ),
-              ],
-            ),
-            _bangunGrupPengaturan(
-              'Keamanan & Privasi',
-              [
-                _bangunItemDaftar(
-                  icon: Icons.lock_reset_rounded,
-                  label: 'Ganti Kata Sandi',
-                ),
-                _bangunToggleItem(
-                  icon: Icons.fingerprint_rounded,
-                  label: 'Autentikasi Biometrik',
-                  value: _biometrikAktif,
-                  onChanged: (value) {
-                    setState(() {
-                      _biometrikAktif = value;
-                    });
-                  },
-                ),
-                _bangunItemDaftar(
-                  icon: Icons.shield_outlined,
-                  label: 'Kebijakan Privasi & Data Atelier',
-                ),
-              ],
-            ),
-            _bangunGrupPengaturan(
-              'Bantuan & Dukungan',
-              [
-                _bangunItemDaftar(
-                  icon: Icons.forum_outlined,
-                  label: 'Hubungi Concierge Atelier',
-                  subtitle: '24/7 Priority VIP Concierge',
-                  badge: 'Online',
-                  badgeColor: TemaAplikasi.primary,
-                ),
-                _bangunItemDaftar(
-                  icon: Icons.help_outline_rounded,
-                  label: 'FAQ & Panduan Ukuran Busana',
                 ),
               ],
             ),
