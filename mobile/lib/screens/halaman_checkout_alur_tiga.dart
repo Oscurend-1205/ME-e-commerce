@@ -10,6 +10,7 @@ import '../theme.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/transisi_geser.dart';
 import '../widgets/widget_stepper_checkout.dart';
+import 'halaman_pembayaran.dart';
 import 'halaman_rincian_pesanan.dart';
 
 /// Halaman Checkout Alur 03 — Metode Pembayaran & Submit
@@ -108,18 +109,45 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
           ? pesananMap['id'] as int
           : int.tryParse(pesananMap['id'].toString()) ?? 0;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pesanan Anda berhasil dibuat.'),
-          backgroundColor: TemaAplikasi.primary,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      // Cek apakah ada snap_token dari Midtrans
+      final snapToken = pesananMap['snap_token'] as String?;
+      final nomorPesanan = pesananMap['nomor_pesanan'] as String? ?? '';
 
-      Navigator.pushReplacement(
-        context,
-        ruteGeser(HalamanRincianPesanan(pesananId: pesananId)),
-      );
+      if (snapToken != null && snapToken.isNotEmpty) {
+        // Navigasi ke halaman pembayaran Midtrans
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pesanan berhasil dibuat. Silakan selesaikan pembayaran.'),
+            backgroundColor: TemaAplikasi.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HalamanPembayaran(
+              pesananId: pesananId,
+              snapToken: snapToken,
+              nomorPesanan: nomorPesanan,
+            ),
+          ),
+        );
+      } else {
+        // Fallback: jika tidak ada snap_token, langsung ke rincian pesanan
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pesanan Anda berhasil dibuat.'),
+            backgroundColor: TemaAplikasi.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          ruteGeser(HalamanRincianPesanan(pesananId: pesananId)),
+        );
+      }
     } else {
       // 409 Conflict: Stok Habis saat Checkout Atomic
       if (respon.code == '409') {

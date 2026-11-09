@@ -91,5 +91,29 @@ class StatePengguna {
       perbaruiJumlahKeranjang(total);
     }
   }
+
+  /// Koleksi ID produk di Wishlist (Reaktif global)
+  static final ValueNotifier<Set<int>> wishlistNotifier = ValueNotifier<Set<int>>({});
+
+  /// Cek apakah produk berada di wishlist
+  static bool isWishlist(int produkId) => wishlistNotifier.value.contains(produkId);
+
+  /// Toggle wishlist produk
+  static void toggleWishlist(int produkId) {
+    final current = Set<int>.from(wishlistNotifier.value);
+    if (current.contains(produkId)) {
+      current.remove(produkId);
+    } else {
+      current.add(produkId);
+    }
+    wishlistNotifier.value = current;
+  }
+
+  /// Tambah produk ke wishlist
+  static void tambahWishlist(int produkId) {
+    final current = Set<int>.from(wishlistNotifier.value);
+    current.add(produkId);
+    wishlistNotifier.value = current;
+  }
 }
 

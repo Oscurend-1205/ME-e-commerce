@@ -262,6 +262,101 @@ class LayananApi {
     }
   }
 
+  /// GET /api/payment/status/{orderId} — Cek status pembayaran
+  static Future<ApiResponse> cekStatusPembayaran(String orderId) async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/payment/status/$orderId');
+
+      final respons = await _client
+          .get(uri, headers: _headers())
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
+
+  // =====================================================================
+  //  ONGKIR (RAJAONGKIR)
+  // =====================================================================
+
+  /// POST /api/ongkir — Cek ongkir real-time dari RajaOngkir
+  static Future<ApiResponse> cekOngkir({
+    required String origin,
+    required String destination,
+    required int weight,
+    String courier = 'jne,sicepat,jnt,anteraja',
+  }) async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/ongkir');
+
+      final body = {
+        'origin': origin,
+        'destination': destination,
+        'weight': weight,
+        'courier': courier,
+      };
+
+      final respons = await _client
+          .post(uri, headers: _headers(), body: jsonEncode(body))
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
+
+  /// GET /api/kota — Ambil daftar kota untuk autocomplete
+  static Future<ApiResponse> ambilKota({String? search}) async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/kota').replace(
+        queryParameters: search != null ? {'search': search} : null,
+      );
+
+      final respons = await _client
+          .get(uri, headers: _headers())
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
+
+  /// GET /api/provinsi — Ambil daftar provinsi
+  static Future<ApiResponse> ambilProvinsi() async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/provinsi');
+
+      final respons = await _client
+          .get(uri, headers: _headers())
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
+
+  /// GET /api/kecamatan — Ambil daftar kecamatan berdasarkan kota
+  static Future<ApiResponse> ambilKecamatan(String cityId) async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/kecamatan').replace(
+        queryParameters: {'city_id': cityId},
+      );
+
+      final respons = await _client
+          .get(uri, headers: _headers())
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
+
   // =====================================================================
   //  PESANAN
   // =====================================================================

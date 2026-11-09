@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\KeranjangController;
 use App\Http\Controllers\Api\KurirController;
 use App\Http\Controllers\Api\MetodePembayaranController;
+use App\Http\Controllers\Api\OngkirController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PesananController;
 use App\Http\Controllers\Api\ProdukController;
 use Illuminate\Support\Facades\Route;
@@ -33,8 +35,18 @@ Route::delete('/keranjang/{id}', [KeranjangController::class, 'destroy']);
 Route::get('/kurir', [KurirController::class, 'index']);
 Route::get('/metode-pembayaran', [MetodePembayaranController::class, 'index']);
 
+// 3.5 Endpoint Ongkir Real-time (RajaOngkir)
+Route::post('/ongkir', [OngkirController::class, 'cekOngkir']);
+Route::get('/kota', [OngkirController::class, 'getKota']);
+Route::get('/provinsi', [OngkirController::class, 'getProvinsi']);
+Route::get('/kecamatan', [OngkirController::class, 'getKecamatan']);
+
 // 4. Endpoint Checkout (Transaksi atomik, lockForUpdate, idempotensi)
 Route::post('/checkout', [CheckoutController::class, 'store']);
+
+// 4.5 Endpoint Payment (Midtrans callback)
+Route::post('/payment/callback', [PaymentController::class, 'callback']);
+Route::get('/payment/status/{orderId}', [PaymentController::class, 'checkStatus']);
 
 // 5. Endpoint Pesanan & Ubah Status
 Route::get('/pesanan', [PesananController::class, 'index']);

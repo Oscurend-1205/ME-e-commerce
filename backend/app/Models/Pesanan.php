@@ -24,6 +24,7 @@ class Pesanan extends Model
         'total',
         'status',
         'kunci_idempoten',
+        'snap_token',
     ];
 
     protected $casts = [
@@ -66,6 +67,7 @@ class Pesanan extends Model
             'catatan' => $this->catatan,
             'nama_kurir' => $this->kurir ? "{$this->kurir->nama} - {$this->kurir->wilayah}" : null,
             'metode_pembayaran' => $this->metodePembayaran ? $this->metodePembayaran->nama : null,
+            'snap_token' => $this->snap_token,
             'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
             'detail' => $this->detail->map(function ($d) {
                 return [
