@@ -272,23 +272,31 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     _pilihStory(story);
   }
 
-  List<Produk> _dapatkanProdukBaruTiba() {
+  List<Produk> _dapatkanProdukBaruTiba({int batas = 4}) {
+    List<Produk> hasil;
     if (_subKategoriBaruTiba == 'SEMUA') {
-      return _daftarProduk;
+      hasil = List<Produk>.from(_daftarProduk);
+    } else {
+      hasil = _daftarProduk.where((p) {
+        final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
+        if (_subKategoriBaruTiba == 'OUTERWEAR') {
+          return s.contains('coat') || s.contains('outer') || s.contains('jaket') || s.contains('mantel') || s.contains('blazer');
+        } else if (_subKategoriBaruTiba == 'ATASAN') {
+          return s.contains('kemeja') || s.contains('shirt') || s.contains('top') || s.contains('atasan') || s.contains('rajut') || s.contains('t-shirt');
+        } else if (_subKategoriBaruTiba == 'CELANA') {
+          return s.contains('celana') || s.contains('pant') || s.contains('trouser') || s.contains('rok');
+        } else if (_subKategoriBaruTiba == 'AKSESORI') {
+          return s.contains('tas') || s.contains('kulit') || s.contains('sabuk') || s.contains('syal') || p.kategori.toLowerCase() == 'aksesori';
+        }
+        return true;
+      }).toList();
     }
-    return _daftarProduk.where((p) {
-      final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
-      if (_subKategoriBaruTiba == 'OUTERWEAR') {
-        return s.contains('coat') || s.contains('outer') || s.contains('jaket') || s.contains('mantel') || s.contains('blazer');
-      } else if (_subKategoriBaruTiba == 'ATASAN') {
-        return s.contains('kemeja') || s.contains('shirt') || s.contains('top') || s.contains('atasan') || s.contains('rajut') || s.contains('t-shirt');
-      } else if (_subKategoriBaruTiba == 'CELANA') {
-        return s.contains('celana') || s.contains('pant') || s.contains('trouser') || s.contains('rok');
-      } else if (_subKategoriBaruTiba == 'AKSESORI') {
-        return s.contains('tas') || s.contains('kulit') || s.contains('sabuk') || s.contains('syal') || p.kategori.toLowerCase() == 'aksesori';
-      }
-      return true;
-    }).toList();
+    // Urutkan dari produk terbaru (ID terbesar) dan batasi jumlahnya untuk Beranda
+    hasil.sort((a, b) => b.id.compareTo(a.id));
+    if (hasil.length > batas) {
+      return hasil.sublist(0, batas);
+    }
+    return hasil;
   }
 
   void _toggleWishlist(Produk produk) {
@@ -575,7 +583,44 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
         // 4. Grid Produk Koleksi Baru Tiba
         _bangunDaftarProdukKoleksi(produkBaruTiba),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 14),
+
+        // Tombol Jelajahi Semua Produk untuk Navigasi ke Tab Jelajah
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () {
+                widget.onPindahTab?.call(1, 'Wanita');
+              },
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: TemaAplikasi.primary, width: 1),
+                shape: const RoundedRectangleBorder(),
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                backgroundColor: Colors.transparent,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    'JELAJAHI SEMUA PRODUK',
+                    style: TextStyle(
+                      fontSize: 11,
+                      letterSpacing: 2.0,
+                      fontWeight: FontWeight.w600,
+                      color: TemaAplikasi.primary,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(Icons.arrow_forward, size: 14, color: TemaAplikasi.primary),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 24),
 
         // 5. Kategori Pilihan (Curated Categories 2x2 Grid)
         _bangunKategoriPilihan(),
