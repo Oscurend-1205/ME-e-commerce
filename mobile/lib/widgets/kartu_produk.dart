@@ -56,6 +56,7 @@ class KartuProduk extends StatelessWidget {
                   child: FotoDummy.bangunGambar(
                     url: fotoUrl,
                     fit: BoxFit.cover,
+                    cacheWidth: 600,
                     fallbackWidget: Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
