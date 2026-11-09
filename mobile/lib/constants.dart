@@ -12,6 +12,11 @@ class Konstan {
       final host = customHost!.trim().replaceAll(RegExp(r'/+$'), '');
       return host.endsWith('/api') ? host : '$host/api';
     }
+    const envApi = String.fromEnvironment('API_URL');
+    if (envApi.isNotEmpty) {
+      final host = envApi.trim().replaceAll(RegExp(r'/+$'), '');
+      return host.endsWith('/api') ? host : '$host/api';
+    }
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return 'http://10.0.2.2:8000/api';
     }
