@@ -4,7 +4,12 @@ import '../models/alamat.dart';
 import '../theme.dart';
 
 class HalamanTambahAlamat extends StatefulWidget {
-  const HalamanTambahAlamat({super.key});
+  final Alamat? alamatAwal;
+
+  const HalamanTambahAlamat({
+    super.key,
+    this.alamatAwal,
+  });
 
   @override
   State<HalamanTambahAlamat> createState() => _HalamanTambahAlamatState();
@@ -12,26 +17,40 @@ class HalamanTambahAlamat extends StatefulWidget {
 
 class _HalamanTambahAlamatState extends State<HalamanTambahAlamat> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _namaController = TextEditingController(
-    text: 'Clarissa Adiwidjaja',
-  );
-  final TextEditingController _teleponController = TextEditingController(
-    text: '811 8899 21',
-  );
-  final TextEditingController _kotaController = TextEditingController(
-    text: 'Jakarta Pusat, Menteng - 10350',
-  );
-  final TextEditingController _alamatController = TextEditingController(
-    text:
-        'Apartemen Keraton At The Plaza, Lantai 28 Unit B, Jl. M.H. Thamrin No. 9',
-  );
-  final TextEditingController _catatanController = TextEditingController(
-    text: 'Titip di resepsionis Lobby B / concierge service',
-  );
+  final TextEditingController _namaController = TextEditingController();
+  final TextEditingController _teleponController = TextEditingController();
+  final TextEditingController _kotaController = TextEditingController();
+  final TextEditingController _alamatController = TextEditingController();
+  final TextEditingController _catatanController = TextEditingController();
 
   String _labelAlamat = 'Rumah';
   bool _jadikanUtama = true;
   bool _simpanKeBukuAlamat = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final alamatAwal = widget.alamatAwal;
+    if (alamatAwal != null) {
+      _namaController.text = alamatAwal.nama;
+      _teleponController.text = alamatAwal.telepon.replaceFirst('+62 ', '');
+      _alamatController.text = alamatAwal.alamat;
+      _catatanController.text = alamatAwal.catatan;
+      _labelAlamat = alamatAwal.label;
+      _jadikanUtama = alamatAwal.utama;
+      _simpanKeBukuAlamat = true;
+    } else {
+      _namaController.text = 'Clarissa Adiwidjaja';
+      _teleponController.text = '811 8899 21';
+      _kotaController.text = 'Jakarta Pusat, Menteng - 10350';
+      _alamatController.text =
+          'Apartemen Keraton At The Plaza, Lantai 28 Unit B, Jl. M.H. Thamrin No. 9';
+      _catatanController.text = 'Titip di resepsionis Lobby B / concierge service';
+      _labelAlamat = 'Rumah';
+      _jadikanUtama = true;
+      _simpanKeBukuAlamat = true;
+    }
+  }
 
   @override
   void dispose() {
@@ -57,7 +76,8 @@ class _HalamanTambahAlamatState extends State<HalamanTambahAlamat> {
     Navigator.pop(
       context,
       Alamat(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        id: widget.alamatAwal?.id ??
+            DateTime.now().microsecondsSinceEpoch.toString(),
         nama: _namaController.text.trim(),
         telepon: '+62 ${_teleponController.text.trim()}',
         alamat: alamatLengkap,
@@ -78,9 +98,9 @@ class _HalamanTambahAlamatState extends State<HalamanTambahAlamat> {
         foregroundColor: TemaAplikasi.primary,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: const Text(
-          'TAMBAH ALAMAT BARU',
-          style: TextStyle(
+        title: Text(
+          widget.alamatAwal == null ? 'TAMBAH ALAMAT BARU' : 'UBAH ALAMAT',
+          style: const TextStyle(
             fontSize: 15,
             letterSpacing: 1.8,
             fontWeight: FontWeight.w700,
@@ -301,9 +321,9 @@ class _HalamanTambahAlamatState extends State<HalamanTambahAlamat> {
                         backgroundColor: TemaAplikasi.primary,
                         foregroundColor: TemaAplikasi.onPrimary,
                       ),
-                      child: const Text(
-                        'SIMPAN ALAMAT',
-                        style: TextStyle(
+                      child: Text(
+                        widget.alamatAwal == null ? 'SIMPAN ALAMAT' : 'PERBARUI ALAMAT',
+                        style: const TextStyle(
                           fontSize: 12,
                           letterSpacing: 1.5,
                           fontWeight: FontWeight.w700,

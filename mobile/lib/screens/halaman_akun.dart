@@ -5,10 +5,10 @@ import '../services/state_pengguna.dart';
 import '../theme.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/komponen_header.dart';
+import 'halaman_buku_alamat.dart';
 import 'halaman_login.dart';
 import 'halaman_metode_pembayaran.dart';
 import 'halaman_riwayat_pesanan.dart';
-import 'halaman_tambah_alamat.dart';
 
 class HalamanAkun extends StatefulWidget {
   const HalamanAkun({super.key});
@@ -105,7 +105,7 @@ class _HalamanAkunState extends State<HalamanAkun> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const HalamanTambahAlamat(),
+                      builder: (_) => const HalamanBukuAlamat(),
                     ),
                   );
                 },
