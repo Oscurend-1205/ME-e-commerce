@@ -91,12 +91,12 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     {
       'label': 'Wanita',
       'foto': FotoDummy.stories[1],
-      'kat': 'Pakaian',
+      'kat': null,
     },
     {
       'label': 'Pria',
       'foto': FotoDummy.stories[2],
-      'kat': 'Pakaian',
+      'kat': null,
     },
     {
       'label': 'Aksesori',
@@ -240,7 +240,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       _kategoriTerpilih = (kategori == null || kategori == 'Semua') ? null : kategori;
       if (_kategoriTerpilih == null) {
         _storyTerpilih = widget.modeJelajah ? 'Wanita' : 'Baru Tiba';
-      } else if (_kategoriTerpilih == 'Pakaian') {
+      } else if (_kategoriTerpilih == 'Atasan' || _kategoriTerpilih == 'Bawahan' || _kategoriTerpilih == 'Pakaian') {
         _storyTerpilih = 'Wanita';
       } else if (_kategoriTerpilih == 'Aksesori') {
         _storyTerpilih = 'Aksesori';
@@ -1337,9 +1337,9 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
             mainAxisSpacing: 10,
             childAspectRatio: 0.75, // Aspek rasio 3:4 sesuai cek-beranda.html
             children: [
-              _bangunKartuKategoriFoto('01 // ESENSIAL', 'Atasan & Kemeja', FotoDummy.katAtasan, 'Pakaian', 'Wanita'),
-              _bangunKartuKategoriFoto('02 // TAILORING', 'Bawahan & Celana', FotoDummy.katBawahan, 'Pakaian', 'Pria'),
-              _bangunKartuKategoriFoto('03 // SUITING', 'Outerwear & Jas', FotoDummy.katOuterwear, 'Pakaian', 'Wanita'),
+              _bangunKartuKategoriFoto('01 // ESENSIAL', 'Atasan & Kemeja', FotoDummy.katAtasan, 'Atasan', 'Wanita'),
+              _bangunKartuKategoriFoto('02 // TAILORING', 'Bawahan & Celana', FotoDummy.katBawahan, 'Bawahan', 'Pria'),
+              _bangunKartuKategoriFoto('03 // SUITING', 'Outerwear & Jas', FotoDummy.katOuterwear, 'Atasan', 'Wanita'),
               _bangunKartuKategoriFoto('04 // AKSESORI', 'Kulit & Tas', FotoDummy.katAksesori, 'Aksesori', 'Aksesori'),
             ],
           ),
@@ -1550,7 +1550,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
         onTap: () {
-          _pilihKategori('Pakaian');
+          _pilihKategori('Atasan');
         },
         child: AspectRatio(
           aspectRatio: 4 / 3,
