@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'screens/halaman_akun.dart';
 import 'screens/halaman_katalog.dart';
-import 'screens/halaman_kelola_produk.dart';
 import 'screens/halaman_riwayat_pesanan.dart';
+import 'services/state_pengguna.dart';
 import 'theme.dart';
 
 void main() {
@@ -34,13 +34,34 @@ class HalamanUtamaNavigasi extends StatefulWidget {
 
 class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
   int _indeksAktif = 0;
+  String? _storyAwalJelajah;
 
-  final List<Widget> _daftarHalaman = const [
-    HalamanKatalog(),
-    HalamanKatalog(modeJelajah: true),
-    HalamanRiwayatPesanan(),
-    HalamanAkun(),
-    HalamanKelolaProduk(),
+  @override
+  void initState() {
+    super.initState();
+    StatePengguna.sinkronkanKeranjang();
+  }
+
+  void _pindahKeTab(int indeks, [String? story]) {
+    setState(() {
+      _indeksAktif = indeks;
+      if (story != null) {
+        _storyAwalJelajah = story;
+      }
+    });
+  }
+
+  List<Widget> get _daftarHalaman => [
+    HalamanKatalog(
+      onPindahTab: _pindahKeTab,
+    ),
+    HalamanKatalog(
+      modeJelajah: true,
+      storyAwal: _storyAwalJelajah,
+      onPindahTab: _pindahKeTab,
+    ),
+    const HalamanRiwayatPesanan(),
+    const HalamanAkun(),
   ];
 
   @override
@@ -93,12 +114,6 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
                   ikonAktif: Icons.person,
                   ikonTidakAktif: Icons.person_outline,
                   label: 'AKUN',
-                ),
-                _bangunItemTab(
-                  indeks: 4,
-                  ikonAktif: Icons.manage_accounts,
-                  ikonTidakAktif: Icons.manage_accounts_outlined,
-                  label: 'KELOLA',
                   pakaiAvatar: true,
                 ),
               ],
@@ -137,20 +152,35 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
                 Container(
                   width: 22,
                   height: 22,
-                  decoration: const BoxDecoration(
-                    color: TemaAplikasi.primary,
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
+                    border: Border.all(color: TemaAplikasi.primary, width: 1.2),
                   ),
-                  child: const Center(
-                    child: Text(
-                      'M',
-                      style: TextStyle(
-                        color: TemaAplikasi.onPrimary,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        height: 1.0,
-                      ),
-                    ),
+                  clipBehavior: Clip.antiAlias,
+                  child: ValueListenableBuilder<String>(
+                    valueListenable: StatePengguna.fotoProfilNotifier,
+                    builder: (context, foto, _) {
+                      return Image.network(
+                        foto,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Container(
+                          color: TemaAplikasi.primary,
+                          child: Center(
+                            child: Text(
+                              StatePengguna.namaUserNotifier.value.isNotEmpty
+                                  ? StatePengguna.namaUserNotifier.value[0].toUpperCase()
+                                  : 'M',
+                              style: const TextStyle(
+                                color: TemaAplikasi.onPrimary,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                height: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 )
               else

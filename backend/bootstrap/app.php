@@ -4,8 +4,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -47,13 +48,14 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // Handler umum untuk 500 Galat Server pada API
-        $exceptions->render(function (\Throwable $e, Request $request) {
+        $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->is('api/*')) {
-                $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
+                $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+
                 return response()->json([
                     'status' => 'gagal',
                     'code' => (string) $status,
-                    'message' => config('app.debug') ? $e->getMessage() : 'Terjadi kesalahan pada server.',
+                    'message' => 'Terjadi kesalahan pada server.',
                     'errors' => null,
                 ], $status);
             }

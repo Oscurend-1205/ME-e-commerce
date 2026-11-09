@@ -7,6 +7,7 @@ use App\Filament\Resources\AsetTampilans\Pages\ListAsetTampilans;
 use App\Models\AsetTampilan;
 use BackedEnum;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\BaseFileUpload;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -59,7 +60,7 @@ class AsetTampilanResource extends Resource
                             ->label('Kunci / Nama Berkas')
                             ->disabled()
                             ->dehydrated(false)
-                            ->formatStateUsing(fn (?string $state): ?string => filled($state) ? $state . '.jpg' : null),
+                            ->formatStateUsing(fn (?string $state): ?string => filled($state) ? $state.'.jpg' : null),
                         TextInput::make('grup')
                             ->label('Grup')
                             ->disabled()
@@ -77,12 +78,21 @@ class AsetTampilanResource extends Resource
                             ->imagePreviewHeight('250')
                             ->helperText('Berkas akan menimpa file lama dengan nama tetap (mis. hero-banner.jpg) sehingga aplikasi Flutter langsung memakai gambar baru.')
                             ->getUploadedFileNameForStorageUsing(
-                                fn (TemporaryUploadedFile $file, ?Model $record): string => ($record?->kunci ?? 'aset') . '.jpg'
+                                fn (TemporaryUploadedFile $file, ?Model $record): string => ($record?->kunci ?? 'aset').'.jpg'
                             )
                             ->afterStateHydrated(function (FileUpload $component, ?string $state): void {
-                                $component->state(filled($state) ? 'produk/' . basename($state) : null);
+                                $component->state(filled($state) ? 'produk/'.basename($state) : null);
                             })
                             ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? basename($state) : null)
+                            ->getUploadedFileUsing(function (BaseFileUpload $component, string $file, string|array|null $storedFileNames): ?array {
+                                $uploaded = $component->getUploadedFile($file, $storedFileNames);
+
+                                if ($uploaded !== null) {
+                                    $uploaded['url'] = url('storage/'.ltrim($file, '/'));
+                                }
+
+                                return $uploaded;
+                            })
                             ->required()
                             ->columnSpanFull(),
                     ]),
@@ -108,7 +118,7 @@ class AsetTampilanResource extends Resource
                     ->sortable(),
                 TextColumn::make('kunci')
                     ->label('Nama Berkas')
-                    ->formatStateUsing(fn (?string $state): string => $state . '.jpg')
+                    ->formatStateUsing(fn (?string $state): string => $state.'.jpg')
                     ->toggleable(),
                 TextColumn::make('updated_at')
                     ->label('Terakhir Diubah')

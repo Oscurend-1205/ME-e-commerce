@@ -64,6 +64,14 @@ class Produk extends Model
             'merek' => $this->merek,
             'gambar' => $this->gambar,
             'gambar_url' => $this->gambar_url,
+            'varian' => $this->varian ? $this->varian->map(function ($v) {
+                return [
+                    'id' => $v->id,
+                    'ukuran' => $v->ukuran,
+                    'warna' => $v->warna,
+                    'stok' => (int) $v->stok,
+                ];
+            })->values()->all() : [],
         ];
     }
 

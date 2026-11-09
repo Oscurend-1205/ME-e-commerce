@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class Konstan {
   /// URL host kustom jika pengguna ingin mengganti IP host (misal IP Wi-Fi)
   static String? customHost;
@@ -9,6 +11,9 @@ class Konstan {
     if (customHost != null && customHost!.trim().isNotEmpty) {
       final host = customHost!.trim().replaceAll(RegExp(r'/+$'), '');
       return host.endsWith('/api') ? host : '$host/api';
+    }
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:8000/api';
     }
     return 'http://127.0.0.1:8000/api';
   }

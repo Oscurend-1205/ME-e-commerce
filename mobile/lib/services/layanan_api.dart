@@ -26,14 +26,20 @@ class LayananApi {
   // =====================================================================
 
   /// GET /api/produk — Ambil daftar produk (opsional: filter kategori, cari)
-  static Future<ApiResponse> ambilProduk({String? kategori, String? cari}) async {
+  static Future<ApiResponse> ambilProduk({
+    String? kategori,
+    String? cari,
+  }) async {
     try {
       final params = <String, String>{};
-      if (kategori != null && kategori.isNotEmpty) params['kategori'] = kategori;
+      if (kategori != null && kategori.isNotEmpty) {
+        params['kategori'] = kategori;
+      }
       if (cari != null && cari.isNotEmpty) params['cari'] = cari;
 
-      final uri = Uri.parse('${Konstan.baseUrl}/produk')
-          .replace(queryParameters: params.isNotEmpty ? params : null);
+      final uri = Uri.parse(
+        '${Konstan.baseUrl}/produk',
+      ).replace(queryParameters: params.isNotEmpty ? params : null);
 
       final respons = await http
           .get(uri, headers: _headers())
@@ -76,7 +82,10 @@ class LayananApi {
   }
 
   /// PUT /api/produk/{id} — Ubah produk
-  static Future<ApiResponse> ubahProduk(int id, Map<String, dynamic> data) async {
+  static Future<ApiResponse> ubahProduk(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/produk/$id');
 
@@ -149,12 +158,18 @@ class LayananApi {
     }
   }
 
-  /// PUT /api/keranjang/{id} — Ubah jumlah item keranjang
-  static Future<ApiResponse> ubahJumlahKeranjang(int id, int jumlah) async {
+  /// PUT /api/keranjang/{id} — Ubah item keranjang (jumlah dan/atau varian)
+  static Future<ApiResponse> ubahItemKeranjang(
+    int id, {
+    int? jumlah,
+    int? varianId,
+  }) async {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/keranjang/$id');
 
-      final body = {'jumlah': jumlah};
+      final body = <String, dynamic>{};
+      if (jumlah != null) body['jumlah'] = jumlah;
+      if (varianId != null) body['varian_id'] = varianId;
 
       final respons = await http
           .put(uri, headers: _headers(), body: jsonEncode(body))
@@ -164,6 +179,11 @@ class LayananApi {
     } catch (e) {
       return _tanganiGalat(e);
     }
+  }
+
+  /// PUT /api/keranjang/{id} — Ubah jumlah item keranjang
+  static Future<ApiResponse> ubahJumlahKeranjang(int id, int jumlah) {
+    return ubahItemKeranjang(id, jumlah: jumlah);
   }
 
   /// DELETE /api/keranjang/{id} — Hapus item dari keranjang
@@ -330,8 +350,9 @@ class LayananApi {
     if (e is SocketException) {
       return ApiResponse(
         status: 'gagal',
-        code: 'NETWORK',
-        message: 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',
+        code: 'NO_CONNECTION',
+        message:
+            'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',
       );
     }
 

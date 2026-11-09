@@ -23,9 +23,29 @@ class VarianProduk extends Model
         'stok' => 'integer',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (VarianProduk $varian): void {
+            if (blank($varian->sku)) {
+                $varian->sku = static::buatSku($varian);
+            }
+        });
+    }
+
+    public static function buatSku(VarianProduk $varian): string
+    {
+        $produk = $varian->produk;
+        $merekBersih = strtoupper((string) preg_replace('/[^A-Za-z0-9]/', '', $produk?->merek ?? 'ME'));
+        $merek = substr($merekBersih !== '' ? $merekBersih : 'ME', 0, 3);
+        $produkId = $produk?->id ?? $varian->produk_id ?? 0;
+
+        return $merek.'-'.$produkId
+            .'-'.strtoupper(substr($varian->ukuran, 0, 2))
+            .'-'.strtoupper(substr($varian->warna, 0, 3));
+    }
+
     public function produk()
     {
         return $this->belongsTo(Produk::class, 'produk_id');
     }
 }
-

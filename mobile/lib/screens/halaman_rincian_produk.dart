@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import '../enums.dart';
 import '../models/produk.dart';
 import '../services/layanan_api.dart';
+import '../services/state_pengguna.dart';
 import '../theme.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/format_rupiah.dart';
+import '../widgets/komponen_header.dart';
 import '../widgets/pemilih_varian.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_keranjang.dart';
@@ -115,6 +117,7 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
     });
 
     if (respon.berhasil) {
+      StatePengguna.sinkronkanKeranjang();
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -186,6 +189,10 @@ duration: const Duration(milliseconds: 1500),
         foregroundColor: TemaAplikasi.primary,
         elevation: 0,
         scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => NavigasiUniversal.kembali(context),
+        ),
         title: Text(
           _produk?.nama.toUpperCase() ?? 'RINCIAN PRODUK',
           style: const TextStyle(
@@ -195,18 +202,8 @@ duration: const Duration(milliseconds: 1500),
           ),
           overflow: TextOverflow.ellipsis,
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_bag_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HalamanKeranjang(),
-                ),
-              );
-            },
-          ),
+        actions: const [
+          TombolTasHeader(),
         ],
       ),
       body: _bangunKonten(),
