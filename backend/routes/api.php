@@ -49,7 +49,12 @@ Route::get('/gambar/{filename}', function ($filename) {
         $path = storage_path('app/public/' . $filename);
     }
     if (!file_exists($path)) {
-        abort(404, 'Gambar tidak ditemukan: ' . $cleanName);
+        $fallback = storage_path('app/public/produk/1.jpg');
+        if (file_exists($fallback)) {
+            $path = $fallback;
+        } else {
+            abort(404, 'Gambar tidak ditemukan: ' . $cleanName);
+        }
     }
     $mime = mime_content_type($path) ?: 'image/jpeg';
     return response()->file($path, [

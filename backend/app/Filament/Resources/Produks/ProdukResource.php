@@ -140,7 +140,7 @@ class ProdukResource extends Resource
                 Section::make('Gambar Produk')
                     ->schema([
                         FileUpload::make('gambar')
-                            ->label('Gambar')
+                            ->label('Gambar Produk')
                             ->image()
                             ->disk('public')
                             ->directory('produk')
@@ -155,7 +155,7 @@ class ProdukResource extends Resource
                                 $uploaded = $component->getUploadedFile($file, $storedFileNames);
 
                                 if ($uploaded !== null) {
-                                    $uploaded['url'] = url('storage/'.ltrim($file, '/'));
+                                    $uploaded['url'] = url('/api/gambar/'.basename($file));
                                 }
 
                                 return $uploaded;
@@ -181,6 +181,7 @@ class ProdukResource extends Resource
                             ->label('')
                             ->imageWidth('100%')
                             ->imageHeight('12rem')
+                            ->defaultImageUrl(url('/api/gambar/1.jpg'))
                             ->extraImgAttributes(['class' => 'object-cover']),
                         TextColumn::make('nama')
                             ->label('')

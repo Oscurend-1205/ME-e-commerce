@@ -45,7 +45,7 @@ class Produk extends Model
     public function getGambarUrlAttribute(): ?string
     {
         if (blank($this->gambar)) {
-            return null;
+            return url('/api/gambar/1.jpg');
         }
         if (str_starts_with($this->gambar, 'http://') || str_starts_with($this->gambar, 'https://')) {
             return $this->gambar;
