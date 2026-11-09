@@ -11,6 +11,7 @@ import '../widgets/format_rupiah.dart';
 import '../widgets/transisi_geser.dart';
 import '../widgets/widget_stepper_checkout.dart';
 import 'halaman_pembayaran.dart';
+import 'halaman_pembayaran_qris.dart';
 import 'halaman_rincian_pesanan.dart';
 
 /// Halaman Checkout Alur 03 — Metode Pembayaran & Submit
@@ -109,11 +110,32 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
           ? pesananMap['id'] as int
           : int.tryParse(pesananMap['id'].toString()) ?? 0;
 
-      // Cek apakah ada snap_token dari Midtrans
+      // Cek apakah metode pembayaran adalah QRIS
+      final kodeMetode = _metodeTerpilihFinal?.kode ?? '';
       final snapToken = pesananMap['snap_token'] as String?;
       final nomorPesanan = pesananMap['nomor_pesanan'] as String? ?? '';
 
-      if (snapToken != null && snapToken.isNotEmpty) {
+      if (kodeMetode == 'qris') {
+        // Navigasi ke halaman QRIS
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pesanan berhasil dibuat. Silakan scan QRIS untuk pembayaran.'),
+            backgroundColor: TemaAplikasi.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HalamanPembayaranQris(
+              pesananId: pesananId,
+              nomorPesanan: nomorPesanan,
+              total: pesananMap['total'] ?? 0,
+            ),
+          ),
+        );
+      } else if (snapToken != null && snapToken.isNotEmpty) {
         // Navigasi ke halaman pembayaran Midtrans
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -134,19 +156,8 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
           ),
         );
       } else {
-        // Fallback: jika tidak ada snap_token, langsung ke rincian pesanan
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Pesanan Anda berhasil dibuat.'),
-            backgroundColor: TemaAplikasi.primary,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-
-        Navigator.pushReplacement(
-          context,
-          ruteGeser(HalamanRincianPesanan(pesananId: pesananId)),
-        );
+        // Fallback: jika tidak ada snap_token, tampilkan opsi manual
+        _tampilkanOpsiPembayaranManual(pesananId, pesananMap);
       }
     } else {
       // 409 Conflict: Stok Habis saat Checkout Atomic
@@ -207,6 +218,98 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
         );
       }
     }
+  }
+
+  void _tampilkanOpsiPembayaranManual(int pesananId, Map<String, dynamic> pesananMap) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: TemaAplikasi.surfaceWhite,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(2),
+        ),
+        title: const Text(
+          'Pembayaran Manual',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+            color: TemaAplikasi.primary,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Payment gateway tidak tersedia. Pilih opsi pembayaran manual:',
+              style: TextStyle(
+                color: TemaAplikasi.secondary,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Nomor Pesanan:',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: TemaAplikasi.primary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              pesananMap['nomor_pesanan'] ?? '',
+              style: const TextStyle(
+                color: TemaAplikasi.secondary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Total Pembayaran:',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: TemaAplikasi.primary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              formatRupiah(pesananMap['total'] ?? 0),
+              style: const TextStyle(
+                color: TemaAplikasi.secondary,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              // Langsung ke rincian pesanan (mode simulasi)
+              Navigator.pushReplacement(
+                context,
+                ruteGeser(HalamanRincianPesanan(pesananId: pesananId)),
+              );
+            },
+            child: const Text(
+              'BAYAR MANUAL (TEST)',
+              style: TextStyle(
+                color: TemaAplikasi.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'BATAL',
+              style: TextStyle(
+                color: TemaAplikasi.secondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
