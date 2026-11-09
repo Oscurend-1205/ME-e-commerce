@@ -80,6 +80,8 @@ class FotoDummy {
     BoxFit fit = BoxFit.cover,
     double? width,
     double? height,
+    int? cacheWidth,
+    int? cacheHeight,
     Widget? fallbackWidget,
   }) {
     return Image.network(
@@ -87,6 +89,8 @@ class FotoDummy {
       width: width,
       height: height,
       fit: fit,
+      cacheWidth: cacheWidth,
+      cacheHeight: cacheHeight,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
         return Container(

@@ -45,8 +45,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
 
   // Controller Animasi Scroll & Marquee Landing Page
   final ScrollController _scrollController = ScrollController();
-  double _posisiScroll = 0.0;
-  double _progressScroll = 0.0;
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
   bool _tampilkanTombolKeAtas = false;
 
   // Filter Subkategori untuk Koleksi Baru Tiba di Beranda Landing Page
@@ -155,14 +154,11 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   void _tanganiScroll() {
     if (!mounted || !_scrollController.hasClients) return;
     final offset = _scrollController.offset;
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final progress = maxScroll > 0 ? (offset / maxScroll).clamp(0.0, 1.0) : 0.0;
-    final tampilTombol = offset > 400;
+    _scrollOffset.value = offset;
 
-    if (tampilTombol != _tampilkanTombolKeAtas || (_posisiScroll - offset).abs() > 4) {
+    final tampilTombol = offset > 400;
+    if (tampilTombol != _tampilkanTombolKeAtas) {
       setState(() {
-        _posisiScroll = offset;
-        _progressScroll = progress;
         _tampilkanTombolKeAtas = tampilTombol;
       });
     }
@@ -172,6 +168,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   void dispose() {
     _scrollController.removeListener(_tanganiScroll);
     _scrollController.dispose();
+    _scrollOffset.dispose();
     _cariController.dispose();
     _emailVipController.dispose();
     super.dispose();
@@ -463,7 +460,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 1. Hero Banner dengan Efek Animasi Scroll Parallax & Overscroll Scale
-        _bangunHeroBanner(),
+        ValueListenableBuilder<double>(
+          valueListenable: _scrollOffset,
+          builder: (context, offset, _) => _bangunHeroBanner(offset),
+        ),
 
         // 2. Animated Continuous Marquee Ribbon
         const _MarqueeRunningText(
@@ -1007,16 +1007,8 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
         ..._bangunHeaderActions(),
         const AvatarHeaderUser(),
       ],
-      bottom: (!widget.modeJelajah && _progressScroll > 0)
-          ? PreferredSize(
-              preferredSize: const Size.fromHeight(2),
-              child: LinearProgressIndicator(
-                value: _progressScroll,
-                backgroundColor: Colors.transparent,
-                valueColor: const AlwaysStoppedAnimation<Color>(TemaAplikasi.primary),
-                minHeight: 2,
-              ),
-            )
+      bottom: (!widget.modeJelajah)
+          ? _HeaderScrollProgress(controller: _scrollController)
           : null,
     );
   }
@@ -1090,6 +1082,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                           child: FotoDummy.bangunGambar(
                             url: story['foto'] as String,
                             fit: BoxFit.cover,
+                            cacheWidth: 256,
                             fallbackWidget: Container(
                               color: isSelected
                                   ? TemaAplikasi.primary
@@ -1127,10 +1120,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   }
 
   // 2. Full-bleed Mobile Hero Editorial Banner (cek-beranda.html)
-  Widget _bangunHeroBanner() {
-    final parallaxOffset = (_posisiScroll * 0.35).clamp(0.0, 100.0);
-    final overscrollScale = _posisiScroll < 0 ? (-_posisiScroll / 350.0).clamp(0.0, 0.25) : 0.0;
-    final textOpacity = (1.0 - (_posisiScroll / 300.0)).clamp(0.0, 1.0);
+  Widget _bangunHeroBanner(double posisiScroll) {
+    final parallaxOffset = (posisiScroll * 0.35).clamp(0.0, 100.0);
+    final overscrollScale = posisiScroll < 0 ? (-posisiScroll / 350.0).clamp(0.0, 0.25) : 0.0;
+    final textOpacity = (1.0 - (posisiScroll / 300.0)).clamp(0.0, 1.0);
 
     return Container(
       width: double.infinity,
@@ -1152,6 +1145,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
               child: FotoDummy.bangunGambar(
                 url: FotoDummy.heroBanner,
                 fit: BoxFit.cover,
+                cacheWidth: 1080,
               ),
             ),
           ),
@@ -1420,6 +1414,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
             FotoDummy.bangunGambar(
               url: urlFoto,
               fit: BoxFit.cover,
+              cacheWidth: 720,
             ),
             Container(
               decoration: const BoxDecoration(
@@ -1524,6 +1519,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
               child: FotoDummy.bangunGambar(
                 url: FotoDummy.manifesto,
                 fit: BoxFit.cover,
+                cacheWidth: 1080,
               ),
             ),
           ),
@@ -1611,6 +1607,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 FotoDummy.bangunGambar(
                   url: FotoDummy.siluetBaru,
                   fit: BoxFit.cover,
+                  cacheWidth: 1080,
                 ),
                 Container(
                   decoration: const BoxDecoration(
@@ -2252,6 +2249,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                   FotoDummy.bangunGambar(
                     url: FotoDummy.heroWanita,
                     fit: BoxFit.cover,
+                    cacheWidth: 1080,
                   ),
                   Container(
                     decoration: const BoxDecoration(
@@ -2636,6 +2634,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                   FotoDummy.bangunGambar(
                     url: FotoDummy.heroPria,
                     fit: BoxFit.cover,
+                    cacheWidth: 1080,
                   ),
                   Container(
                     decoration: const BoxDecoration(
@@ -3072,6 +3071,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                   child: FotoDummy.bangunGambar(
                     url: foto,
                     fit: BoxFit.cover,
+                    cacheWidth: 1080,
                   ),
                 ),
                 Positioned(
@@ -3286,6 +3286,58 @@ class _MarqueeRunningTextState extends State<_MarqueeRunningText> {
           );
         },
       ),
+    );
+  }
+}
+
+/// Progress bar scroll di header yang hanya me-rebuild dirinya sendiri,
+/// sehingga offset scroll tidak memicu rebuild seluruh halaman.
+class _HeaderScrollProgress extends StatefulWidget implements PreferredSizeWidget {
+  const _HeaderScrollProgress({required this.controller});
+
+  final ScrollController controller;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(2);
+
+  @override
+  State<_HeaderScrollProgress> createState() => _HeaderScrollProgressState();
+}
+
+class _HeaderScrollProgressState extends State<_HeaderScrollProgress> {
+  double _progress = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_perbarui);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_perbarui);
+    super.dispose();
+  }
+
+  void _perbarui() {
+    if (!mounted || !widget.controller.hasClients) return;
+    final maxScroll = widget.controller.position.maxScrollExtent;
+    final progress = maxScroll > 0
+        ? (widget.controller.offset / maxScroll).clamp(0.0, 1.0)
+        : 0.0;
+    if ((progress - _progress).abs() > 0.005) {
+      setState(() => _progress = progress);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_progress <= 0) return const SizedBox(height: 2);
+    return LinearProgressIndicator(
+      value: _progress,
+      backgroundColor: Colors.transparent,
+      valueColor: const AlwaysStoppedAnimation<Color>(TemaAplikasi.primary),
+      minHeight: 2,
     );
   }
 }
