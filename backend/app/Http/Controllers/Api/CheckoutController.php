@@ -232,32 +232,58 @@ class CheckoutController extends Controller
             }
 
             try {
-                $snapToken = $this->midtrans->generateSnapToken([
-                    'order_id' => $pesananBaru->nomor_pesanan,
-                    'gross_amount' => (int) $pesananBaru->total,
-                    'customer_name' => $pesananBaru->nama_penerima,
-                    'customer_email' => 'customer@example.com',
-                    'customer_phone' => '',
-                    'item_details' => $itemDetails,
-                ]);
+                if ($metode->kode === 'qris') {
+                    $qrisData = $this->midtrans->generateQrisTransaction([
+                        'order_id' => $pesananBaru->nomor_pesanan,
+                        'gross_amount' => (int) $pesananBaru->total,
+                        'customer_name' => $pesananBaru->nama_penerima,
+                        'customer_email' => 'customer@example.com',
+                        'customer_phone' => '',
+                        'item_details' => $itemDetails,
+                    ]);
 
-                // Simpan snap token ke database
-                $pesananBaru->update(['snap_token' => $snapToken]);
+                    $pesananBaru->update(['snap_token' => $qrisData['transaction_id'] ?? $pesananBaru->nomor_pesanan]);
 
-                $dataPesanan = $pesananBaru->formatLengkap();
-                $dataPesanan['snap_token'] = $snapToken;
-                $dataPesanan['client_key'] = $this->midtrans->getClientKey();
+                    $dataPesanan = $pesananBaru->formatLengkap();
+                    $dataPesanan['snap_token'] = $qrisData['transaction_id'] ?? null;
+                    $dataPesanan['qr_url'] = $qrisData['qr_url'] ?? null;
+                    $dataPesanan['qr_string'] = $qrisData['qr_string'] ?? null;
+                    $dataPesanan['expired_at'] = $qrisData['expired_at'] ?? null;
+                    $dataPesanan['client_key'] = $this->midtrans->getClientKey();
 
-                return $this->sukses(
-                    $dataPesanan,
-                    'Pesanan berhasil dibuat. Silakan selesaikan pembayaran.',
-                    201
-                );
+                    return $this->sukses(
+                        $dataPesanan,
+                        'Pesanan berhasil dibuat. Silakan scan QRIS untuk menyelesaikan pembayaran.',
+                        201
+                    );
+                } else {
+                    $snapToken = $this->midtrans->generateSnapToken([
+                        'order_id' => $pesananBaru->nomor_pesanan,
+                        'gross_amount' => (int) $pesananBaru->total,
+                        'customer_name' => $pesananBaru->nama_penerima,
+                        'customer_email' => 'customer@example.com',
+                        'customer_phone' => '',
+                        'item_details' => $itemDetails,
+                    ]);
+
+                    // Simpan snap token ke database
+                    $pesananBaru->update(['snap_token' => $snapToken]);
+
+                    $dataPesanan = $pesananBaru->formatLengkap();
+                    $dataPesanan['snap_token'] = $snapToken;
+                    $dataPesanan['client_key'] = $this->midtrans->getClientKey();
+
+                    return $this->sukses(
+                        $dataPesanan,
+                        'Pesanan berhasil dibuat. Silakan selesaikan pembayaran.',
+                        201
+                    );
+                }
             } catch (\Exception $e) {
                 report($e);
                 // Jika Midtrans gagal, tetap return pesanan tanpa snap token
                 $dataPesanan = $pesananBaru->formatLengkap();
-                $dataPesanan['error_midtrans'] = 'Gagal generate payment gateway. Hubungi admin.';
+                $dataPesanan['error_midtrans'] = 'Gagal generate payment gateway (' . $e->getMessage() . ').';
 
                 return $this->sukses(
                     $dataPesanan,

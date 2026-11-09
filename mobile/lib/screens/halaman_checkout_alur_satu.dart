@@ -166,74 +166,80 @@ class _HalamanCheckoutAlurSatuState extends State<HalamanCheckoutAlurSatu> {
     return Container(
       width: double.infinity,
       color: TemaAplikasi.surfaceBright,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              InkWell(
-                onTap: () => Navigator.pop(context),
-                borderRadius: BorderRadius.circular(2),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.arrow_back,
-                        size: 18,
-                        color: TemaAplikasi.secondary,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  InkWell(
+                    onTap: () => Navigator.pop(context),
+                    borderRadius: BorderRadius.circular(2),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.arrow_back,
+                            size: 18,
+                            color: TemaAplikasi.secondary,
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            'Kembali ke Tas Belanja',
+                            style: TextStyle(
+                              fontSize: 10,
+                              letterSpacing: 1.2,
+                              fontWeight: FontWeight.w600,
+                              color: TemaAplikasi.secondary,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 6),
-                      Text(
-                        'Kembali ke Tas Belanja',
-                        style: TextStyle(
-                          fontSize: 10,
-                          letterSpacing: 1.2,
-                          fontWeight: FontWeight.w600,
-                          color: TemaAplikasi.secondary,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                  const Text(
+                    'LANGKAH 01 / 03',
+                    style: TextStyle(
+                      fontSize: 10,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w600,
+                      color: TemaAplikasi.secondary,
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 12),
               const Text(
-                'LANGKAH 01 / 03',
+                'Checkout Pesanan',
                 style: TextStyle(
-                  fontSize: 10,
-                  letterSpacing: 1.2,
+                  fontFamily: 'PlayfairDisplay',
+                  fontSize: 24,
                   fontWeight: FontWeight.w600,
-                  color: TemaAplikasi.secondary,
+                  letterSpacing: -0.3,
+                  color: TemaAplikasi.primary,
+                  height: 1.2,
                 ),
               ),
+              const SizedBox(height: 2),
+              const Text(
+                'Tinjau pesanan dan ringkasan tas belanja Anda',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: TemaAplikasi.secondary,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const WidgetStepperCheckout(langkahAktif: 1),
             ],
           ),
-          const SizedBox(height: 12),
-          const Text(
-            'Checkout Pesanan',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w400,
-              letterSpacing: -0.3,
-              color: TemaAplikasi.primary,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 2),
-          const Text(
-            'Tinjau pesanan dan ringkasan tas belanja Anda',
-            style: TextStyle(
-              fontSize: 12,
-              color: TemaAplikasi.secondary,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const WidgetStepperCheckout(langkahAktif: 1),
-        ],
+        ),
       ),
     );
   }

@@ -54,6 +54,57 @@ class MidtransService
     }
 
     /**
+     * Generate QRIS Core API transaction via Midtrans
+     *
+     * @param array $params
+     * @return array
+     */
+    public function generateQrisTransaction(array $params): array
+    {
+        $payload = [
+            'payment_type' => 'qris',
+            'transaction_details' => [
+                'order_id' => $params['order_id'],
+                'gross_amount' => (int) $params['gross_amount'],
+            ],
+            'qris' => [
+                'acquirer' => 'gopay',
+            ],
+            'customer_details' => [
+                'first_name' => $params['customer_name'] ?? 'Pelanggan',
+                'email' => $params['customer_email'] ?? 'customer@example.com',
+                'phone' => $params['customer_phone'] ?? '',
+            ],
+            'item_details' => $params['item_details'] ?? [],
+        ];
+
+        $response = \Midtrans\CoreApi::charge($payload);
+
+        $qrUrl = null;
+        if (isset($response->actions) && (is_array($response->actions) || is_object($response->actions))) {
+            foreach ($response->actions as $action) {
+                $name = is_object($action) ? ($action->name ?? '') : ($action['name'] ?? '');
+                $url = is_object($action) ? ($action->url ?? '') : ($action['url'] ?? '');
+                if ($name === 'generate-qr-code') {
+                    $qrUrl = $url;
+                    break;
+                }
+            }
+        }
+
+        $qrString = is_object($response) ? ($response->qr_string ?? null) : ($response['qr_string'] ?? null);
+        $transactionId = is_object($response) ? ($response->transaction_id ?? null) : ($response['transaction_id'] ?? null);
+        $expiryTime = is_object($response) ? ($response->expiry_time ?? null) : ($response['expiry_time'] ?? null);
+
+        return [
+            'transaction_id' => $transactionId,
+            'qr_url' => $qrUrl,
+            'qr_string' => $qrString,
+            'expired_at' => $expiryTime,
+        ];
+    }
+
+    /**
      * Verifikasi signature callback
      *
      * @param string $orderId - order ID

@@ -118,6 +118,31 @@ class PaymentController extends Controller
             ], 404);
         }
 
+        // Jika masih menunggu pembayaran, cek langsung ke Midtrans API
+        // untuk mendukung sinkronisasi real-time tanpa harus menunggu webhook (misal di localhost)
+        if ($pesanan->status === 'menunggu_pembayaran') {
+            try {
+                $midtransStatus = $this->midtrans->getTransactionDetail($orderId);
+                if ($midtransStatus) {
+                    $trxStatus = is_object($midtransStatus)
+                        ? ($midtransStatus->transaction_status ?? null)
+                        : ($midtransStatus['transaction_status'] ?? null);
+                    $fraudStatus = is_object($midtransStatus)
+                        ? ($midtransStatus->fraud_status ?? null)
+                        : ($midtransStatus['fraud_status'] ?? null);
+
+                    if ($trxStatus) {
+                        $statusBaru = $this->determineStatus($trxStatus, $fraudStatus);
+                        if ($statusBaru && $statusBaru !== $pesanan->status) {
+                            $pesanan->update(['status' => $statusBaru]);
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::info('Cek status Midtrans silent error: ' . $e->getMessage());
+            }
+        }
+
         return response()->json([
             'status' => true,
             'data' => [
