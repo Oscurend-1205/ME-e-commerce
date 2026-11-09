@@ -697,9 +697,9 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Foto Editorial ME MINIMALISM
-          FotoDummy.bangunGambar(
-            url: FotoDummy.heroBanner,
+          // Foto editorial lokal agar banner tetap tampil tanpa koneksi backend.
+          Image.asset(
+            'assets/images/foto-koleksi.jpeg',
             fit: BoxFit.cover,
           ),
 

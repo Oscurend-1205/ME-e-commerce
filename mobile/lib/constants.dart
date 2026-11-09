@@ -4,12 +4,20 @@ class Konstan {
   /// URL host kustom jika pengguna ingin mengganti IP host (misal IP Wi-Fi)
   static String? customHost;
 
+  static String _normalisasiHost(String value) {
+    var host = value.trim().replaceAll(RegExp(r'/+$'), '');
+    if (!host.startsWith('http://') && !host.startsWith('https://')) {
+      host = 'http://$host';
+    }
+    return host;
+  }
+
   /// URL API terpusat:
   /// - Jika customHost diisi, gunakan customHost.
   /// - Default: http://127.0.0.1:8000/api (berfungsi di Web, Windows, dan HP fisik via USB/ADB Reverse).
   static String get baseUrl {
     if (customHost != null && customHost!.trim().isNotEmpty) {
-      final host = customHost!.trim().replaceAll(RegExp(r'/+$'), '');
+      final host = _normalisasiHost(customHost!);
       return host.endsWith('/api') ? host : '$host/api';
     }
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {

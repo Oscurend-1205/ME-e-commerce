@@ -11,7 +11,9 @@ enum JenisGalat {
 
 /// Fungsi pembantu untuk memetakan kode respons/galat ke enum JenisGalat
 JenisGalat tentukanJenisGalat(String? kode) {
-  switch (kode) {
+  final normal = (kode ?? '').trim().toUpperCase();
+
+  switch (normal) {
     case 'NO_CONNECTION':
     case 'NETWORK':
       return JenisGalat.tidakAdaSambungan;
