@@ -13,6 +13,7 @@ use App\Models\Produk;
 use App\Models\User;
 use App\Models\VarianProduk;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
@@ -33,15 +34,15 @@ class DatabaseSeeder extends Seeder
 
         // Nonaktifkan foreign keys dan bersihkan tabel transaksi & katalog agar seeder bersifat idempoten
         Schema::disableForeignKeyConstraints();
-        DetailPesanan::truncate();
-        Pesanan::truncate();
-        Keranjang::truncate();
-        VarianProduk::truncate();
-        Produk::truncate();
-        Kategori::truncate();
-        Pelanggan::truncate();
-        Kurir::truncate();
-        MetodePembayaran::truncate();
+        DetailPesanan::query()->delete();
+        Pesanan::query()->delete();
+        Keranjang::query()->delete();
+        VarianProduk::query()->delete();
+        Produk::query()->delete();
+        Kategori::query()->delete();
+        Pelanggan::query()->delete();
+        Kurir::query()->delete();
+        MetodePembayaran::query()->delete();
         Schema::enableForeignKeyConstraints();
 
         // 1. Pelanggan Tetap untuk Pengujian (PRD Bagian 9)
@@ -772,5 +773,10 @@ class DatabaseSeeder extends Seeder
             'jumlah' => 2,
             'subtotal' => 178000,
         ]);
+
+        // Sinkronisasi data katalog & foto dari snapshot tim jika ada
+        if (file_exists(database_path('data/katalog.json'))) {
+            Artisan::call('katalog:import');
+        }
     }
 }
