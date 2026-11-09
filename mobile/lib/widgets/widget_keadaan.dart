@@ -127,9 +127,9 @@ class WidgetGalat extends StatelessWidget {
                     },
                   ),
                   ActionChip(
-                    label: const Text('Wi-Fi PC (172.16.187.168)'),
+                    label: const Text('Wi-Fi PC (192.168.1.9)'),
                     onPressed: () {
-                      controller.text = 'http://172.16.187.168:8000/api';
+                      controller.text = 'http://192.168.1.9:8000/api';
                     },
                   ),
                   ActionChip(
