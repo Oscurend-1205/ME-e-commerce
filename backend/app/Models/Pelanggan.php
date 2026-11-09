@@ -10,7 +10,27 @@ class Pelanggan extends Model
     use HasFactory;
 
     protected $table = 'pelanggan';
-    protected $fillable = ['nama'];
+
+    protected $fillable = [
+        'nama',
+        'email',
+        'password',
+        'no_telp',
+        'foto',
+        'api_token',
+    ];
+
+    protected $hidden = [
+        'password',
+        'api_token',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'password' => 'hashed',
+        ];
+    }
 
     public function keranjang()
     {
@@ -22,4 +42,3 @@ class Pelanggan extends Model
         return $this->hasMany(Pesanan::class, 'pelanggan_id');
     }
 }
-

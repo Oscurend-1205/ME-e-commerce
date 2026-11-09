@@ -6,8 +6,11 @@ import 'screens/halaman_riwayat_pesanan.dart';
 import 'services/state_pengguna.dart';
 import 'theme.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Pulihkan sesi login tersimpan agar keranjang & pesanan tetap utuh
+  // setelah aplikasi ditutup dan dibuka kembali.
+  await StatePengguna.muatSesiTersimpan();
   runApp(const AplikasiME());
 }
 

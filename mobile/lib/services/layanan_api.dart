@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 import '../constants.dart';
 import '../models/api_response.dart';
+import 'state_pengguna.dart';
 
 class LayananApi {
   /// HTTP client bersama agar koneksi (keep-alive) dipakai ulang
@@ -14,15 +15,105 @@ class LayananApi {
 
   // === Header standar ===
   static Map<String, String> _headers({Map<String, String>? tambahan}) {
-    final headers = {
+    final headers = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'X-Pelanggan-Id': Konstan.pelangganId.toString(),
     };
+    // Jika sudah login, sertakan token Bearer untuk autentikasi
+    final token = StatePengguna.tokenNotifier.value;
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
     if (tambahan != null) {
       headers.addAll(tambahan);
     }
     return headers;
+  }
+
+  // =====================================================================
+  //  AUTENTIKASI
+  // =====================================================================
+
+  /// POST /api/auth/register — Daftar akun baru
+  static Future<ApiResponse> register({
+    required String nama,
+    required String email,
+    required String password,
+    String? noTelp,
+  }) async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/auth/register');
+
+      final body = <String, dynamic>{
+        'nama': nama,
+        'email': email,
+        'password': password,
+      };
+      if (noTelp != null && noTelp.isNotEmpty) {
+        body['no_telp'] = noTelp;
+      }
+
+      final respons = await _client
+          .post(uri, headers: _headers(), body: jsonEncode(body))
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
+
+  /// POST /api/auth/login — Masuk dengan email & password
+  static Future<ApiResponse> login({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/auth/login');
+
+      final body = {
+        'email': email,
+        'password': password,
+      };
+
+      final respons = await _client
+          .post(uri, headers: _headers(), body: jsonEncode(body))
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
+
+  /// POST /api/auth/logout — Keluar dari akun
+  static Future<ApiResponse> logout() async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/auth/logout');
+
+      final respons = await _client
+          .post(uri, headers: _headers())
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
+
+  /// GET /api/auth/me — Ambil data profil yang sedang login
+  static Future<ApiResponse> ambilProfil() async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/auth/me');
+
+      final respons = await _client
+          .get(uri, headers: _headers())
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
   }
 
   // =====================================================================

@@ -15,6 +15,7 @@ import '../widgets/modal_pilih_varian.dart';
 import '../widgets/widget_keadaan.dart';
 import '../widgets/transisi_geser.dart';
 import 'halaman_checkout_alur_satu.dart';
+import 'halaman_login.dart';
 import 'halaman_rincian_produk.dart';
 
 class HalamanKeranjang extends StatefulWidget {
@@ -1338,6 +1339,10 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
               child: ElevatedButton.icon(
                 onPressed: adaItem
                     ? () {
+                        if (!StatePengguna.isLoggedInNotifier.value) {
+                          _tampilkanDialogHarusLogin();
+                          return;
+                        }
                         Navigator.push(
                           context,
                           ruteGeser(const HalamanCheckoutAlurSatu()),
@@ -1368,5 +1373,55 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
         ),
       ),
     );
+  }
+
+  Future<void> _tampilkanDialogHarusLogin() async {
+    final lanjut = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: TemaAplikasi.surfaceWhite,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        title: const Text(
+          'Masuk Diperlukan',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: TemaAplikasi.primary,
+          ),
+        ),
+        content: const Text(
+          'Silakan masuk atau daftar akun terlebih dahulu untuk melanjutkan checkout.',
+          style: TextStyle(fontSize: 13, color: TemaAplikasi.secondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            style: TextButton.styleFrom(
+              foregroundColor: TemaAplikasi.secondary,
+            ),
+            child: const Text('NANTI'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: TemaAplikasi.primary,
+              foregroundColor: TemaAplikasi.onPrimary,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            child: const Text('MASUK'),
+          ),
+        ],
+      ),
+    );
+
+    if (lanjut == true && mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const HalamanLogin()),
+      );
+    }
   }
 }

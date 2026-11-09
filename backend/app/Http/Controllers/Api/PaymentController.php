@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Pesanan;
 use App\Services\MidtransService;
+use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
+    use ApiResponse;
+
     protected MidtransService $midtrans;
 
     public function __construct()
@@ -24,7 +27,6 @@ class PaymentController extends Controller
     public function callback(Request $request): JsonResponse
     {
         $serverKey = config('services.midtrans.server_key', env('MIDTRANS_SERVER_KEY'));
-        $isProduction = config('services.midtrans.is_production', env('MIDTRANS_IS_PRODUCTION', false));
 
         $orderId = $request->input('order_id');
         $statusCode = $request->input('status_code');
@@ -51,7 +53,7 @@ class PaymentController extends Controller
                 'expected' => $hashed,
                 'received' => $signatureKey,
             ]);
-            return response()->json(['message' => 'Invalid signature'], 400);
+            return $this->gagal('Signature tidak valid.', 400);
         }
 
         // Cari pesanan
@@ -59,36 +61,39 @@ class PaymentController extends Controller
 
         if (!$pesanan) {
             Log::warning('Pesanan tidak ditemukan untuk order_id: ' . $orderId);
-            return response()->json(['message' => 'Order not found'], 404);
+            return $this->gagal('Pesanan tidak ditemukan.', 404);
         }
 
-        // Update status pesanan berdasarkan transaction status
-        $statusBaru = $this->determineStatus($transactionStatus, $fraudStatus);
+        // Update status pesanan berdasarkan transaction status.
+        // Hanya status yang disepakati PRD yang boleh ditulis ke pesanan.
+        $statusBaru = $this->tentukanStatusSah($transactionStatus, $fraudStatus);
 
         if ($statusBaru) {
+            $statusLama = $pesanan->status;
             $pesanan->update(['status' => $statusBaru]);
 
             Log::info('Status pesanan diperbarui', [
                 'order_id' => $orderId,
-                'status_lama' => $pesanan->status,
+                'status_lama' => $statusLama,
                 'status_baru' => $statusBaru,
             ]);
         }
 
-        return response()->json(['message' => 'Callback processed successfully']);
+        return $this->sukses(null, 'Callback diproses.');
     }
 
     /**
-     * Tentukan status pesanan berdasarkan transaction status Midtrans
+     * Petakan transaction status Midtrans ke status pesanan yang sah:
+     * menunggu_pembayaran, menunggu_konfirmasi, dibayar, diproses,
+     * dikirim, selesai, dibatalkan.
+     * Status di luar daftar (mis. refund) tidak mengubah status pesanan.
      */
-    private function determineStatus(string $transactionStatus, ?string $fraudStatus): ?string
+    private function tentukanStatusSah(string $transactionStatus, ?string $fraudStatus): ?string
     {
-        // Status dari Midtrans:
-        // capture, settlement, pending, deny, cancel, expire, refund
-
         switch ($transactionStatus) {
             case 'capture':
-                return $fraudStatus === 'accept' ? 'dibayar' : 'menunggu_verifikasi';
+                // Pembayaran berhasil ditahan gateway; hanya lanjut bila lolos cek fraud
+                return $fraudStatus === 'accept' ? 'dibayar' : 'dibatalkan';
             case 'settlement':
                 return 'dibayar';
             case 'pending':
@@ -97,9 +102,8 @@ class PaymentController extends Controller
             case 'cancel':
             case 'expire':
                 return 'dibatalkan';
-            case 'refund':
-                return 'refund';
             default:
+                // refund dsb.: dicatat di log, status pesanan tidak diubah
                 return null;
         }
     }
@@ -112,10 +116,7 @@ class PaymentController extends Controller
         $pesanan = Pesanan::where('nomor_pesanan', $orderId)->first();
 
         if (!$pesanan) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Order tidak ditemukan',
-            ], 404);
+            return $this->gagal('Pesanan tidak ditemukan.', 404);
         }
 
         // Jika masih menunggu pembayaran, cek langsung ke Midtrans API
@@ -132,7 +133,7 @@ class PaymentController extends Controller
                         : ($midtransStatus['fraud_status'] ?? null);
 
                     if ($trxStatus) {
-                        $statusBaru = $this->determineStatus($trxStatus, $fraudStatus);
+                        $statusBaru = $this->tentukanStatusSah($trxStatus, $fraudStatus);
                         if ($statusBaru && $statusBaru !== $pesanan->status) {
                             $pesanan->update(['status' => $statusBaru]);
                         }
@@ -143,14 +144,11 @@ class PaymentController extends Controller
             }
         }
 
-        return response()->json([
-            'status' => true,
-            'data' => [
-                'order_id' => $pesanan->nomor_pesanan,
-                'status_pesanan' => $pesanan->status,
-                'total' => $pesanan->total,
-                'created_at' => $pesanan->created_at->format('Y-m-d H:i:s'),
-            ],
-        ]);
+        return $this->sukses([
+            'order_id' => $pesanan->nomor_pesanan,
+            'status_pesanan' => $pesanan->status,
+            'total' => $pesanan->total,
+            'created_at' => $pesanan->created_at->format('Y-m-d H:i:s'),
+        ], 'Status pembayaran berhasil dicek');
     }
 }

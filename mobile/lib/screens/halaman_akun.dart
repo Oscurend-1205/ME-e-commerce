@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../services/layanan_api.dart';
 import '../services/state_pengguna.dart';
 import '../theme.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/komponen_header.dart';
+import 'halaman_login.dart';
 import 'halaman_metode_pembayaran.dart';
 import 'halaman_riwayat_pesanan.dart';
 import 'halaman_tambah_alamat.dart';
@@ -16,8 +18,28 @@ class HalamanAkun extends StatefulWidget {
 }
 
 class _HalamanAkunState extends State<HalamanAkun> {
-  bool _notifikasiAktif = true;
-  bool _biometrikAktif = true;
+  Future<void> _logout() async {
+    await LayananApi.logout();
+    if (!mounted) return;
+    StatePengguna.setLoggedOut();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Anda telah keluar dari akun.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Future<void> _bukaLogin() async {
+    final berhasil = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => const HalamanLogin()),
+    );
+    if (berhasil == true && mounted) {
+      setState(() {});
+      StatePengguna.sinkronkanKeranjang();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,106 +78,83 @@ class _HalamanAkunState extends State<HalamanAkun> {
         child: Column(
           children: [
             _bangunRingkasanProfil(),
-            _bangunStatAkun(),
             _bangunKeanggotaan(),
-            _bangunGrupPengaturan(
-              'Pesanan & Transaksi',
-              [
-                _bangunItemDaftar(
-                  icon: Icons.local_mall_outlined,
-                  label: 'Riwayat Pesanan & Pelacakan',
-                  badge: '1 Aktif',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => HalamanRiwayatPesanan(),
-                      ),
-                    );
-                  },
-                ),
-                _bangunItemDaftar(
-                  icon: Icons.receipt_long_outlined,
-                  label: 'Faktur & Bukti Transaksi',
-                ),
-              ],
-            ),
-            _bangunGrupPengaturan(
-              'Preferensi & Pengaturan',
-              [
-                _bangunItemDaftar(
-                  icon: Icons.location_on_outlined,
-                  label: 'Alamat Pengiriman',
-                  trailingText: '3 Tersimpan',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const HalamanTambahAlamat(),
-                      ),
-                    );
-                  },
-                ),
-                _bangunItemDaftar(
-                  key: const ValueKey('metode_pembayaran_item'),
-                  icon: Icons.credit_card_outlined,
-                  label: 'Metode Pembayaran',
-                  trailingText: 'BCA & CC',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const HalamanMetodePembayaran(),
-                      ),
-                    );
-                  },
-                ),
-                _bangunToggleItem(
-                  icon: Icons.notifications_none_rounded,
-                  label: 'Notifikasi Eksklusif ME',
-                  value: _notifikasiAktif,
-                  onChanged: (val) {
-                    setState(() {
-                      _notifikasiAktif = val;
-                    });
-                  },
-                ),
-                _bangunToggleItem(
-                  icon: Icons.fingerprint_rounded,
-                  label: 'Keamanan Biometrik & FaceID',
-                  value: _biometrikAktif,
-                  onChanged: (val) {
-                    setState(() {
-                      _biometrikAktif = val;
-                    });
-                  },
-                ),
-              ],
-            ),
+            _bangunGrupPengaturan('Pesanan & Transaksi', [
+              _bangunItemDaftar(
+                icon: Icons.local_mall_outlined,
+                label: 'Riwayat Pesanan & Pelacakan',
+                badge: '1 Aktif',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => HalamanRiwayatPesanan()),
+                  );
+                },
+              ),
+              _bangunItemDaftar(
+                icon: Icons.receipt_long_outlined,
+                label: 'Faktur & Bukti Transaksi',
+              ),
+            ]),
+            _bangunGrupPengaturan('Preferensi & Pengaturan', [
+              _bangunItemDaftar(
+                icon: Icons.location_on_outlined,
+                label: 'Alamat Pengiriman',
+                trailingText: '3 Tersimpan',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const HalamanTambahAlamat(),
+                    ),
+                  );
+                },
+              ),
+              _bangunItemDaftar(
+                key: const ValueKey('metode_pembayaran_item'),
+                icon: Icons.credit_card_outlined,
+                label: 'Metode Pembayaran',
+                trailingText: 'BCA & CC',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const HalamanMetodePembayaran(),
+                    ),
+                  );
+                },
+              ),
+            ]),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 28, 16, 24),
-              child: SizedBox(
-                width: double.infinity,
-                child: TextButton.icon(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
-                    backgroundColor: TemaAplikasi.surfaceContainerLow,
-                    foregroundColor: TemaAplikasi.errorColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(2),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: StatePengguna.isLoggedInNotifier,
+                builder: (context, isLoggedIn, _) {
+                  if (!isLoggedIn) return const SizedBox.shrink();
+                  return SizedBox(
+                    width: double.infinity,
+                    child: TextButton.icon(
+                      onPressed: _logout,
+                      style: TextButton.styleFrom(
+                        backgroundColor: TemaAplikasi.surfaceContainerLow,
+                        foregroundColor: TemaAplikasi.errorColor,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      icon: const Icon(Icons.logout_rounded, size: 18),
+                      label: const Text(
+                        'KELUAR DARI AKUN',
+                        style: TextStyle(
+                          fontSize: 11,
+                          letterSpacing: 1.6,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
-                  ),
-                  icon: const Icon(Icons.logout_rounded, size: 18),
-                  label: const Text(
-                    'KELUAR DARI AKUN',
-                    style: TextStyle(
-                      fontSize: 11,
-                      letterSpacing: 1.6,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 10),
@@ -171,10 +170,7 @@ class _HalamanAkunState extends State<HalamanAkun> {
             const SizedBox(height: 4),
             const Text(
               'ME Atelier Mobile App v2.4.0 • Paris & Jakarta',
-              style: TextStyle(
-                fontSize: 11,
-                color: TemaAplikasi.secondary,
-              ),
+              style: TextStyle(fontSize: 11, color: TemaAplikasi.secondary),
             ),
             const SizedBox(height: 4),
             const Text(
@@ -193,130 +189,178 @@ class _HalamanAkunState extends State<HalamanAkun> {
   }
 
   Widget _bangunRingkasanProfil() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 22, 16, 18),
-      decoration: const BoxDecoration(
-        color: TemaAplikasi.surfaceContainerLow,
-      ),
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: () => _tampilkanPemilihAvatar(context),
-            child: Stack(
-              children: [
-                Container(
-                  width: 96,
-                  height: 96,
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: TemaAplikasi.surfaceContainerHigh,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(18),
-                        blurRadius: 12,
-                        offset: const Offset(0, 5),
+    return ValueListenableBuilder<bool>(
+      valueListenable: StatePengguna.isLoggedInNotifier,
+      builder: (context, isLoggedIn, _) {
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(16, 22, 16, 18),
+          decoration:
+              const BoxDecoration(color: TemaAplikasi.surfaceContainerLow),
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: isLoggedIn
+                    ? () => _tampilkanPemilihAvatar(context)
+                    : _bukaLogin,
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 96,
+                      height: 96,
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: TemaAplikasi.surfaceContainerHigh,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(18),
+                            blurRadius: 12,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: ClipOval(
-                    child: ValueListenableBuilder<String>(
-                      valueListenable: StatePengguna.fotoProfilNotifier,
-                      builder: (context, fotoUrl, _) {
-                        return FotoDummy.bangunGambar(
-                          url: fotoUrl,
-                          fit: BoxFit.cover,
-                          fallbackWidget: Container(
-                            color: const Color(0xFF1D1D1D),
-                            child: Center(
-                              child: Text(
-                                StatePengguna.namaUserNotifier.value.isNotEmpty
-                                    ? StatePengguna.namaUserNotifier.value[0].toUpperCase()
-                                    : 'C',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 38,
-                                  fontWeight: FontWeight.w700,
+                      child: ClipOval(
+                        child: isLoggedIn
+                            ? ValueListenableBuilder<String>(
+                                valueListenable:
+                                    StatePengguna.fotoProfilNotifier,
+                                builder: (context, fotoUrl, _) {
+                                  return FotoDummy.bangunGambar(
+                                    url: fotoUrl,
+                                    fit: BoxFit.cover,
+                                    fallbackWidget: Container(
+                                      color: const Color(0xFF1D1D1D),
+                                      child: Center(
+                                        child: Text(
+                                          StatePengguna.namaUserNotifier
+                                                  .value.isNotEmpty
+                                              ? StatePengguna.namaUserNotifier
+                                                  .value[0]
+                                                  .toUpperCase()
+                                              : 'M',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 38,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              )
+                            : Container(
+                                color: TemaAplikasi.surfaceContainerHigh,
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.person_outline_rounded,
+                                    size: 48,
+                                    color: TemaAplikasi.secondary,
+                                  ),
                                 ),
                               ),
-                            ),
+                      ),
+                    ),
+                    if (isLoggedIn)
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: TemaAplikasi.primary,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
                           ),
-                        );
-                      },
-                    ),
-                  ),
+                          child: const Icon(
+                            Icons.photo_camera_rounded,
+                            size: 16,
+                            color: TemaAplikasi.onPrimary,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: TemaAplikasi.primary,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                    child: const Icon(
-                      Icons.photo_camera_rounded,
-                      size: 16,
-                      color: TemaAplikasi.onPrimary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          ValueListenableBuilder<String>(
-            valueListenable: StatePengguna.namaUserNotifier,
-            builder: (context, nama, _) {
-              return Text(
-                nama,
-                style: const TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.2,
-                  color: TemaAplikasi.primary,
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 4),
-          ValueListenableBuilder<String>(
-            valueListenable: StatePengguna.emailUserNotifier,
-            builder: (context, email, _) {
-              return Text(
-                email,
-                style: const TextStyle(
-                  fontSize: 12,
-                  letterSpacing: 0.5,
-                  color: TemaAplikasi.secondary,
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 18),
-          TextButton(
-            onPressed: () => _tampilkanEditProfil(context),
-            style: TextButton.styleFrom(
-              backgroundColor: TemaAplikasi.surfaceWhite,
-              foregroundColor: TemaAplikasi.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-              side: const BorderSide(color: TemaAplikasi.borderGray),
-            ),
-            child: const Text(
-              'EDIT PROFIL',
-              style: TextStyle(
-                fontSize: 10,
-                letterSpacing: 1.8,
-                fontWeight: FontWeight.w700,
               ),
-            ),
+              const SizedBox(height: 14),
+              ValueListenableBuilder<String>(
+                valueListenable: StatePengguna.namaUserNotifier,
+                builder: (context, nama, _) {
+                  return Text(
+                    nama,
+                    style: const TextStyle(
+                      fontSize: 23,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.2,
+                      color: TemaAplikasi.primary,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 4),
+              ValueListenableBuilder<String>(
+                valueListenable: StatePengguna.emailUserNotifier,
+                builder: (context, email, _) {
+                  return Text(
+                    email,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      letterSpacing: 0.5,
+                      color: TemaAplikasi.secondary,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 18),
+              if (isLoggedIn)
+                TextButton(
+                  onPressed: () => _tampilkanEditProfil(context),
+                  style: TextButton.styleFrom(
+                    backgroundColor: TemaAplikasi.surfaceWhite,
+                    foregroundColor: TemaAplikasi.primary,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 10),
+                    side: const BorderSide(color: TemaAplikasi.borderGray),
+                  ),
+                  child: const Text(
+                    'EDIT PROFIL',
+                    style: TextStyle(
+                      fontSize: 10,
+                      letterSpacing: 1.8,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                )
+              else
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: _bukaLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: TemaAplikasi.primary,
+                      foregroundColor: TemaAplikasi.onPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'MASUK / DAFTAR',
+                      style: TextStyle(
+                        fontSize: 11,
+                        letterSpacing: 1.8,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -392,12 +436,13 @@ class _HalamanAkunState extends State<HalamanAkun> {
                   return GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 14,
-                      childAspectRatio: 0.82,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 14,
+                          childAspectRatio: 0.82,
+                        ),
                     itemCount: StatePengguna.daftarPresetAvatar.length,
                     itemBuilder: (context, idx) {
                       final preset = StatePengguna.daftarPresetAvatar[idx];
@@ -409,7 +454,9 @@ class _HalamanAkunState extends State<HalamanAkun> {
                           Navigator.pop(ctx);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Avatar diubah: ${preset['label']}'),
+                              content: Text(
+                                'Avatar diubah: ${preset['label']}',
+                              ),
                               behavior: SnackBarBehavior.floating,
                               duration: const Duration(seconds: 2),
                             ),
@@ -517,11 +564,19 @@ class _HalamanAkunState extends State<HalamanAkun> {
                       style: const TextStyle(fontSize: 12),
                       decoration: const InputDecoration(
                         hintText: 'https://images.unsplash.com/...',
-                        hintStyle: TextStyle(fontSize: 11, color: TemaAplikasi.mutedGray),
+                        hintStyle: TextStyle(
+                          fontSize: 11,
+                          color: TemaAplikasi.mutedGray,
+                        ),
                         isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
                         border: OutlineInputBorder(
-                          borderSide: BorderSide(color: TemaAplikasi.borderGray),
+                          borderSide: BorderSide(
+                            color: TemaAplikasi.borderGray,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: TemaAplikasi.primary),
@@ -538,7 +593,9 @@ class _HalamanAkunState extends State<HalamanAkun> {
                         Navigator.pop(ctx);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Foto profil kustom berhasil diterapkan.'),
+                            content: Text(
+                              'Foto profil kustom berhasil diterapkan.',
+                            ),
                             behavior: SnackBarBehavior.floating,
                           ),
                         );
@@ -547,8 +604,13 @@ class _HalamanAkunState extends State<HalamanAkun> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: TemaAplikasi.primary,
                       foregroundColor: TemaAplikasi.onPrimary,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 11,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                       elevation: 0,
                     ),
                     child: const Text(
@@ -570,9 +632,15 @@ class _HalamanAkunState extends State<HalamanAkun> {
   }
 
   void _tampilkanEditProfil(BuildContext context) {
-    final namaController = TextEditingController(text: StatePengguna.namaUserNotifier.value);
-    final emailController = TextEditingController(text: StatePengguna.emailUserNotifier.value);
-    final fotoController = TextEditingController(text: StatePengguna.fotoProfilNotifier.value);
+    final namaController = TextEditingController(
+      text: StatePengguna.namaUserNotifier.value,
+    );
+    final emailController = TextEditingController(
+      text: StatePengguna.emailUserNotifier.value,
+    );
+    final fotoController = TextEditingController(
+      text: StatePengguna.fotoProfilNotifier.value,
+    );
 
     showModalBottomSheet(
       context: context,
@@ -635,11 +703,17 @@ class _HalamanAkunState extends State<HalamanAkun> {
               const SizedBox(height: 6),
               TextField(
                 controller: namaController,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
                 decoration: const InputDecoration(
                   hintText: 'Nama lengkap Anda',
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: TemaAplikasi.borderGray),
                   ),
@@ -666,7 +740,10 @@ class _HalamanAkunState extends State<HalamanAkun> {
                 decoration: const InputDecoration(
                   hintText: 'nama@domain.com',
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: TemaAplikasi.borderGray),
                   ),
@@ -692,7 +769,10 @@ class _HalamanAkunState extends State<HalamanAkun> {
                 decoration: const InputDecoration(
                   hintText: 'https://...',
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: TemaAplikasi.borderGray),
                   ),
@@ -710,7 +790,9 @@ class _HalamanAkunState extends State<HalamanAkun> {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         side: const BorderSide(color: TemaAplikasi.borderGray),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                       child: const Text(
                         'BATAL',
@@ -753,7 +835,9 @@ class _HalamanAkunState extends State<HalamanAkun> {
                         backgroundColor: TemaAplikasi.primary,
                         foregroundColor: TemaAplikasi.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                         elevation: 0,
                       ),
                       child: const Text(
@@ -775,72 +859,13 @@ class _HalamanAkunState extends State<HalamanAkun> {
     );
   }
 
-  Widget _bangunStatAkun() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      color: TemaAplikasi.surfaceWhite,
-      child: GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 4,
-        childAspectRatio: 1.1,
-        crossAxisSpacing: 0,
-        mainAxisSpacing: 0,
-        children: [
-          _bangunStatItem('3', 'Menunggu Bayar'),
-          _bangunStatItem('1', 'Sedang Dikirim'),
-          _bangunStatItem('12', 'Riwayat Pesanan'),
-          _bangunStatItem('8', 'Wishlist'),
-        ],
-      ),
-    );
-  }
-
-  Widget _bangunStatItem(String jumlah, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(
-          right: BorderSide(color: TemaAplikasi.borderGray),
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            jumlah,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              color: TemaAplikasi.primary,
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 9,
-              letterSpacing: 0.8,
-              color: TemaAplikasi.secondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _bangunKeanggotaan() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(18),
-        decoration: const BoxDecoration(
-          color: Color(0xFF1D1B1A),
-        ),
+        decoration: const BoxDecoration(color: Color(0xFF1D1B1A)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -849,7 +874,11 @@ class _HalamanAkunState extends State<HalamanAkun> {
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.verified_rounded, size: 16, color: Color(0xFFE9E3DF)),
+                    Icon(
+                      Icons.verified_rounded,
+                      size: 16,
+                      color: Color(0xFFE9E3DF),
+                    ),
                     SizedBox(width: 6),
                     Text(
                       'Keanggotaan Eksklusif',
@@ -903,7 +932,11 @@ class _HalamanAkunState extends State<HalamanAkun> {
                   ),
                 ),
                 SizedBox(width: 8),
-                Icon(Icons.arrow_forward_rounded, size: 16, color: Color(0xFFE9E3DF)),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 16,
+                  color: Color(0xFFE9E3DF),
+                ),
               ],
             ),
           ],
@@ -1011,7 +1044,10 @@ class _HalamanAkunState extends State<HalamanAkun> {
               ),
               if (badge.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: badgeColor,
                     borderRadius: BorderRadius.circular(999),
@@ -1038,43 +1074,14 @@ class _HalamanAkunState extends State<HalamanAkun> {
                   ),
                 ),
               const SizedBox(width: 8),
-              const Icon(Icons.chevron_right_rounded, size: 22, color: TemaAplikasi.secondary),
+              const Icon(
+                Icons.chevron_right_rounded,
+                size: 22,
+                color: TemaAplikasi.secondary,
+              ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _bangunToggleItem({
-    required IconData icon,
-    required String label,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          Icon(icon, size: 22, color: TemaAplikasi.secondary),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                color: TemaAplikasi.primary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeTrackColor: TemaAplikasi.primary,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-        ],
       ),
     );
   }
