@@ -13,7 +13,7 @@ import '../widgets/foto_dummy.dart';
 import '../widgets/komponen_header.dart';
 import '../widgets/modal_pilih_varian.dart';
 import '../widgets/widget_keadaan.dart';
-import 'halaman_checkout.dart';
+import 'halaman_checkout_alur_satu.dart';
 
 class HalamanKeranjang extends StatefulWidget {
   const HalamanKeranjang({super.key});
@@ -1246,7 +1246,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const HalamanCheckout(),
+                            builder: (context) => const HalamanCheckoutAlurSatu(),
                           ),
                         ).then((_) => _muatKeranjang());
                       }
