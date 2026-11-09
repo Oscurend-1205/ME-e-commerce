@@ -79,3 +79,4 @@ class ExportKatalogCommand extends Command
         return Command::SUCCESS;
     }
 }
+
