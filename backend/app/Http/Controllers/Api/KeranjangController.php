@@ -17,11 +17,8 @@ class KeranjangController extends Controller
 
     protected function getPelangganId(Request $request): int
     {
-        $id = $request->header('X-Pelanggan-Id');
-        if ($id && is_numeric($id)) {
-            return (int) $id;
-        }
-        return 1; // Pelanggan tetap default pengujian
+        // Ambil dari middleware auth.pelanggan yang sudah menyuntikkan pelanggan_id
+        return (int) $request->input('pelanggan_id', 0);
     }
 
     /**

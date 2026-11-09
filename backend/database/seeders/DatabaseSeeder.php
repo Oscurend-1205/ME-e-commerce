@@ -49,6 +49,9 @@ class DatabaseSeeder extends Seeder
         $pelanggan = Pelanggan::create([
             'id' => 1,
             'nama' => 'Auril Aditya',
+            'email' => 'auril@toko-me.test',
+            'password' => 'password',
+            'no_telp' => '081234567890',
         ]);
 
         // 2. Kategori: Atasan, Bawahan, Aksesori (menggantikan Pakaian & Aksesori)

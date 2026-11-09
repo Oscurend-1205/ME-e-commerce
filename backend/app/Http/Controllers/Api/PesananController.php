@@ -17,11 +17,7 @@ class PesananController extends Controller
 
     protected function getPelangganId(Request $request): int
     {
-        $id = $request->header('X-Pelanggan-Id');
-        if ($id && is_numeric($id)) {
-            return (int) $id;
-        }
-        return 1;
+        return (int) $request->input('pelanggan_id', 0);
     }
 
     /**

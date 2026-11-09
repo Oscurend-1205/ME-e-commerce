@@ -1,10 +1,99 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'layanan_api.dart';
 
 /// State reaktif global untuk profil pengguna dan item keranjang
 /// Menjamin foto profil dan status pengguna selalu sinkron seketika di seluruh header dan halaman
 class StatePengguna {
+  // =====================================================================
+  //  STATE AUTENTIKASI
+  // =====================================================================
+
+  /// Apakah pengguna sudah login (true) atau masih guest (false)
+  static final ValueNotifier<bool> isLoggedInNotifier = ValueNotifier<bool>(false);
+
+  /// Token API untuk request yang membutuhkan autentikasi
+  static final ValueNotifier<String?> tokenNotifier = ValueNotifier<String?>(null);
+
+  /// ID pelanggan yang sedang login (null jika guest)
+  static final ValueNotifier<int?> pelangganIdNotifier = ValueNotifier<int?>(null);
+
+  /// Nomor telepon pengguna
+  static final ValueNotifier<String?> noTelpNotifier = ValueNotifier<String?>(null);
+
+  // === Kunci penyimpanan sesi lokal (SharedPreferences) ===
+  static const String _kToken = 'sesi_token';
+  static const String _kPelangganId = 'sesi_pelanggan_id';
+  static const String _kNama = 'sesi_nama';
+  static const String _kEmail = 'sesi_email';
+  static const String _kNoTelp = 'sesi_no_telp';
+  static const String _kFoto = 'sesi_foto';
+
+  /// Memulihkan sesi login yang tersimpan saat aplikasi dibuka kembali,
+  /// lalu memvalidasinya ke server lewat GET /api/auth/me.
+  /// Token yang sudah tidak berlaku akan dibersihkan otomatis.
+  static Future<void> muatSesiTersimpan() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString(_kToken);
+    if (token == null || token.isEmpty) return;
+
+    tokenNotifier.value = token;
+    isLoggedInNotifier.value = true;
+
+    final respon = await LayananApi.ambilProfil();
+    if (!respon.berhasil || respon.data == null) {
+      // Token kedaluwarsa / tidak valid: kembali ke mode tamu
+      await _hapusSesiTersimpan();
+      setLoggedOut();
+      return;
+    }
+
+    final data = respon.data as Map<String, dynamic>;
+    pelangganIdNotifier.value = data['id'] is int
+        ? data['id'] as int
+        : int.tryParse('${data['id']}');
+    namaUserNotifier.value = data['nama']?.toString() ?? 'Pengguna';
+    emailUserNotifier.value = data['email']?.toString() ?? '';
+    noTelpNotifier.value = data['no_telp']?.toString();
+    final foto = data['foto']?.toString();
+    if (foto != null && foto.isNotEmpty) {
+      fotoProfilNotifier.value = foto;
+    }
+    await _simpanSesiTersimpan();
+  }
+
+  static Future<void> _simpanSesiTersimpan() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = tokenNotifier.value;
+    if (token == null || token.isEmpty) return;
+
+    await prefs.setString(_kToken, token);
+    final id = pelangganIdNotifier.value;
+    if (id != null) await prefs.setInt(_kPelangganId, id);
+    await prefs.setString(_kNama, namaUserNotifier.value);
+    await prefs.setString(_kEmail, emailUserNotifier.value);
+    final telp = noTelpNotifier.value;
+    if (telp != null && telp.isNotEmpty) {
+      await prefs.setString(_kNoTelp, telp);
+    }
+    await prefs.setString(_kFoto, fotoProfilNotifier.value);
+  }
+
+  static Future<void> _hapusSesiTersimpan() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_kToken);
+    await prefs.remove(_kPelangganId);
+    await prefs.remove(_kNama);
+    await prefs.remove(_kEmail);
+    await prefs.remove(_kNoTelp);
+    await prefs.remove(_kFoto);
+  }
+
+  // =====================================================================
+  //  PROFIL PENGGUNA
+  // =====================================================================
+
   /// Foto profil pengguna saat ini (Reaktif via ValueNotifier)
   static final ValueNotifier<String> fotoProfilNotifier = ValueNotifier<String>(
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
@@ -12,12 +101,12 @@ class StatePengguna {
 
   /// Nama lengkap pengguna
   static final ValueNotifier<String> namaUserNotifier = ValueNotifier<String>(
-    'Clarissa Vance',
+    'Tamu',
   );
 
   /// Email pengguna
   static final ValueNotifier<String> emailUserNotifier = ValueNotifier<String>(
-    'clarissa.vance@atelier-me.com',
+    '',
   );
 
   /// Jumlah total item di keranjang belanja (Reaktif di semua header)
@@ -82,8 +171,9 @@ class StatePengguna {
     jumlahKeranjangNotifier.value = jumlah >= 0 ? jumlah : 0;
   }
 
-  /// Sinkronkan jumlah item keranjang dari API server
+  /// Sinkronkan jumlah item keranjang dari API server (hanya jika sudah login).
   static Future<void> sinkronkanKeranjang() async {
+    if (!isLoggedInNotifier.value) return;
     final respon = await LayananApi.ambilKeranjang();
     if (respon.berhasil && respon.data != null) {
       final items = (respon.data as Map<String, dynamic>)['items'] as List?;
@@ -91,6 +181,47 @@ class StatePengguna {
       perbaruiJumlahKeranjang(total);
     }
   }
+
+  // =====================================================================
+  //  AUTENTIKASI
+  // =====================================================================
+
+  /// Set state pengguna sudah login dengan data dari server
+  static void setLoggedIn({
+    required int pelangganId,
+    required String token,
+    required String nama,
+    required String email,
+    String? noTelp,
+    String? foto,
+  }) {
+    pelangganIdNotifier.value = pelangganId;
+    tokenNotifier.value = token;
+    namaUserNotifier.value = nama;
+    emailUserNotifier.value = email;
+    noTelpNotifier.value = noTelp;
+    if (foto != null && foto.isNotEmpty) {
+      fotoProfilNotifier.value = foto;
+    }
+    isLoggedInNotifier.value = true;
+    _simpanSesiTersimpan();
+  }
+
+  /// Set state pengguna logout (kembali ke guest)
+  static void setLoggedOut() {
+    pelangganIdNotifier.value = null;
+    tokenNotifier.value = null;
+    namaUserNotifier.value = 'Tamu';
+    emailUserNotifier.value = '';
+    noTelpNotifier.value = null;
+    jumlahKeranjangNotifier.value = 0;
+    isLoggedInNotifier.value = false;
+    _hapusSesiTersimpan();
+  }
+
+  // =====================================================================
+  //  WISHLIST
+  // =====================================================================
 
   /// Koleksi ID produk di Wishlist (Reaktif global)
   static final ValueNotifier<Set<int>> wishlistNotifier = ValueNotifier<Set<int>>({});
@@ -116,4 +247,3 @@ class StatePengguna {
     wishlistNotifier.value = current;
   }
 }
-

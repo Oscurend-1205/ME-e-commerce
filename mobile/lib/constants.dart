@@ -36,6 +36,5 @@ class Konstan {
     return '$host/storage/produk';
   }
 
-  static const int pelangganId = 1;
   static const Duration batasWaktu = Duration(seconds: 10);
 }
