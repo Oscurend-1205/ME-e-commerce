@@ -34,6 +34,7 @@ class HalamanUtamaNavigasi extends StatefulWidget {
 
 class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
   int _indeksAktif = 0;
+  String? _storyAwalJelajah;
 
   @override
   void initState() {
@@ -41,11 +42,26 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
     StatePengguna.sinkronkanKeranjang();
   }
 
-  final List<Widget> _daftarHalaman = const [
-    HalamanKatalog(),
-    HalamanKatalog(modeJelajah: true),
-    HalamanRiwayatPesanan(),
-    HalamanAkun(),
+  void _pindahKeTab(int indeks, [String? story]) {
+    setState(() {
+      _indeksAktif = indeks;
+      if (story != null) {
+        _storyAwalJelajah = story;
+      }
+    });
+  }
+
+  List<Widget> get _daftarHalaman => [
+    HalamanKatalog(
+      onPindahTab: _pindahKeTab,
+    ),
+    HalamanKatalog(
+      modeJelajah: true,
+      storyAwal: _storyAwalJelajah,
+      onPindahTab: _pindahKeTab,
+    ),
+    const HalamanRiwayatPesanan(),
+    const HalamanAkun(),
   ];
 
   @override
