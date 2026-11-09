@@ -24,10 +24,16 @@ class Konstan {
   }
 
   /// URL dasar penyimpanan aset gambar di backend Laravel:
-  /// Menggunakan /api/gambar agar mendukung header CORS untuk Flutter Web (Chrome) & HP fisik
+  /// - Web: /api/gambar (butuh header CORS untuk Chrome)
+  /// - Mobile/Desktop: /storage/produk (file statis via symlink public/storage,
+  ///   dilayani langsung web server tanpa boot framework Laravel — jauh lebih cepat)
   static String get storageUrl {
     final base = baseUrl.replaceAll(RegExp(r'/+$'), '');
-    return base.endsWith('/api') ? '$base/gambar' : '$base/api/gambar';
+    if (kIsWeb) {
+      return base.endsWith('/api') ? '$base/gambar' : '$base/api/gambar';
+    }
+    final host = base.replaceAll(RegExp(r'/api$'), '');
+    return '$host/storage/produk';
   }
 
   static const int pelangganId = 1;

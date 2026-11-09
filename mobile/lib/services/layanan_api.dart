@@ -8,6 +8,10 @@ import '../constants.dart';
 import '../models/api_response.dart';
 
 class LayananApi {
+  /// HTTP client bersama agar koneksi (keep-alive) dipakai ulang
+  /// antar request, bukan membuat TCP handshake baru setiap kali.
+  static final http.Client _client = http.Client();
+
   // === Header standar ===
   static Map<String, String> _headers({Map<String, String>? tambahan}) {
     final headers = {
@@ -41,7 +45,7 @@ class LayananApi {
         '${Konstan.baseUrl}/produk',
       ).replace(queryParameters: params.isNotEmpty ? params : null);
 
-      final respons = await http
+      final respons = await _client
           .get(uri, headers: _headers())
           .timeout(Konstan.batasWaktu);
 
@@ -56,7 +60,7 @@ class LayananApi {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/produk/$id');
 
-      final respons = await http
+      final respons = await _client
           .get(uri, headers: _headers())
           .timeout(Konstan.batasWaktu);
 
@@ -71,7 +75,7 @@ class LayananApi {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/produk');
 
-      final respons = await http
+      final respons = await _client
           .post(uri, headers: _headers(), body: jsonEncode(data))
           .timeout(Konstan.batasWaktu);
 
@@ -89,7 +93,7 @@ class LayananApi {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/produk/$id');
 
-      final respons = await http
+      final respons = await _client
           .put(uri, headers: _headers(), body: jsonEncode(data))
           .timeout(Konstan.batasWaktu);
 
@@ -104,7 +108,7 @@ class LayananApi {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/produk/$id');
 
-      final respons = await http
+      final respons = await _client
           .delete(uri, headers: _headers())
           .timeout(Konstan.batasWaktu);
 
@@ -123,7 +127,7 @@ class LayananApi {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/keranjang');
 
-      final respons = await http
+      final respons = await _client
           .get(uri, headers: _headers())
           .timeout(Konstan.batasWaktu);
 
@@ -148,7 +152,7 @@ class LayananApi {
         'jumlah': jumlah,
       };
 
-      final respons = await http
+      final respons = await _client
           .post(uri, headers: _headers(), body: jsonEncode(body))
           .timeout(Konstan.batasWaktu);
 
@@ -171,7 +175,7 @@ class LayananApi {
       if (jumlah != null) body['jumlah'] = jumlah;
       if (varianId != null) body['varian_id'] = varianId;
 
-      final respons = await http
+      final respons = await _client
           .put(uri, headers: _headers(), body: jsonEncode(body))
           .timeout(Konstan.batasWaktu);
 
@@ -191,7 +195,7 @@ class LayananApi {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/keranjang/$id');
 
-      final respons = await http
+      final respons = await _client
           .delete(uri, headers: _headers())
           .timeout(Konstan.batasWaktu);
 
@@ -210,7 +214,7 @@ class LayananApi {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/kurir');
 
-      final respons = await http
+      final respons = await _client
           .get(uri, headers: _headers())
           .timeout(Konstan.batasWaktu);
 
@@ -242,7 +246,7 @@ class LayananApi {
         'metode_pembayaran_id': metodePembayaranId,
       };
 
-      final respons = await http
+      final respons = await _client
           .post(
             uri,
             headers: _headers(tambahan: {'X-Kunci-Idempoten': kunciIdempoten}),
@@ -265,7 +269,7 @@ class LayananApi {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/pesanan');
 
-      final respons = await http
+      final respons = await _client
           .get(uri, headers: _headers())
           .timeout(Konstan.batasWaktu);
 
@@ -280,7 +284,7 @@ class LayananApi {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/pesanan/$id');
 
-      final respons = await http
+      final respons = await _client
           .get(uri, headers: _headers())
           .timeout(Konstan.batasWaktu);
 
@@ -297,7 +301,7 @@ class LayananApi {
 
       final body = {'status': status};
 
-      final respons = await http
+      final respons = await _client
           .patch(uri, headers: _headers(), body: jsonEncode(body))
           .timeout(Konstan.batasWaktu);
 
@@ -316,7 +320,7 @@ class LayananApi {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/metode-pembayaran');
 
-      final respons = await http
+      final respons = await _client
           .get(uri, headers: _headers())
           .timeout(Konstan.batasWaktu);
 
