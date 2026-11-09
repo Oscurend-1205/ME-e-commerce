@@ -108,6 +108,6 @@ class AdminProdukResourceTest extends TestCase
         $files = $fileUpload->getUploadedFiles();
 
         $this->assertNotEmpty($files);
-        $this->assertStringEndsWith('/storage/produk/1.jpg', $files[array_key_first($files)]['url']);
+        $this->assertStringEndsWith('/api/gambar/1.jpg', $files[array_key_first($files)]['url']);
     }
 }

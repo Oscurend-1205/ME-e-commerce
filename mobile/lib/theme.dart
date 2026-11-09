@@ -16,6 +16,8 @@ class TemaAplikasi {
   static const Color mutedGray = Color(0xFF767676);
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color errorColor = Color(0xFFBA1A1A);
+  static const Color successColor = Color(0xFF4CAF50);
+  static const Color warningColor = Color(0xFFFFA726);
 
   static ThemeData get tema {
     return ThemeData(

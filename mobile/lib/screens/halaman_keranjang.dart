@@ -13,7 +13,9 @@ import '../widgets/foto_dummy.dart';
 import '../widgets/komponen_header.dart';
 import '../widgets/modal_pilih_varian.dart';
 import '../widgets/widget_keadaan.dart';
-import 'halaman_checkout.dart';
+import '../widgets/transisi_geser.dart';
+import 'halaman_checkout_alur_satu.dart';
+import 'halaman_rincian_produk.dart';
 
 class HalamanKeranjang extends StatefulWidget {
   const HalamanKeranjang({super.key});
@@ -28,6 +30,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
   String _pesanGalat = '';
 
   DataKeranjang? _dataKeranjang;
+  List<Produk> _daftarRekomendasi = [];
   bool _sedangMemperbarui = false;
 
   @override
@@ -41,16 +44,34 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
       _keadaan = KeadaanMuat.memuat;
     });
 
-    final respon = await LayananApi.ambilKeranjang();
+    final hasil = await Future.wait([
+      LayananApi.ambilKeranjang(),
+      LayananApi.ambilProduk(),
+    ]);
 
     if (!mounted) return;
 
-    if (respon.berhasil && respon.data != null) {
-      final data = DataKeranjang.fromJson(respon.data as Map<String, dynamic>);
+    final responKeranjang = hasil[0];
+    final responProduk = hasil[1];
+
+    if (responKeranjang.berhasil && responKeranjang.data != null) {
+      final data = DataKeranjang.fromJson(responKeranjang.data as Map<String, dynamic>);
       final total = data.items.fold<int>(0, (sum, i) => sum + i.jumlah);
       StatePengguna.perbaruiJumlahKeranjang(total);
+
+      List<Produk> rekomendasi = [];
+      if (responProduk.berhasil && responProduk.data is List) {
+        final cartProductIds = data.items.map((i) => i.produkId).toSet();
+        rekomendasi = (responProduk.data as List)
+            .map((p) => Produk.fromJson(p as Map<String, dynamic>))
+            .where((p) => !cartProductIds.contains(p.id))
+            .take(6)
+            .toList();
+      }
+
       setState(() {
         _dataKeranjang = data;
+        _daftarRekomendasi = rekomendasi;
         _keadaan = data.items.isEmpty
             ? KeadaanMuat.kosong
             : KeadaanMuat.berhasil;
@@ -58,8 +79,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     } else {
       setState(() {
         _keadaan = KeadaanMuat.galat;
-        _jenisGalat = tentukanJenisGalat(respon.code);
-        _pesanGalat = respon.message;
+        _jenisGalat = tentukanJenisGalat(responKeranjang.code);
+        _pesanGalat = responKeranjang.message;
       });
     }
   }
@@ -216,24 +237,52 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     _muatKeranjang();
   }
 
-  void _pindahKeWishlist(ItemKeranjang item) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.favorite, color: Colors.white, size: 16),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text('${item.namaProduk} dipindahkan ke Wishlist.'),
-            ),
-          ],
+  Future<void> _pindahKeWishlist(ItemKeranjang item) async {
+    setState(() {
+      _sedangMemperbarui = true;
+    });
+
+    // 1. Simpan ke wishlist pengguna secara reaktif global
+    StatePengguna.tambahWishlist(item.produkId);
+
+    // 2. Hapus item dari keranjang belanja
+    final respon = await LayananApi.hapusDariKeranjang(item.id);
+
+    if (!mounted) return;
+
+    setState(() {
+      _sedangMemperbarui = false;
+    });
+
+    if (respon.berhasil) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.favorite, color: Colors.white, size: 16),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text('${item.namaProduk} berhasil dipindahkan ke Wishlist.'),
+              ),
+            ],
+          ),
+          duration: const Duration(milliseconds: 2000),
+          backgroundColor: TemaAplikasi.primary,
+          behavior: SnackBarBehavior.floating,
         ),
-        duration: const Duration(milliseconds: 1500),
-        backgroundColor: TemaAplikasi.primary,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+      );
+      _muatKeranjang();
+    } else {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(respon.message),
+          backgroundColor: TemaAplikasi.errorColor,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   int get _subtotal => _dataKeranjang?.subtotal ?? 0;
@@ -245,11 +294,9 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
 
   @override
   Widget build(BuildContext context) {
-    final totalSemuaItem = _dataKeranjang?.items.length ?? 0;
-
     return Scaffold(
       backgroundColor: TemaAplikasi.surfaceWhite,
-      appBar: _bangunHeaderUtama(totalSemuaItem),
+      appBar: _bangunHeaderUtama(),
       body: Stack(
         children: [
           RefreshIndicator(
@@ -275,8 +322,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     );
   }
 
-  // 1. Header Utama Sesuai cek-keranjangBelanja.html
-  PreferredSizeWidget _bangunHeaderUtama(int totalItem) {
+  // 1. Header Utama Sesuai cek-keranjangBelanja.html (Bebas Overflow)
+  PreferredSizeWidget _bangunHeaderUtama() {
     return AppBar(
       backgroundColor: TemaAplikasi.surfaceWhite,
       surfaceTintColor: Colors.transparent,
@@ -284,46 +331,53 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
       leading: IconButton(
         icon: const Icon(
           Icons.arrow_back,
-          size: 22,
+          size: 20,
           color: TemaAplikasi.primary,
         ),
         onPressed: () => NavigasiUniversal.kembali(context),
       ),
-      title: Row(
-        children: const [
-          LogoBrandHeader(),
-          Spacer(),
-          Text(
-            'TAS BELANJA',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 2.0,
-              color: TemaAplikasi.primary,
-            ),
-          ),
-          Spacer(),
-        ],
+      centerTitle: true,
+      title: const Text(
+        'TAS BELANJA',
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 2.0,
+          color: TemaAplikasi.primary,
+        ),
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.search_outlined, size: 22),
+          icon: const Icon(Icons.search_outlined, size: 20),
           onPressed: () => NavigasiUniversal.kePencarian(context),
         ),
-        IconButton(
-          icon: const Icon(Icons.favorite_border, size: 22),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Membuka koleksi Wishlist ME Studio.'),
-                duration: Duration(seconds: 1),
-                behavior: SnackBarBehavior.floating,
+        ValueListenableBuilder<Set<int>>(
+          valueListenable: StatePengguna.wishlistNotifier,
+          builder: (context, wishlist, _) {
+            final hasWishlist = wishlist.isNotEmpty;
+            return IconButton(
+              icon: Icon(
+                hasWishlist ? Icons.favorite : Icons.favorite_border,
+                size: 20,
+                color: hasWishlist ? TemaAplikasi.errorColor : TemaAplikasi.primary,
               ),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      hasWishlist
+                          ? '${wishlist.length} item tersimpan di Wishlist Anda.'
+                          : 'Wishlist Anda masih kosong.',
+                    ),
+                    duration: const Duration(seconds: 1),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
             );
           },
         ),
-        TombolTasHeader(onTap: () {}),
-        const SizedBox(width: 4),
+        const SizedBox(width: 8),
       ],
     );
   }
@@ -488,35 +542,75 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
 
   // 2. Indikator Bebas Ongkir Kilat Atelier
   Widget _bangunNotifikasiBebasOngkir() {
+    const int batasBebasOngkir = 1500000;
+    final int subtotalSaatIni = _subtotal;
+    final int kekurangan = batasBebasOngkir - subtotalSaatIni;
+    final double progress = (subtotalSaatIni / batasBebasOngkir).clamp(0.0, 1.0);
+    final bool tercapai = kekurangan <= 0;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: TemaAplikasi.surfaceLight,
         borderRadius: BorderRadius.circular(2),
+        border: Border.all(color: TemaAplikasi.borderGray),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(
-                Icons.local_shipping_outlined,
-                size: 18,
-                color: TemaAplikasi.primary,
-              ),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  'Ongkos kirim mengikuti tarif kurir dan dihitung server saat checkout.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+              const Row(
+                children: [
+                  Icon(
+                    Icons.local_shipping_outlined,
+                    size: 18,
                     color: TemaAplikasi.primary,
                   ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Bebas Ongkir Kilat Atelier',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: TemaAplikasi.primary,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                tercapai ? '100%' : '${(progress * 100).toInt()}%',
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.0,
+                  color: TemaAplikasi.secondary,
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            tercapai
+                ? 'Selamat! Pesanan Anda memenuhi syarat kurir prioritas tanpa biaya.'
+                : 'Tambahkan ${formatRupiah(kekurangan)} lagi untuk kualifikasi kurir prioritas tanpa biaya.',
+            style: TextStyle(
+              fontSize: 11,
+              color: tercapai ? TemaAplikasi.primary : TemaAplikasi.secondary,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(1),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 3.5,
+              backgroundColor: TemaAplikasi.surfaceContainerHigh,
+              valueColor: const AlwaysStoppedAnimation<Color>(TemaAplikasi.primary),
+            ),
           ),
         ],
       ),
@@ -788,6 +882,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
 
   // 4. Cross-sell Carousel: Sempurnakan Tampilan (cek-keranjangBelanja.html)
   Widget _bangunCrossSellCarousel() {
+    if (_daftarRekomendasi.isEmpty) return const SizedBox.shrink();
+
     return Container(
       width: double.infinity,
       color: TemaAplikasi.surfaceLight,
@@ -800,8 +896,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Column(
+              children: [
+                const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -826,8 +922,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                   ],
                 ),
                 Text(
-                  '2 Pilihan',
-                  style: TextStyle(
+                  '${_daftarRekomendasi.length} Pilihan',
+                  style: const TextStyle(
                     fontSize: 11,
                     letterSpacing: 1.0,
                     color: TemaAplikasi.secondary,
@@ -838,29 +934,16 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
           ),
           const SizedBox(height: 14),
 
-          // Carousel horizontal dua produk pelengkap
+          // Carousel horizontal produk pelengkap nyata dari server
           SizedBox(
             height: 260,
-            child: ListView(
+            child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _bangunKartuUpsell(
-                  nama: 'Silk Neck Scarf',
-                  harga: 320000,
-                  tag: 'PELENGKAP',
-                  fotoUrl: FotoDummy.upsell1,
-                  produkId: 12,
-                ),
-                const SizedBox(width: 12),
-                _bangunKartuUpsell(
-                  nama: 'Wide-Leg Trousers',
-                  harga: 890000,
-                  tag: 'SET PASANGAN',
-                  fotoUrl: FotoDummy.upsell2,
-                  produkId: 5,
-                ),
-              ],
+              itemCount: _daftarRekomendasi.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, index) =>
+                  _bangunKartuUpsell(_daftarRekomendasi[index]),
             ),
           ),
         ],
@@ -868,184 +951,196 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     );
   }
 
-  Widget _bangunKartuUpsell({
-    required String nama,
-    required int harga,
-    required String tag,
-    required String fotoUrl,
-    required int produkId,
-  }) {
-    return Container(
-      width: 170,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: TemaAplikasi.surfaceWhite,
-        borderRadius: BorderRadius.circular(2),
-        border: Border.all(color: TemaAplikasi.borderGray),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: TemaAplikasi.surfaceContainer,
+  Widget _bangunKartuUpsell(Produk produk) {
+    final gambar = produk.fotoUrl;
+    final tag = produk.kategori.isNotEmpty
+        ? produk.kategori.toUpperCase()
+        : 'PELENGKAP';
+
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          ruteGeser(HalamanRincianProduk(produkId: produk.id)),
+        ).then((_) => _muatKeranjang());
+      },
+      child: Container(
+        width: 170,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: TemaAplikasi.surfaceWhite,
+          borderRadius: BorderRadius.circular(2),
+          border: Border.all(color: TemaAplikasi.borderGray),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: TemaAplikasi.surfaceContainer,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: FotoDummy.bangunGambar(
+                      url: gambar,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 6,
+                    left: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      color: TemaAplikasi.primary,
+                      child: Text(
+                        tag,
+                        style: const TextStyle(
+                          color: TemaAplikasi.onPrimary,
+                          fontSize: 8,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              produk.nama,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: TemaAplikasi.primary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              formatRupiah(produk.harga),
+              style: const TextStyle(
+                fontSize: 11.5,
+                color: TemaAplikasi.secondary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 32,
+              child: ElevatedButton.icon(
+                onPressed: () => _tambahRekomendasiKeKeranjang(produk),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: TemaAplikasi.primary,
+                  foregroundColor: TemaAplikasi.onPrimary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(2),
                   ),
-                  clipBehavior: Clip.antiAlias,
-                  child: FotoDummy.bangunGambar(
-                    url: fotoUrl,
-                    fit: BoxFit.cover,
+                  padding: EdgeInsets.zero,
+                ),
+                icon: const Icon(Icons.add, size: 13),
+                label: const Text(
+                  'TAMBAH',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.0,
                   ),
-                ),
-                Positioned(
-                  top: 6,
-                  left: 6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    color: TemaAplikasi.primary,
-                    child: Text(
-                      tag,
-                      style: const TextStyle(
-                        color: TemaAplikasi.onPrimary,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            nama,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: TemaAplikasi.primary,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            formatRupiah(harga),
-            style: const TextStyle(
-              fontSize: 11.5,
-              color: TemaAplikasi.secondary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            height: 32,
-            child: ElevatedButton.icon(
-              onPressed: () async {
-                final detail = await LayananApi.ambilRincianProduk(produkId);
-                if (!mounted) return;
-
-                if (detail.berhasil && detail.data != null) {
-                  final produk = Produk.fromJson(detail.data as Map<String, dynamic>);
-                  final varianList = produk.varian ?? const <Varian>[];
-
-                  if (varianList.isEmpty) {
-                    final respon = await LayananApi.tambahKeKeranjang(
-                      produkId: produk.id,
-                      varianId: 0,
-                      jumlah: 1,
-                    );
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          respon.berhasil
-                              ? '$nama berhasil ditambahkan ke tas belanja!'
-                              : respon.message,
-                        ),
-                        duration: const Duration(milliseconds: 1500),
-                        backgroundColor: respon.berhasil ? TemaAplikasi.primary : TemaAplikasi.errorColor,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                    if (respon.berhasil) {
-                      _muatKeranjang();
-                    }
-                    return;
-                  }
-
-                  await ModalPilihVarian.tampilkanTambah(
-                    context,
-                    produk: produk,
-                    onKonfirmasi: (varian, jumlah) async {
-                      final respon = await LayananApi.tambahKeKeranjang(
-                        produkId: produk.id,
-                        varianId: varian.id,
-                        jumlah: jumlah,
-                      );
-                      if (!mounted) return false;
-
-                      if (respon.berhasil) {
-                        _muatKeranjang();
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '${produk.nama} (${varian.ukuran}, ${varian.warna}) x$jumlah berhasil ditambahkan!',
-                            ),
-                            duration: const Duration(milliseconds: 1500),
-                            backgroundColor: TemaAplikasi.primary,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                        return true;
-                      }
-
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(respon.message),
-                          duration: const Duration(milliseconds: 1500),
-                          backgroundColor: TemaAplikasi.errorColor,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                      return false;
-                    },
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: TemaAplikasi.primary,
-                foregroundColor: TemaAplikasi.onPrimary,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                padding: EdgeInsets.zero,
-              ),
-              icon: const Icon(Icons.add, size: 13),
-              label: const Text(
-                'TAMBAH',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.0,
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _tambahRekomendasiKeKeranjang(Produk produk) async {
+    final detail = await LayananApi.ambilRincianProduk(produk.id);
+    if (!mounted) return;
+
+    if (detail.berhasil && detail.data != null) {
+      final produkLengkap =
+          Produk.fromJson(detail.data as Map<String, dynamic>);
+      final varianList = produkLengkap.varian ?? const <Varian>[];
+
+      if (varianList.isEmpty) {
+        final respon = await LayananApi.tambahKeKeranjang(
+          produkId: produkLengkap.id,
+          varianId: 0,
+          jumlah: 1,
+        );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              respon.berhasil
+                  ? '${produk.nama} berhasil ditambahkan ke tas belanja!'
+                  : respon.message,
+            ),
+            duration: const Duration(milliseconds: 1500),
+            backgroundColor: respon.berhasil
+                ? TemaAplikasi.primary
+                : TemaAplikasi.errorColor,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        if (respon.berhasil) {
+          _muatKeranjang();
+        }
+        return;
+      }
+
+      await ModalPilihVarian.tampilkanTambah(
+        context,
+        produk: produkLengkap,
+        onKonfirmasi: (varian, jumlah) async {
+          final respon = await LayananApi.tambahKeKeranjang(
+            produkId: produkLengkap.id,
+            varianId: varian.id,
+            jumlah: jumlah,
+          );
+          if (!mounted) return false;
+
+          if (respon.berhasil) {
+            _muatKeranjang();
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${produk.nama} (${varian.ukuran}, ${varian.warna}) x$jumlah berhasil ditambahkan!',
+                ),
+                duration: const Duration(milliseconds: 1500),
+                backgroundColor: TemaAplikasi.primary,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            return true;
+          }
+
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(respon.message),
+              duration: const Duration(milliseconds: 1500),
+              backgroundColor: TemaAplikasi.errorColor,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return false;
+        },
+      );
+    }
   }
 
   // 6. Ringkasan Pesanan (cek-keranjangBelanja.html)
@@ -1245,9 +1340,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                     ? () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => const HalamanCheckout(),
-                          ),
+                          ruteGeser(const HalamanCheckoutAlurSatu()),
                         ).then((_) => _muatKeranjang());
                       }
                     : null,

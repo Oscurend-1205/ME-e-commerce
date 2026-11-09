@@ -92,6 +92,11 @@ class DatabaseSeeder extends Seeder
             'nama' => 'Transfer Bank Manual (BCA/Mandiri)',
         ]);
 
+        $metodeQris = MetodePembayaran::create([
+            'kode' => 'qris',
+            'nama' => 'QRIS (Quick Response Code Indonesian Standard)',
+        ]);
+
         // 5. 36 Produk ME (Kelompok 2): Atasan 15, Bawahan 12, Aksesori 9
         $daftarProduk = [
             [

@@ -10,6 +10,7 @@ use App\Models\Kurir;
 use App\Models\MetodePembayaran;
 use App\Models\Pesanan;
 use App\Models\VarianProduk;
+use App\Services\MidtransService;
 use App\Traits\ApiResponse;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
@@ -23,6 +24,13 @@ class CheckoutController extends Controller
     use ApiResponse;
 
     private const PESAN_GALAT_SERVER = 'Terjadi kesalahan pada server. Silakan coba lagi.';
+
+    protected MidtransService $midtrans;
+
+    public function __construct()
+    {
+        $this->midtrans = new MidtransService();
+    }
 
     protected function getPelangganId(Request $request): int
     {
@@ -73,6 +81,7 @@ class CheckoutController extends Controller
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string',
+            'catatan' => 'nullable|string|max:1000',
             'kurir_id' => 'required|exists:kurir,id',
             'metode_pembayaran_id' => 'required|exists:metode_pembayaran,id',
         ], [
@@ -170,6 +179,7 @@ class CheckoutController extends Controller
                     'metode_pembayaran_id' => $metode->id,
                     'nama_penerima' => $request->input('nama'),
                     'alamat' => $request->input('alamat'),
+                    'catatan' => $request->input('catatan'),
                     'subtotal' => $subtotal,
                     'ongkir' => $ongkir,
                     'total' => $total,
@@ -200,11 +210,87 @@ class CheckoutController extends Controller
                 return $this->balasUlangIdempoten($pesananBaru);
             }
 
-            return $this->sukses(
-                $pesananBaru->formatLengkap(),
-                'Pesanan berhasil dibuat',
-                201
-            );
+            // Generate Midtrans Snap token untuk pembayaran
+            $itemDetails = [];
+            foreach ($pesananBaru->detail as $detail) {
+                $itemDetails[] = [
+                    'id' => $detail->id,
+                    'price' => (int) $detail->harga_satuan,
+                    'quantity' => (int) $detail->jumlah,
+                    'name' => $detail->nama_produk . ' - ' . $detail->ukuran . ' / ' . $detail->warna,
+                ];
+            }
+
+            // Tambahkan ongkir sebagai item terpisah
+            if ($pesananBaru->ongkir > 0) {
+                $itemDetails[] = [
+                    'id' => 'ONGKIR',
+                    'price' => (int) $pesananBaru->ongkir,
+                    'quantity' => 1,
+                    'name' => 'Biaya Pengiriman - ' . ($pesananBaru->kurir ? $pesananBaru->kurir->nama : 'Kurir'),
+                ];
+            }
+
+            try {
+                if ($metode->kode === 'qris') {
+                    $qrisData = $this->midtrans->generateQrisTransaction([
+                        'order_id' => $pesananBaru->nomor_pesanan,
+                        'gross_amount' => (int) $pesananBaru->total,
+                        'customer_name' => $pesananBaru->nama_penerima,
+                        'customer_email' => 'customer@example.com',
+                        'customer_phone' => '',
+                        'item_details' => $itemDetails,
+                    ]);
+
+                    $pesananBaru->update(['snap_token' => $qrisData['transaction_id'] ?? $pesananBaru->nomor_pesanan]);
+
+                    $dataPesanan = $pesananBaru->formatLengkap();
+                    $dataPesanan['snap_token'] = $qrisData['transaction_id'] ?? null;
+                    $dataPesanan['qr_url'] = $qrisData['qr_url'] ?? null;
+                    $dataPesanan['qr_string'] = $qrisData['qr_string'] ?? null;
+                    $dataPesanan['expired_at'] = $qrisData['expired_at'] ?? null;
+                    $dataPesanan['client_key'] = $this->midtrans->getClientKey();
+
+                    return $this->sukses(
+                        $dataPesanan,
+                        'Pesanan berhasil dibuat. Silakan scan QRIS untuk menyelesaikan pembayaran.',
+                        201
+                    );
+                } else {
+                    $snapToken = $this->midtrans->generateSnapToken([
+                        'order_id' => $pesananBaru->nomor_pesanan,
+                        'gross_amount' => (int) $pesananBaru->total,
+                        'customer_name' => $pesananBaru->nama_penerima,
+                        'customer_email' => 'customer@example.com',
+                        'customer_phone' => '',
+                        'item_details' => $itemDetails,
+                    ]);
+
+                    // Simpan snap token ke database
+                    $pesananBaru->update(['snap_token' => $snapToken]);
+
+                    $dataPesanan = $pesananBaru->formatLengkap();
+                    $dataPesanan['snap_token'] = $snapToken;
+                    $dataPesanan['client_key'] = $this->midtrans->getClientKey();
+
+                    return $this->sukses(
+                        $dataPesanan,
+                        'Pesanan berhasil dibuat. Silakan selesaikan pembayaran.',
+                        201
+                    );
+                }
+            } catch (\Exception $e) {
+                report($e);
+                // Jika Midtrans gagal, tetap return pesanan tanpa snap token
+                $dataPesanan = $pesananBaru->formatLengkap();
+                $dataPesanan['error_midtrans'] = 'Gagal generate payment gateway (' . $e->getMessage() . ').';
+
+                return $this->sukses(
+                    $dataPesanan,
+                    'Pesanan berhasil dibuat, tetapi payment gateway gagal.',
+                    201
+                );
+            }
         } catch (KonflikCheckoutException $e) {
             // Stok habis / keranjang kosong: bentrok keadaan data (409). Pesannya aman ditampilkan.
             return $this->gagal($e->getMessage(), 409);
