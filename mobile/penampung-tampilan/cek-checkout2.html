@@ -1,0 +1,356 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><meta content="mobile_tab" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "secondary-fixed": "#e3e2e2", "primary-fixed-dim": "#c8c6c5", "tertiary-fixed": "#e6e1df", "tertiary-fixed-dim": "#cac6c3", "surface-light": "#F7F7F7", "on-primary": "#ffffff", "on-primary-fixed-variant": "#474646", "surface-dim": "#dadada", "on-secondary-container": "#646464", "on-secondary-fixed-variant": "#464747", "on-tertiary-container": "#868381", "surface-container-highest": "#e2e2e2", "surface-container-lowest": "#ffffff", "on-error": "#ffffff", "on-surface-variant": "#444748", "secondary-container": "#e3e2e2", "background": "#f9f9f9", "on-secondary-fixed": "#1b1c1c", "on-tertiary-fixed": "#1d1b1a", "inverse-primary": "#c8c6c5", "primary": "#000000", "primary-container": "#1c1b1b", "surface-container-high": "#e8e8e8", "inverse-surface": "#2f3131", "outline-variant": "#c4c7c7", "secondary-fixed-dim": "#c7c6c6", "on-surface": "#1a1c1c", "outline": "#747878", "secondary": "#5e5e5e", "tertiary-container": "#1d1b1a", "error": "#ba1a1a", "on-background": "#1a1c1c", "inverse-on-surface": "#f0f1f1", "on-primary-container": "#858383", "surface-container-low": "#f3f3f4", "surface-tint": "#5f5e5e", "border-gray": "#E5E5E5", "on-tertiary": "#ffffff", "surface": "#f9f9f9", "error-container": "#ffdad6", "on-primary-fixed": "#1c1b1b", "surface-container": "#eeeeee", "muted-gray": "#767676", "on-secondary": "#ffffff", "primary-fixed": "#e5e2e1", "on-tertiary-fixed-variant": "#484645", "surface-bright": "#f9f9f9", "surface-variant": "#e2e2e2", "tertiary": "#000000", "on-error-container": "#93000a" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "gutter": "1rem", "space-xs": "0.25rem", "gutter-desktop": "1.5rem", "space-sm": "0.5rem", "margin": "1rem", "margin-tablet": "2rem", "space-lg": "1.5rem", "space-xl": "2.5rem", "margin-desktop": "3rem", "space-md": "1rem" }, fontFamily: { "body-sm": ["Inter"], "body-md": ["Inter"], "headline-lg": ["Playfair Display"], "headline-xl": ["Playfair Display"], "headline-xl-mobile": ["Playfair Display"], "body-lg": ["Inter"], "label-md": ["Inter"], "label-lg": ["Inter"], "headline-lg-mobile": ["Playfair Display"], "label-sm": ["Inter"], "headline-md": ["Playfair Display"], "headline-sm": ["Playfair Display"] }, fontSize: { "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0.01em", "fontWeight": "400" }], "headline-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "headline-xl": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "400" }], "headline-xl-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.16em", "fontWeight": "500" }], "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.14em", "fontWeight": "500" }], "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "400" }], "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.18em", "fontWeight": "600" }], "headline-md": ["28px", { "lineHeight": "36px", "fontWeight": "400" }], "headline-sm": ["22px", { "lineHeight": "30px", "fontWeight": "500" }] } } } }</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><span class="font-headline-md text-headline-md tracking-tight font-serif text-primary select-none">ME</span></div><div class="flex items-center gap-space-xs"><button aria-label="Search" class="w-11 h-11 flex items-center justify-center text-primary hover:text-secondary transition-colors"><span class="material-symbols-outlined text-[22px]">search</span></button><button aria-label="Wishlist" class="w-11 h-11 flex items-center justify-center text-primary hover:text-secondary transition-colors"><span class="material-symbols-outlined text-[22px]">favorite</span></button><button aria-label="Shopping Bag" class="w-11 h-11 flex items-center justify-center text-primary hover:text-secondary transition-colors relative"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute top-2 right-2 w-4 h-4 bg-primary text-on-primary font-label-sm text-[9px] flex items-center justify-center rounded-full leading-none">2</span></button><div class="pl-space-xs flex items-center"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1VLq1pfnbUP3toFZZzvnzAHtrkeSGUg4Vs50OzqRCrQdoo2lNArwi6oNLQx-fUiVjKWgcp0e7a4ddB3TOCxcs0mb59y-4C9kLo82YfbBBVdw42BzbyaEgv4pgAmSfhPaxqVpiL9pRkNh35xXNplPpt-IgTW2WGSzS2IVUA7CXvSSgbJuqiIKfhdjUeJp5uVn7cQ37wHTDBLS8yxNxqJbaavK8HiO_EswyIiCd8QmxyE787PNoR6BQfXJqdD"></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-20 bg-surface"><div class="flex flex-col w-full text-on-surface">
+<!-- STEPPER & NAVIGATION BAR -->
+<div class="px-gutter pt-3 pb-4 bg-surface-container-lowest"><div class="flex items-center justify-between mb-3">
+  <button aria-label="Kembali ke Tas Belanja" class="inline-flex items-center gap-1.5 text-primary hover:text-secondary transition-colors" type="button">
+    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+    <span class="font-label-sm text-[11px] uppercase tracking-wider font-medium text-primary">KEMBALI KE TAS</span>
+  </button>
+  <span class="font-label-sm text-[11px] text-muted-gray uppercase tracking-wider font-medium">LANGKAH 02 / 03</span>
+</div>
+<div class="mb-4">
+  <h1 class="font-headline-sm text-headline-sm font-serif text-primary tracking-tight mb-1">Pengiriman &amp; Alamat</h1>
+  <p class="font-body-sm text-[12px] text-muted-gray">Pilih alamat tujuan dan kurir concierge eksklusif untuk pesanan Anda</p>
+</div>
+<div class="flex items-center justify-between pt-space-md px-1"><div class="flex flex-col items-center flex-1 gap-1.5"><div class="flex items-center w-full"><div class="h-px flex-1 bg-transparent"></div><div class="w-5 h-5 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-sm text-[10px] font-semibold"><span class="material-symbols-outlined text-[12px] leading-none text-on-primary">check</span></div><div class="h-px flex-1 bg-primary"></div></div><span class="font-label-sm text-label-sm text-primary tracking-wider uppercase font-semibold">01. Tas</span></div><div class="flex flex-col items-center flex-1 gap-1.5"><div class="flex items-center w-full"><div class="h-px flex-1 bg-primary"></div><div class="w-5 h-5 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-sm text-[10px] font-semibold">2</div><div class="h-px flex-1 bg-border-gray"></div></div><span class="font-label-sm text-label-sm text-primary tracking-wider uppercase font-semibold underline underline-offset-4">02. Kirim</span></div><div class="flex flex-col items-center flex-1 gap-1.5"><div class="flex items-center w-full"><div class="h-px flex-1 bg-border-gray"></div><div class="w-5 h-5 rounded-full bg-surface-container-highest text-secondary flex items-center justify-center font-label-sm text-[10px] font-semibold">3</div><div class="h-px flex-1 bg-transparent"></div></div><span class="font-label-sm text-label-sm text-secondary tracking-wider uppercase font-semibold">03. Bayar</span></div></div></div>
+<div class="h-2 bg-surface-container-low w-full"></div>
+<!-- SECTION: ALAMAT PENERIMA -->
+<section class="px-gutter py-5 bg-surface-container-lowest">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
+<h2 class="font-label-md text-label-md uppercase tracking-widest text-primary font-semibold">ALAMAT PENERIMA</h2>
+</div>
+<button class="font-label-sm text-label-sm uppercase tracking-wider text-primary hover:text-secondary underline underline-offset-4 transition-colors" type="button">
+        + TAMBAH BARU
+      </button>
+</div>
+<!-- Address Cards Stack -->
+<div class="flex flex-col gap-3" id="address-selection-group">
+<!-- Address Card 1: Selected / Primary -->
+<label class="cursor-pointer block relative p-4 bg-surface-light hover:bg-surface-container transition-all" data-address-card="">
+<input checked="" class="sr-only peer" name="delivery_address" type="radio" value="keraton">
+<div class="flex items-start gap-3">
+<!-- Custom Radio Dot -->
+<div class="mt-0.5 w-4 h-4 rounded-full bg-surface-container-lowest flex items-center justify-center transition-all peer-checked:bg-primary shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-on-primary"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1 flex-wrap">
+<span class="font-body-md text-body-md font-semibold text-primary truncate">Clarissa Adiwidjaja</span>
+<span class="font-label-sm text-[9px] px-1.5 py-0.5 uppercase tracking-wider bg-primary text-on-primary">UTAMA</span>
+<span class="font-label-sm text-[9px] px-1.5 py-0.5 uppercase tracking-wider bg-surface-container-highest text-on-surface-variant">RUMAH</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary mb-1.5">
+              +62 812-3456-7890
+            </p>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+              Apartemen Keraton At The Plaza, Lt. 28 Unit B, Jl. M.H. Thamrin No. 9, Menteng, Jakarta Pusat, DKI Jakarta 10350
+            </p>
+<!-- Micro Actions -->
+<div class="mt-3 pt-3 flex items-center gap-4 bg-surface-container/30 px-2 py-1.5">
+<button class="font-label-sm text-label-sm uppercase tracking-wider text-primary flex items-center gap-1 hover:text-secondary" type="button">
+<span class="material-symbols-outlined text-[14px]">edit</span>
+<span class="">Ubah</span>
+</button>
+<span class="text-secondary-fixed-dim">|</span>
+<button class="font-label-sm text-label-sm uppercase tracking-wider text-secondary hover:text-primary flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">note_alt</span>
+<span class="">Catatan Kurir: Titip Resepsionis Lobby B</span>
+</button>
+</div>
+</div>
+</div>
+</label>
+<!-- Address Card 2: Secondary / Unselected -->
+<label class="cursor-pointer block relative p-4 bg-surface-container-low hover:bg-surface-light transition-all opacity-80" data-address-card="">
+<input class="sr-only peer" name="delivery_address" type="radio" value="sequis">
+<div class="flex items-start gap-3">
+<div class="mt-0.5 w-4 h-4 rounded-full bg-surface-container-lowest flex items-center justify-center transition-all peer-checked:bg-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-lowest"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1 flex-wrap">
+<span class="font-body-md text-body-md font-semibold text-primary truncate">Clarissa Adiwidjaja (ME Atelier HQ)</span>
+<span class="font-label-sm text-[9px] px-1.5 py-0.5 uppercase tracking-wider bg-surface-container-highest text-on-surface-variant">KANTOR</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary mb-1.5">
+              +62 812-9876-5432
+            </p>
+<p class="font-body-sm text-body-sm text-secondary leading-relaxed">
+              Sequis Center Lantai 12, Jl. Jend. Sudirman Kav 71, SCBD, Senayan, Kebayoran Baru, Jakarta Selatan 12190
+            </p>
+</div>
+</div>
+</label>
+</div>
+</section>
+<div class="h-2 bg-surface-container-low w-full"></div>
+<!-- SECTION: COURIER & SERVICE TIER -->
+<section class="px-gutter py-5 bg-surface-container-lowest">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">local_shipping</span>
+<h2 class="font-label-md text-label-md uppercase tracking-widest text-primary font-semibold">PILIHAN KURIR PENGIRIMAN</h2>
+</div>
+<span class="font-label-sm text-[10px] text-muted-gray uppercase">3 Opsi Tersedia</span>
+</div>
+<div class="space-y-3" id="shipping-tier-group">
+<!-- Tier 1: Concierge White Glove (Selected) -->
+<label class="cursor-pointer block relative p-4 bg-surface-light hover:bg-surface-container transition-all">
+<input checked="" class="sr-only peer" name="shipping_tier" type="radio" value="concierge">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-start gap-3">
+<div class="mt-1 w-4 h-4 rounded-full bg-surface-container-lowest flex items-center justify-center transition-all peer-checked:bg-primary shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-on-primary"></span>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1 flex-wrap">
+<span class="font-body-md text-body-md font-semibold text-primary">ME ATELIER WHITE GLOVE</span>
+<span class="font-label-sm text-[9px] px-1.5 py-0.5 bg-primary text-on-primary uppercase tracking-widest">EKSKLUSIF</span>
+</div>
+<p class="font-body-sm text-body-sm font-medium text-primary mb-1">
+                Tiba Besok, 14:00 – 18:00 WIB
+              </p>
+<p class="font-body-sm text-[12px] text-secondary leading-snug">
+                Kurir pribadi berseragam atelier, kemasan ME Signature Gift Box kaku &amp; pelindung garmen sutra debu.
+              </p>
+</div>
+</div>
+<div class="text-right flex-shrink-0">
+<span class="font-label-md text-label-md uppercase text-primary font-bold tracking-wider">GRATIS</span>
+<span class="block font-body-sm text-[10px] text-muted-gray line-through">Rp 75.000</span>
+</div>
+</div>
+</label>
+<!-- Tier 2: Same-day Instant -->
+<label class="cursor-pointer block relative p-4 bg-surface-container-low hover:bg-surface-light transition-all opacity-80">
+<input class="sr-only peer" name="shipping_tier" type="radio" value="sameday">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-start gap-3">
+<div class="mt-1 w-4 h-4 rounded-full bg-surface-container-lowest flex items-center justify-center transition-all peer-checked:bg-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-lowest"></span>
+</div>
+<div>
+<span class="font-body-md text-body-md font-semibold text-primary block mb-0.5">SAME-DAY INSTANT COURIER</span>
+<p class="font-body-sm text-body-sm text-secondary mb-1">
+                Tiba Hari Ini (Estimasi 4 – 6 Jam)
+              </p>
+<p class="font-body-sm text-[12px] text-muted-gray leading-snug">
+                Pengantaran prioritas ekspres langsung dari butik ME Plaza Indonesia.
+              </p>
+</div>
+</div>
+<div class="text-right flex-shrink-0">
+<span class="font-label-md text-label-md uppercase text-primary font-semibold tracking-wider">Rp 35.000</span>
+</div>
+</div>
+</label>
+<!-- Tier 3: Standard Eco -->
+<label class="cursor-pointer block relative p-4 bg-surface-container-low hover:bg-surface-light transition-all opacity-80">
+<input class="sr-only peer" name="shipping_tier" type="radio" value="standard">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-start gap-3">
+<div class="mt-1 w-4 h-4 rounded-full bg-surface-container-lowest flex items-center justify-center transition-all peer-checked:bg-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-lowest"></span>
+</div>
+<div>
+<span class="font-body-md text-body-md font-semibold text-primary block mb-0.5">STANDARD ECO DELIVERY</span>
+<p class="font-body-sm text-body-sm text-secondary mb-1">
+                2 – 3 Hari Kerja
+              </p>
+<p class="font-body-sm text-[12px] text-muted-gray leading-snug">
+                Kemasan kardus daur ulang netral karbon terverifikasi FSC.
+              </p>
+</div>
+</div>
+<div class="text-right flex-shrink-0">
+<span class="font-label-md text-label-md uppercase text-primary font-bold tracking-wider">GRATIS</span>
+</div>
+</div>
+</label>
+</div>
+</section>
+<div class="h-2 bg-surface-container-low w-full"></div>
+<!-- SECTION: GIFTING & COMPLIMENTARY SERVICES -->
+<section class="px-gutter py-5 bg-surface-container-lowest">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-[18px] text-primary">featured_seasonal_and_gifts</span>
+<h2 class="font-label-md text-label-md uppercase tracking-widest text-primary font-semibold">LAYANAN ME GIFTING &amp; PROTEKSI</h2>
+</div>
+<div class="space-y-4">
+<!-- Gift Packaging Toggle Card -->
+<div class="p-4 bg-surface-light">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px] text-primary">redeem</span>
+<div>
+<span class="font-body-md text-body-md font-semibold text-primary block">Kemas Sebagai Hadiah</span>
+<span class="font-body-sm text-[11px] text-muted-gray">Kotak Pita Sutra Hitam ME Signature + Kertas Tisu Putih</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="gift-toggle" type="checkbox">
+<div class="w-9 h-5 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-container-lowest after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Optional Personalized Message Note -->
+<div class="mt-3 pt-3 bg-surface-container-lowest p-3" id="gift-message-container">
+<label class="block font-label-sm text-label-sm uppercase tracking-wider text-secondary mb-1" for="gift-note">
+            KARTU UCAPAN PRIBADI (KALIGRAFI ME)
+          </label>
+<textarea class="w-full bg-surface-light p-2.5 font-body-sm text-body-sm text-on-surface focus:outline-none focus:bg-surface-container-lowest transition-colors placeholder:text-muted-gray resize-none" id="gift-note" placeholder="Tuliskan pesan berkesan Anda di sini (maks. 120 kata)..." rows="2">Untuk Clarissa terkasih, selamat atas pembukaan galeri barumu. Semoga koleksi ini melengkapi keanggunanmu.</textarea>
+<div class="flex justify-between items-center mt-1">
+<span class="font-label-sm text-[10px] text-muted-gray">Dicetak pada kartu linen bertekstur 300gsm</span>
+<span class="font-label-sm text-[10px] text-primary uppercase font-bold">GRATIS</span>
+</div>
+</div>
+</div>
+<!-- Shipping Insurance -->
+<div class="p-3.5 bg-surface-light flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px] text-primary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<div>
+<span class="font-body-sm text-body-sm font-semibold text-primary block">Proteksi Penuh Pengiriman Mewah</span>
+<span class="font-body-sm text-[11px] text-secondary">Garansi ganti rugi 100% atas kerusakan &amp; kehilangan transit</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="font-label-sm text-[10px] text-primary font-bold uppercase tracking-wider">AKTIF</span>
+<span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+</div>
+</section>
+<div class="h-2 bg-surface-container-low w-full"></div>
+<!-- SECTION: RINGKASAN BARANG SINGKAT -->
+<section class="px-gutter py-4 bg-surface-container-lowest">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary">ITEM DIKIRIM (2 PRODUK)</span>
+<span class="font-body-sm text-[12px] text-muted-gray">Dari Butik ME Plaza Senayan</span>
+</div>
+<div class="flex items-center gap-3">
+<!-- Item Thumbnail 1 -->
+<div class="flex items-center gap-2.5 p-2 bg-surface-light flex-1 min-w-0">
+<img class="w-12 h-14 object-cover flex-shrink-0" data-alt="Close up minimalist shot of a tailored tailored neutral cream linen oversized blazer draped against pristine clean luxury studio background monochrome aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByNFt5wOXIN1Ly-7Ic8nAnTmdpMV6RY5PC1GLY0IqfDxIOdj3GIxnawGt9X0QYpHZl38jhj-FeevGei6ZbxUGPJKySXPuWwXfmpceFHaGPPTIZkup3Prn06J6HMlG9tFvFux3zlRdIZ_Z9eeuYDzTbC-wyM1zyTv8Q8perwvVXqTu45I7bRgh225t49x9dkj1kNsNCiR6E09Zp2OxyLWlAsvsEploaqdKOfi32NiIo">
+<div class="min-w-0 flex-1">
+<p class="font-body-sm text-body-sm text-primary font-medium truncate">Tailored Linen Blazer</p>
+<p class="font-label-sm text-[10px] text-muted-gray uppercase">S | Bone White</p>
+<p class="font-body-sm text-[11px] text-primary font-semibold">Rp 1.450.000</p>
+</div>
+</div>
+<!-- Item Thumbnail 2 -->
+<div class="flex items-center gap-2.5 p-2 bg-surface-light flex-1 min-w-0">
+<img class="w-12 h-14 object-cover flex-shrink-0" data-alt="High luxury black smooth structured calfskin leather mini tote bag with polished dark silver hardware photographed on white marble background high fashion" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwZYSfgeFW87vRat1LTAoYdIh_que0zJRp4mEbbyiU8OJYi1XbT84V_CKfHeGZUs9894CY_cZ17c_jLqAqE6_nlrVZ0zMjV7XBWe0WecynL2bHu3wc6wUbQg5BvQlQIGgohj8xRePfXMnTgcKy3KdNKMoNj1A84y_DtJvqbofrl2aXd1nWUGZsD32QEU6y-mqAyzPlpKeLw4uMlweZecu42x7CUOzc-76G-SLOOPrT">
+<div class="min-w-0 flex-1">
+<p class="font-body-sm text-body-sm text-primary font-medium truncate">Mini Structured Calfskin</p>
+<p class="font-label-sm text-[10px] text-muted-gray uppercase">OS | Onyx Black</p>
+<p class="font-body-sm text-[11px] text-primary font-semibold">Rp 1.198.000</p>
+</div>
+</div>
+</div>
+</section>
+<!-- STICKY BOTTOM CHECKOUT ACTION PANEL -->
+<aside class="sticky bottom-0 w-full z-40 bg-surface-container-lowest shadow-[0_-4px_16px_rgba(0,0,0,0.06)] px-gutter py-3.5 pb-safe">
+<div class="flex items-center justify-between mb-2.5">
+<div>
+<span class="font-label-sm text-[10px] text-muted-gray uppercase tracking-widest block">TOTAL TAGIHAN</span>
+<div class="flex items-baseline gap-1.5">
+<span class="font-headline-sm text-headline-sm font-serif text-primary">Rp 2.648.000</span>
+<span class="font-label-sm text-[10px] text-primary uppercase font-bold tracking-wider">(BEBAS ONGKIR)</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-[10px] text-secondary uppercase block">ESTIMASI TIBA</span>
+<span class="font-body-sm text-[12px] text-primary font-medium">Besok Sore (Concierge)</span>
+</div>
+</div>
+<!-- Primary Action Button -->
+<a class="w-full bg-primary hover:bg-secondary text-on-primary py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.99] text-center" href="#" id="btn-proceed-payment">
+<span class="font-label-md text-label-md uppercase tracking-[0.2em] font-semibold text-on-primary">
+        LANJUT KE PEMBAYARAN
+      </span>
+<span class="material-symbols-outlined text-[18px] text-on-primary">arrow_forward</span>
+</a>
+</aside>
+<script>
+    // Micro-interactions for Selection States
+    document.addEventListener('DOMContentLoaded', () => {
+      // Address selection visual synchronization
+      const addressCards = document.querySelectorAll('#address-selection-group label');
+      addressCards.forEach(card => {
+        const input = card.querySelector('input[type="radio"]');
+        card.addEventListener('click', () => {
+          addressCards.forEach(c => {
+            c.classList.remove('bg-surface-light');
+            c.classList.add('bg-surface-container-low', 'opacity-80');
+            const dot = c.querySelector('.w-1\\.5');
+            if (dot) {
+              dot.classList.remove('bg-on-primary');
+              dot.classList.add('bg-surface-container-lowest');
+            }
+          });
+          card.classList.remove('bg-surface-container-low', 'opacity-80');
+          card.classList.add('bg-surface-light');
+          const activeDot = card.querySelector('.w-1\\.5');
+          if (activeDot) {
+            activeDot.classList.remove('bg-surface-container-lowest');
+            activeDot.classList.add('bg-on-primary');
+          }
+        });
+      });
+
+      // Shipping courier tier visual synchronization
+      const shippingTiers = document.querySelectorAll('#shipping-tier-group label');
+      shippingTiers.forEach(tier => {
+        tier.addEventListener('click', () => {
+          shippingTiers.forEach(t => {
+            t.classList.remove('bg-surface-light');
+            t.classList.add('bg-surface-container-low', 'opacity-80');
+            const dot = t.querySelector('.w-1\\.5');
+            if (dot) {
+              dot.classList.remove('bg-on-primary');
+              dot.classList.add('bg-surface-container-lowest');
+            }
+          });
+          tier.classList.remove('bg-surface-container-low', 'opacity-80');
+          tier.classList.add('bg-surface-light');
+          const activeDot = tier.querySelector('.w-1\\.5');
+          if (activeDot) {
+            activeDot.classList.remove('bg-surface-container-lowest');
+            activeDot.classList.add('bg-on-primary');
+          }
+        });
+      });
+
+      // Gifting message collapse toggle
+      const giftToggle = document.getElementById('gift-toggle');
+      const giftContainer = document.getElementById('gift-message-container');
+      if (giftToggle && giftContainer) {
+        giftToggle.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            giftContainer.style.display = 'block';
+          } else {
+            giftContainer.style.display = 'none';
+          }
+        });
+      }
+    });
+  </script>
+</div></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-1px_8px_rgba(0,0,0,0.04)]" data-active-classes="text-primary font-semibold"><div class="flex justify-around items-center h-16 px-gutter"><a class="flex flex-col items-center justify-center gap-space-xs min-w-[44px] min-h-[44px] px-space-sm text-secondary hover:text-primary transition-colors" data-path="beranda" href="#"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-sm text-label-sm uppercase tracking-widest">Beranda</span></a><a class="flex flex-col items-center justify-center gap-space-xs min-w-[44px] min-h-[44px] px-space-sm text-secondary hover:text-primary transition-colors" data-path="jelajah" href="#"><span class="material-symbols-outlined text-[22px]">explore</span><span class="font-label-sm text-label-sm uppercase tracking-widest">Jelajah</span></a><a class="flex flex-col items-center justify-center gap-space-xs min-w-[44px] min-h-[44px] px-space-sm text-secondary hover:text-primary transition-colors" data-path="wishlist" href="#"><span class="material-symbols-outlined text-[22px]">favorite_border</span><span class="font-label-sm text-label-sm uppercase tracking-widest">Wishlist</span></a><a class="flex flex-col items-center justify-center gap-space-xs min-w-[44px] min-h-[44px] px-space-sm text-secondary hover:text-primary transition-colors" data-path="akun" href="#"><span class="material-symbols-outlined text-[22px]">person</span><span class="font-label-sm text-label-sm uppercase tracking-widest">Akun</span></a></div></nav>
+
+
+
+</body></html>

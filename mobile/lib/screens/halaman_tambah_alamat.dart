@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/alamat.dart';
 import '../theme.dart';
 
 class HalamanTambahAlamat extends StatefulWidget {
@@ -16,6 +17,9 @@ class _HalamanTambahAlamatState extends State<HalamanTambahAlamat> {
   final TextEditingController _teleponController = TextEditingController(
     text: '811 8899 21',
   );
+  final TextEditingController _kotaController = TextEditingController(
+    text: 'Jakarta Pusat, Menteng - 10350',
+  );
   final TextEditingController _alamatController = TextEditingController(
     text: 'Apartemen Keraton At The Plaza, Lantai 28 Unit B, Jl. M.H. Thamrin No. 9',
   );
@@ -31,9 +35,30 @@ class _HalamanTambahAlamatState extends State<HalamanTambahAlamat> {
   void dispose() {
     _namaController.dispose();
     _teleponController.dispose();
+    _kotaController.dispose();
     _alamatController.dispose();
     _catatanController.dispose();
     super.dispose();
+  }
+
+  void _simpan() {
+    final alamatLengkap = [
+      _alamatController.text.trim(),
+      _kotaController.text.trim(),
+    ].where((s) => s.isNotEmpty).join(', ');
+
+    Navigator.pop(
+      context,
+      Alamat(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        nama: _namaController.text.trim(),
+        telepon: '+62 ${_teleponController.text.trim()}',
+        alamat: alamatLengkap,
+        label: _labelAlamat,
+        catatan: _catatanController.text.trim(),
+        utama: _jadikanUtama,
+      ),
+    );
   }
 
   @override
@@ -155,7 +180,7 @@ class _HalamanTambahAlamatState extends State<HalamanTambahAlamat> {
                     const SizedBox(height: 18),
                     _buildField(
                       label: 'KOTA, KECAMATAN & KODE POS',
-                      controller: TextEditingController(text: 'Jakarta Pusat, Menteng - 10350'),
+                      controller: _kotaController,
                       readOnly: true,
                     ),
                     const SizedBox(height: 18),
@@ -231,7 +256,7 @@ class _HalamanTambahAlamatState extends State<HalamanTambahAlamat> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: _simpan,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         backgroundColor: TemaAplikasi.primary,
