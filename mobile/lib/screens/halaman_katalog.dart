@@ -239,7 +239,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     setState(() {
       _kategoriTerpilih = (kategori == null || kategori == 'Semua') ? null : kategori;
       if (_kategoriTerpilih == null) {
-        _storyTerpilih = 'Baru Tiba';
+        _storyTerpilih = widget.modeJelajah ? 'Wanita' : 'Baru Tiba';
       } else if (_kategoriTerpilih == 'Pakaian') {
         _storyTerpilih = 'Wanita';
       } else if (_kategoriTerpilih == 'Aksesori') {
@@ -3223,7 +3223,7 @@ class _MarqueeRunningTextState extends State<_MarqueeRunningText> {
   Widget build(BuildContext context) {
     return Container(
       height: widget.height,
-      color: widget.backgroundColor,
+      color: TemaAplikasi.primary,
       alignment: Alignment.center,
       child: ListView.builder(
         controller: _controller,
