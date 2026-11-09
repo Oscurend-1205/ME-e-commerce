@@ -232,6 +232,7 @@ class LayananApi {
   static Future<ApiResponse> checkout({
     required String nama,
     required String alamat,
+    String? catatan,
     required int kurirId,
     required int metodePembayaranId,
     required String kunciIdempoten,
@@ -242,6 +243,7 @@ class LayananApi {
       final body = {
         'nama': nama,
         'alamat': alamat,
+        if (catatan != null && catatan.isNotEmpty) 'catatan': catatan,
         'kurir_id': kurirId,
         'metode_pembayaran_id': metodePembayaranId,
       };

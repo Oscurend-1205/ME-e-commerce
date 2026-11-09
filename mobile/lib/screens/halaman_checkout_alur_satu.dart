@@ -4,11 +4,14 @@ import '../constants.dart';
 import '../enums.dart';
 import '../models/keranjang.dart';
 import '../models/kurir.dart';
+import '../models/metode_pembayaran.dart';
 import '../services/layanan_api.dart';
 import '../theme.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/foto_dummy.dart';
+import '../widgets/transisi_geser.dart';
 import '../widgets/widget_keadaan.dart';
+import '../widgets/widget_stepper_checkout.dart';
 import 'halaman_checkout_alur_dua.dart';
 
 /// Halaman Checkout Alur 01 — Review pesanan sesuai cek-checkout1.html
@@ -30,6 +33,7 @@ class _HalamanCheckoutAlurSatuState extends State<HalamanCheckoutAlurSatu> {
 
   DataKeranjang? _dataKeranjang;
   List<Kurir> _daftarKurir = [];
+  List<MetodePembayaran> _daftarMetode = [];
 
   @override
   void initState() {
@@ -51,14 +55,16 @@ class _HalamanCheckoutAlurSatuState extends State<HalamanCheckoutAlurSatu> {
     final hasil = await Future.wait([
       LayananApi.ambilKeranjang(),
       LayananApi.ambilKurir(),
+      LayananApi.ambilMetodePembayaran(),
     ]);
 
     if (!mounted) return;
 
     final responKeranjang = hasil[0];
     final responKurir = hasil[1];
+    final responMetode = hasil[2];
 
-    final responGagal = [responKeranjang, responKurir]
+    final responGagal = [responKeranjang, responKurir, responMetode]
         .where((respon) => !respon.berhasil)
         .toList();
 
@@ -87,10 +93,14 @@ class _HalamanCheckoutAlurSatuState extends State<HalamanCheckoutAlurSatu> {
     final kurirList = (responKurir.data as List? ?? [])
         .map((k) => Kurir.fromJson(k as Map<String, dynamic>))
         .toList();
+    final metodeList = (responMetode.data as List? ?? [])
+        .map((m) => MetodePembayaran.fromJson(m as Map<String, dynamic>))
+        .toList();
 
     setState(() {
       _dataKeranjang = dataKeranjang;
       _daftarKurir = kurirList;
+      _daftarMetode = metodeList;
       _keadaan = KeadaanMuat.berhasil;
     });
   }
@@ -103,10 +113,11 @@ class _HalamanCheckoutAlurSatuState extends State<HalamanCheckoutAlurSatu> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => HalamanCheckoutAlurDua(
+      ruteGeser(
+        HalamanCheckoutAlurDua(
           dataKeranjang: _dataKeranjang!,
           daftarKurir: _daftarKurir,
+          daftarMetode: _daftarMetode,
         ),
       ),
     ).then((_) => _muatData());
@@ -204,7 +215,7 @@ class _HalamanCheckoutAlurSatuState extends State<HalamanCheckoutAlurSatu> {
           const Text(
             'Checkout Pesanan',
             style: TextStyle(
-              fontSize: 26,
+              fontSize: 24,
               fontWeight: FontWeight.w400,
               letterSpacing: -0.3,
               color: TemaAplikasi.primary,
@@ -213,7 +224,7 @@ class _HalamanCheckoutAlurSatuState extends State<HalamanCheckoutAlurSatu> {
           ),
           const SizedBox(height: 2),
           const Text(
-            'Tinjau pesanan, alamat pengiriman, dan ringkasan pembayaran Anda',
+            'Tinjau pesanan dan ringkasan tas belanja Anda',
             style: TextStyle(
               fontSize: 12,
               color: TemaAplikasi.secondary,
@@ -221,80 +232,8 @@ class _HalamanCheckoutAlurSatuState extends State<HalamanCheckoutAlurSatu> {
             ),
           ),
           const SizedBox(height: 16),
-          _bangunStepper(),
+          const WidgetStepperCheckout(langkahAktif: 1),
         ],
-      ),
-    );
-  }
-
-  Widget _bangunStepper() {
-    const label = ['01. CHECKOUT', '02. PENGIRIMAN', '03. PEMBAYARAN'];
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Row(
-        children: List.generate(3, (i) {
-          final aktif = i == 0;
-          return Expanded(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: i > 0
-                            ? TemaAplikasi.surfaceContainerHigh
-                            : Colors.transparent,
-                      ),
-                    ),
-                    Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: aktif ? TemaAplikasi.primary : Colors.transparent,
-                        border: aktif
-                            ? null
-                            : Border.all(color: TemaAplikasi.surfaceContainerHigh),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${i + 1}',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: aktif
-                              ? TemaAplikasi.onPrimary
-                              : TemaAplikasi.mutedGray,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: i < 2
-                            ? TemaAplikasi.surfaceContainerHigh
-                            : Colors.transparent,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  label[i],
-                  style: TextStyle(
-                    fontSize: 10,
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.w600,
-                    color: aktif ? TemaAplikasi.primary : TemaAplikasi.mutedGray,
-                    decoration: aktif ? TextDecoration.underline : TextDecoration.none,
-                    decorationColor: TemaAplikasi.primary,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
       ),
     );
   }
@@ -442,32 +381,14 @@ class _HalamanCheckoutAlurSatuState extends State<HalamanCheckoutAlurSatu> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'KODE PROMOSI & HAK ISTIMEWA',
-                style: TextStyle(
-                  fontSize: 10,
-                  letterSpacing: 1.4,
-                  fontWeight: FontWeight.w600,
-                  color: TemaAplikasi.secondary,
-                ),
-              ),
-              InkWell(
-                onTap: _lanjutKePengiriman,
-                child: const Text(
-                  'Ubah Kode',
-                  style: TextStyle(
-                    fontSize: 10,
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.w600,
-                    color: TemaAplikasi.primary,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-            ],
+          const Text(
+            'KODE PROMOSI & HAK ISTIMEWA',
+            style: TextStyle(
+              fontSize: 10,
+              letterSpacing: 1.4,
+              fontWeight: FontWeight.w600,
+              color: TemaAplikasi.secondary,
+            ),
           ),
           const SizedBox(height: 8),
           Container(
@@ -779,7 +700,7 @@ class _HalamanCheckoutAlurSatuState extends State<HalamanCheckoutAlurSatu> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Lanjut Ke Pengiriman',
+                      'LANJUT KE PENGIRIMAN',
                       style: TextStyle(
                         fontSize: 11,
                         letterSpacing: 2.4,

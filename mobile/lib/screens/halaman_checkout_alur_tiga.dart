@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
-import '../enums.dart';
+import '../models/alamat.dart';
 import '../models/keranjang.dart';
 import '../models/kurir.dart';
 import '../models/metode_pembayaran.dart';
 import '../services/layanan_api.dart';
 import '../theme.dart';
 import '../widgets/format_rupiah.dart';
-import '../widgets/widget_keadaan.dart';
-import 'halaman_checkout_alur_dua.dart';
+import '../widgets/transisi_geser.dart';
+import '../widgets/widget_stepper_checkout.dart';
 import 'halaman_rincian_pesanan.dart';
 
 /// Halaman Checkout Alur 03 — Metode Pembayaran & Submit
 /// Desain mengikuti cek-checkout3.html
+/// Seluruh data referensi (keranjang, kurir, metode pembayaran, alamat)
+/// sudah dibawa dari langkah sebelumnya sehingga halaman ini
+/// langsung tampil tanpa loading.
 class HalamanCheckoutAlurTiga extends StatefulWidget {
   final DataKeranjang dataKeranjang;
   final Kurir? kurirTerpilih;
-  final AlamatSementara alamatTerpilih;
+  final Alamat alamatTerpilih;
+  final List<MetodePembayaran> daftarMetode;
   final bool kemasHadiah;
   final String kartuUcapan;
 
@@ -26,6 +30,7 @@ class HalamanCheckoutAlurTiga extends StatefulWidget {
     required this.dataKeranjang,
     this.kurirTerpilih,
     required this.alamatTerpilih,
+    required this.daftarMetode,
     this.kemasHadiah = false,
     this.kartuUcapan = '',
   });
@@ -35,11 +40,6 @@ class HalamanCheckoutAlurTiga extends StatefulWidget {
 }
 
 class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
-  KeadaanMuat _keadaan = KeadaanMuat.memuat;
-  JenisGalat _jenisGalat = JenisGalat.tidakDiketahui;
-  String _pesanGalat = '';
-
-  List<MetodePembayaran> _daftarMetode = [];
   MetodePembayaran? _metodeTerpilihFinal;
 
   bool _sedangMemproses = false;
@@ -49,54 +49,13 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
   void initState() {
     super.initState();
     _kunciIdempotenSaatIni = const Uuid().v4();
-    _muatData();
+    _metodeTerpilihFinal =
+        widget.daftarMetode.isNotEmpty ? widget.daftarMetode.first : null;
   }
 
   @override
   void dispose() {
     super.dispose();
-  }
-
-  Future<void> _muatData() async {
-    setState(() {
-      _keadaan = KeadaanMuat.memuat;
-    });
-
-    final responMetode = await LayananApi.ambilMetodePembayaran();
-
-    if (!mounted) return;
-
-    if (!responMetode.berhasil) {
-      setState(() {
-        _keadaan = KeadaanMuat.galat;
-        _jenisGalat = tentukanJenisGalat(responMetode.code);
-        _pesanGalat = responMetode.message;
-      });
-      return;
-    }
-
-    final metodeRaw = responMetode.data is List
-        ? responMetode.data as List
-        : [];
-
-    if (metodeRaw.isEmpty) {
-      setState(() {
-        _keadaan = KeadaanMuat.galat;
-        _jenisGalat = JenisGalat.tidakDiketahui;
-        _pesanGalat = 'Data metode pembayaran belum tersedia.';
-      });
-      return;
-    }
-
-    final metodeList = metodeRaw
-        .map((m) => MetodePembayaran.fromJson(m as Map<String, dynamic>))
-        .toList();
-
-    setState(() {
-      _daftarMetode = metodeList;
-      _metodeTerpilihFinal = metodeList.first;
-      _keadaan = KeadaanMuat.berhasil;
-    });
   }
 
   int get _ongkir => widget.kurirTerpilih?.tarif ?? 0;
@@ -120,10 +79,19 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
 
     final alamatLengkap = widget.alamatTerpilih.alamat;
 
+    final catatan = [
+      if (widget.alamatTerpilih.catatan.isNotEmpty)
+        'Catatan alamat: ${widget.alamatTerpilih.catatan}',
+      if (widget.kemasHadiah) 'Kemas sebagai hadiah',
+      if (widget.kartuUcapan.isNotEmpty)
+        'Kartu ucapan: ${widget.kartuUcapan}',
+    ].join('\n');
+
     final respon = await LayananApi.checkout(
       kunciIdempoten: _kunciIdempotenSaatIni!,
       nama: widget.alamatTerpilih.nama,
       alamat: alamatLengkap,
+      catatan: catatan.isEmpty ? null : catatan,
       kurirId: widget.kurirTerpilih?.id ?? 0,
       metodePembayaranId: _metodeTerpilihFinal!.id,
     );
@@ -150,9 +118,7 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => HalamanRincianPesanan(pesananId: pesananId),
-        ),
+        ruteGeser(HalamanRincianPesanan(pesananId: pesananId)),
       );
     } else {
       // 409 Conflict: Stok Habis saat Checkout Atomic
@@ -217,20 +183,61 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
 
   @override
   Widget build(BuildContext context) {
+    final tanpaMetode = widget.daftarMetode.isEmpty;
+
     return Scaffold(
       backgroundColor: TemaAplikasi.surfaceBright,
-      body: _keadaan == KeadaanMuat.memuat
-          ? const WidgetMemuat()
-          : _keadaan == KeadaanMuat.galat
-          ? WidgetGalat(
-              jenisGalat: _jenisGalat,
-              pesan: _pesanGalat,
-              onCobaLagi: _muatData,
-            )
-          : _bangunKonten(),
-      bottomNavigationBar: _keadaan == KeadaanMuat.berhasil
-          ? _bangunBilahBawah()
-          : null,
+      body: tanpaMetode ? _bangunErrorTanpaMetode() : _bangunKonten(),
+      bottomNavigationBar: tanpaMetode ? null : _bangunBilahBawah(),
+    );
+  }
+
+  Widget _bangunErrorTanpaMetode() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 48,
+              color: TemaAplikasi.secondary,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Metode pembayaran belum tersedia',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: TemaAplikasi.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Kembali ke langkah sebelumnya dan coba lagi.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: TemaAplikasi.secondary,
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'KEMBALI',
+                style: TextStyle(
+                  fontSize: 11,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                  color: TemaAplikasi.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -288,7 +295,7 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
           const Text(
             'Metode Pembayaran',
             style: TextStyle(
-              fontSize: 26,
+              fontSize: 24,
               fontWeight: FontWeight.w400,
               letterSpacing: -0.3,
               color: TemaAplikasi.primary,
@@ -305,152 +312,36 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
             ),
           ),
           const SizedBox(height: 16),
-          _bangunStepper(),
+          const WidgetStepperCheckout(langkahAktif: 3),
         ],
       ),
     );
   }
 
-  Widget _bangunStepper() {
-    const label = ['01. TAS', '02. KIRIM', '03. BAYAR'];
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Row(
-        children: List.generate(3, (i) {
-          final aktif = i == 2;
-          final selesai = i < 2;
-          return Expanded(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: i > 0
-                            ? (selesai ? TemaAplikasi.primary : TemaAplikasi.surfaceContainerHigh)
-                            : Colors.transparent,
-                      ),
-                    ),
-                    Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: (aktif || selesai) ? TemaAplikasi.primary : Colors.transparent,
-                        border: (aktif || selesai)
-                            ? null
-                            : Border.all(color: TemaAplikasi.surfaceContainerHigh),
-                      ),
-                      alignment: Alignment.center,
-                      child: selesai
-                          ? const Icon(
-                              Icons.check,
-                              size: 12,
-                              color: TemaAplikasi.onPrimary,
-                            )
-                          : Text(
-                              '${i + 1}',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: aktif
-                                    ? TemaAplikasi.onPrimary
-                                    : TemaAplikasi.mutedGray,
-                              ),
-                            ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: i < 2
-                            ? (aktif ? TemaAplikasi.primary : TemaAplikasi.surfaceContainerHigh)
-                            : Colors.transparent,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  label[i],
-                  style: TextStyle(
-                    fontSize: 10,
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.w600,
-                    color: aktif ? TemaAplikasi.primary : TemaAplikasi.mutedGray,
-                    decoration: aktif ? TextDecoration.underline : TextDecoration.none,
-                    decorationColor: TemaAplikasi.primary,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  // 2. Countdown Reservation Banner & Security
-  Widget _bangunCountdownBanner() {
+  // 2. Security & Trust Reassurance
+  Widget _bangunJaminanKeamanan() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(12),
-      color: TemaAplikasi.surfaceContainer,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      color: TemaAplikasi.surfaceWhite,
+      child: const Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Row(
-                children: [
-                  Icon(
-                    Icons.schedule,
-                    size: 18,
-                    color: TemaAplikasi.primary,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'RESERVASI STOK EKSKLUSIF',
-                    style: TextStyle(
-                      fontSize: 11,
-                      letterSpacing: 1.2,
-                      fontWeight: FontWeight.w600,
-                      color: TemaAplikasi.primary,
-                    ),
-                  ),
-                ],
-              ),
-              const Text(
-                '14:59',
-                style: TextStyle(
-                  fontSize: 11,
-                  letterSpacing: 1.2,
-                  fontWeight: FontWeight.w600,
-                  color: TemaAplikasi.primary,
-                ),
-              ),
-            ],
+          Icon(
+            Icons.lock_outline,
+            size: 16,
+            color: TemaAplikasi.primary,
           ),
-          const SizedBox(height: 8),
-          const Row(
-            children: [
-              Icon(
-                Icons.lock_outline,
-                size: 15,
+          SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Enkripsi SSL 256-Bit • Transaksi Terverifikasi & Terlindungi',
+              style: TextStyle(
+                fontSize: 11,
+                letterSpacing: 0.8,
+                fontWeight: FontWeight.w500,
                 color: TemaAplikasi.secondary,
               ),
-              SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  '256-bit SSL Encrypted • Verifikasi Keamanan 3D Secure',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: TemaAplikasi.secondary,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),
@@ -515,6 +406,31 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
               ),
             ],
           ),
+          if (widget.kemasHadiah) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(
+                  Icons.card_giftcard_outlined,
+                  size: 16,
+                  color: TemaAplikasi.primary,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    widget.kartuUcapan.isNotEmpty
+                        ? 'Kemas Sebagai Hadiah (Dengan Kartu Ucapan)'
+                        : 'Kemas Sebagai Hadiah (ME Signature Box)',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: TemaAplikasi.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -549,7 +465,7 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
             ],
           ),
           const SizedBox(height: 12),
-          ..._daftarMetode.map((metode) => _bangunKartuMetode(metode)),
+          ...widget.daftarMetode.map((metode) => _bangunKartuMetode(metode)),
         ],
       ),
     );
@@ -620,7 +536,7 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
                             ),
                           ),
                         ),
-                        if (metode.id == _daftarMetode.first.id)
+                        if (metode.id == widget.daftarMetode.first.id)
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -658,51 +574,7 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
     );
   }
 
-  // 5. Editorial Gift Packaging Assurance Note
-  Widget _bangunCatatanKemasan() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(14),
-      color: TemaAplikasi.surfaceContainerLow,
-      child: Row(
-        children: [
-          const Icon(
-            Icons.card_giftcard_outlined,
-            size: 20,
-            color: TemaAplikasi.primary,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'KEMASAN KHAS ATELIER ME',
-                  style: TextStyle(
-                    fontSize: 10,
-                    letterSpacing: 1.4,
-                    fontWeight: FontWeight.w600,
-                    color: TemaAplikasi.primary,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Setiap busana dikemas dalam kotak bertanda monogram sutra pelindung debu.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: TemaAplikasi.secondary,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 6. Final Breakdown Calculation Table
+  // 5. Final Breakdown Calculation Table
   Widget _bangunRincianPembayaran() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -724,12 +596,14 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
           const SizedBox(height: 8),
           _barisRincian(
             'Pengiriman ${widget.kurirTerpilih?.nama ?? 'Kurir'}',
-            _ongkir == 0 ? 'Gratis' : formatRupiah(_ongkir),
+            _ongkir == 0 ? 'Bebas Biaya' : formatRupiah(_ongkir),
           ),
+          if (widget.kemasHadiah) ...[
+            const SizedBox(height: 8),
+            _barisRincian('Kemas Hadiah & Pita ME', 'Bebas Biaya'),
+          ],
           const SizedBox(height: 8),
-          _barisRincian('Proteksi & Kemas Hadiah', 'Gratis Privé'),
-          const SizedBox(height: 8),
-          _barisRincian('Asuransi Pengiriman Penuh', 'Bebas Biaya'),
+          _barisRincian('Pajak PPN 11%', 'Sudah Termasuk'),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(color: TemaAplikasi.surfaceContainerHigh, height: 1),
@@ -800,22 +674,18 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
   }
 
   Widget _bangunKonten() {
-    return SingleChildScrollView(
+    return ListView(
       padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _bangunHeader(),
-          _bangunCountdownBanner(),
-          _bangunRingkasanPengiriman(),
-          const SizedBox(height: 16),
-          _bangunMetodePembayaran(),
-          const SizedBox(height: 16),
-          _bangunCatatanKemasan(),
-          _bangunRincianPembayaran(),
-          const SizedBox(height: 100), // Space for bottom bar
-        ],
-      ),
+      children: [
+        _bangunHeader(),
+        _bangunJaminanKeamanan(),
+        _bangunRingkasanPengiriman(),
+        const SizedBox(height: 8),
+        _bangunMetodePembayaran(),
+        const SizedBox(height: 8),
+        _bangunRincianPembayaran(),
+        const SizedBox(height: 80), // Space for bottom bar
+      ],
     );
   }
 

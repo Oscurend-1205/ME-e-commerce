@@ -73,6 +73,7 @@ class CheckoutController extends Controller
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string',
+            'catatan' => 'nullable|string|max:1000',
             'kurir_id' => 'required|exists:kurir,id',
             'metode_pembayaran_id' => 'required|exists:metode_pembayaran,id',
         ], [
@@ -170,6 +171,7 @@ class CheckoutController extends Controller
                     'metode_pembayaran_id' => $metode->id,
                     'nama_penerima' => $request->input('nama'),
                     'alamat' => $request->input('alamat'),
+                    'catatan' => $request->input('catatan'),
                     'subtotal' => $subtotal,
                     'ongkir' => $ongkir,
                     'total' => $total,

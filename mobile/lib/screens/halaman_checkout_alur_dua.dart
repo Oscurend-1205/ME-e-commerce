@@ -1,42 +1,28 @@
 import 'package:flutter/material.dart';
 
-import '../constants.dart';
+import '../models/alamat.dart';
 import '../models/keranjang.dart';
 import '../models/kurir.dart';
+import '../models/metode_pembayaran.dart';
 import '../theme.dart';
 import '../widgets/format_rupiah.dart';
-import '../widgets/foto_dummy.dart';
+import '../widgets/transisi_geser.dart';
+import '../widgets/widget_stepper_checkout.dart';
 import 'halaman_checkout_alur_tiga.dart';
-
-/// Model sederhana untuk data alamat (sementara, backend belum ada API alamat)
-class AlamatSementara {
-  final String id;
-  final String nama;
-  final String telepon;
-  final String alamat;
-  final String label;
-  final bool utama;
-
-  AlamatSementara({
-    required this.id,
-    required this.nama,
-    required this.telepon,
-    required this.alamat,
-    required this.label,
-    this.utama = false,
-  });
-}
+import 'halaman_tambah_alamat.dart';
 
 /// Halaman Checkout Alur 02 — Pilih Alamat & Kurir
 /// Desain mengikuti cek-checkout2.html (list alamat + kurir, bukan form)
 class HalamanCheckoutAlurDua extends StatefulWidget {
   final DataKeranjang dataKeranjang;
   final List<Kurir> daftarKurir;
+  final List<MetodePembayaran> daftarMetode;
 
   const HalamanCheckoutAlurDua({
     super.key,
     required this.dataKeranjang,
     required this.daftarKurir,
+    required this.daftarMetode,
   });
 
   @override
@@ -44,31 +30,30 @@ class HalamanCheckoutAlurDua extends StatefulWidget {
 }
 
 class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
-  // Dummy data alamat (backend belum ada API alamat)
-  final List<AlamatSementara> _daftarAlamat = [
-    AlamatSementara(
+  // Data alamat awal (backend belum menyediakan API alamat;
+  // alamat baru dari form disimpan sementara di memori alur ini)
+  final List<Alamat> _daftarAlamat = [
+    const Alamat(
       id: '1',
       nama: 'Clarissa Adiwidjaja',
       telepon: '+62 812-3456-7890',
       alamat: 'Apartemen Keraton At The Plaza, Lt. 28 Unit B, Jl. M.H. Thamrin No. 9, Menteng, Jakarta Pusat, DKI Jakarta 10350',
-      label: 'RUMAH',
+      label: 'Rumah',
       utama: true,
     ),
-    AlamatSementara(
+    const Alamat(
       id: '2',
       nama: 'Clarissa Adiwidjaja (ME Atelier HQ)',
       telepon: '+62 812-9876-5432',
       alamat: 'Sequis Center Lantai 12, Jl. Jend. Sudirman Kav 71, SCBD, Senayan, Kebayoran Baru, Jakarta Selatan 12190',
-      label: 'KANTOR',
+      label: 'Kantor',
     ),
   ];
 
-  AlamatSementara? _alamatTerpilih;
+  Alamat? _alamatTerpilih;
   Kurir? _kurirTerpilih;
-  bool _kemasHadiah = true;
-  final TextEditingController _kartuUcapanController = TextEditingController(
-    text: 'Untuk Clarissa terkasih, selamat atas pembukaan galeri barumu. Semoga koleksi ini melengkapi keanggunanmu.',
-  );
+  bool _kemasHadiah = false;
+  final TextEditingController _kartuUcapanController = TextEditingController();
 
   @override
   void initState() {
@@ -89,6 +74,36 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
   int get _ongkir => _kurirTerpilih?.tarif ?? 0;
   int get _total => widget.dataKeranjang.subtotal + _ongkir;
 
+  Future<void> _tambahAlamat() async {
+    final alamatBaru = await Navigator.push<Alamat>(
+      context,
+      ruteGeser(const HalamanTambahAlamat()),
+    );
+
+    if (alamatBaru == null || !mounted) return;
+
+    setState(() {
+      if (alamatBaru.utama) {
+        for (var i = 0; i < _daftarAlamat.length; i++) {
+          final lama = _daftarAlamat[i];
+          if (lama.utama) {
+            _daftarAlamat[i] = Alamat(
+              id: lama.id,
+              nama: lama.nama,
+              telepon: lama.telepon,
+              alamat: lama.alamat,
+              label: lama.label,
+              catatan: lama.catatan,
+              utama: false,
+            );
+          }
+        }
+      }
+      _daftarAlamat.add(alamatBaru);
+      _alamatTerpilih = alamatBaru;
+    });
+  }
+
   void _lanjutKePembayaran() {
     if (_alamatTerpilih == null || _kurirTerpilih == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -102,11 +117,12 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => HalamanCheckoutAlurTiga(
+      ruteGeser(
+        HalamanCheckoutAlurTiga(
           dataKeranjang: widget.dataKeranjang,
           kurirTerpilih: _kurirTerpilih,
           alamatTerpilih: _alamatTerpilih!,
+          daftarMetode: widget.daftarMetode,
           kemasHadiah: _kemasHadiah,
           kartuUcapan: _kartuUcapanController.text.trim(),
         ),
@@ -127,8 +143,8 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
   Widget _bangunHeader() {
     return Container(
       width: double.infinity,
-      color: TemaAplikasi.surfaceWhite,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      color: TemaAplikasi.surfaceBright,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -146,16 +162,16 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
                       Icon(
                         Icons.arrow_back,
                         size: 18,
-                        color: TemaAplikasi.primary,
+                        color: TemaAplikasi.secondary,
                       ),
                       SizedBox(width: 6),
                       Text(
-                        'KEMBALI KE TAS',
+                        'Kembali ke Tas Belanja',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 10,
                           letterSpacing: 1.2,
-                          fontWeight: FontWeight.w500,
-                          color: TemaAplikasi.primary,
+                          fontWeight: FontWeight.w600,
+                          color: TemaAplikasi.secondary,
                         ),
                       ),
                     ],
@@ -165,9 +181,10 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
               const Text(
                 'LANGKAH 02 / 03',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 10,
                   letterSpacing: 1.2,
-                  color: TemaAplikasi.mutedGray,
+                  fontWeight: FontWeight.w600,
+                  color: TemaAplikasi.secondary,
                 ),
               ),
             ],
@@ -176,103 +193,25 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
           const Text(
             'Pengiriman & Alamat',
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 24,
               fontWeight: FontWeight.w400,
               letterSpacing: -0.3,
               color: TemaAplikasi.primary,
               height: 1.2,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           const Text(
-            'Pilih alamat tujuan dan kurir concierge eksklusif untuk pesanan Anda',
+            'Pilih alamat tujuan dan kurir eksklusif untuk pesanan Anda',
             style: TextStyle(
               fontSize: 12,
-              color: TemaAplikasi.mutedGray,
+              color: TemaAplikasi.secondary,
+              height: 1.4,
             ),
           ),
           const SizedBox(height: 16),
-          _bangunStepper(),
+          const WidgetStepperCheckout(langkahAktif: 2),
         ],
-      ),
-    );
-  }
-
-  Widget _bangunStepper() {
-    const label = ['01. TAS', '02. KIRIM', '03. BAYAR'];
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Row(
-        children: List.generate(3, (i) {
-          final aktif = i == 1;
-          final selesai = i < 1;
-          return Expanded(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: i > 0
-                            ? (selesai ? TemaAplikasi.primary : TemaAplikasi.borderGray)
-                            : Colors.transparent,
-                      ),
-                    ),
-                    Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: (aktif || selesai) ? TemaAplikasi.primary : TemaAplikasi.surfaceContainerHigh,
-                        border: (aktif || selesai)
-                            ? null
-                            : Border.all(color: TemaAplikasi.surfaceContainerHigh),
-                      ),
-                      alignment: Alignment.center,
-                      child: selesai
-                          ? const Icon(
-                              Icons.check,
-                              size: 12,
-                              color: TemaAplikasi.onPrimary,
-                            )
-                          : Text(
-                              '${i + 1}',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: aktif
-                                    ? TemaAplikasi.onPrimary
-                                    : TemaAplikasi.secondary,
-                              ),
-                            ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: i < 2
-                            ? (aktif ? TemaAplikasi.primary : TemaAplikasi.borderGray)
-                            : Colors.transparent,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  label[i],
-                  style: TextStyle(
-                    fontSize: 10,
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.w600,
-                    color: aktif ? TemaAplikasi.primary : TemaAplikasi.secondary,
-                    decoration: aktif ? TextDecoration.underline : TextDecoration.none,
-                    decorationColor: TemaAplikasi.primary,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
       ),
     );
   }
@@ -308,14 +247,7 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
                 ],
               ),
               InkWell(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Fitur tambah alamat baru segera hadir.'),
-                      backgroundColor: TemaAplikasi.primary,
-                    ),
-                  );
-                },
+                onTap: _tambahAlamat,
                 child: const Text(
                   '+ TAMBAH BARU',
                   style: TextStyle(
@@ -336,7 +268,7 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
     );
   }
 
-  Widget _bangunKartuAlamat(AlamatSementara alamat) {
+  Widget _bangunKartuAlamat(Alamat alamat) {
     final terpilih = _alamatTerpilih?.id == alamat.id;
 
     return InkWell(
@@ -418,7 +350,7 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
                         ),
                         color: TemaAplikasi.surfaceContainerHigh,
                         child: Text(
-                          alamat.label,
+                          alamat.label.toUpperCase(),
                           style: const TextStyle(
                             fontSize: 9,
                             letterSpacing: 1.2,
@@ -630,215 +562,8 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
     );
   }
 
-  // 4. Section: LAYANAN ME GIFTING & PROTEKSI
+  // 4. Section: LAYANAN ME GIFTING (OPSIONAL)
   Widget _bangunLayananGift() {
-    return Container(
-      color: TemaAplikasi.surfaceWhite,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(
-                Icons.card_giftcard_outlined,
-                size: 18,
-                color: TemaAplikasi.primary,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'LAYANAN ME GIFTING & PROTEKSI',
-                style: TextStyle(
-                  fontSize: 11,
-                  letterSpacing: 1.6,
-                  fontWeight: FontWeight.w600,
-                  color: TemaAplikasi.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Gift Packaging Toggle
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: TemaAplikasi.surfaceLight,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(
-                          Icons.redeem_outlined,
-                          size: 20,
-                          color: TemaAplikasi.primary,
-                        ),
-                        SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Kemas Sebagai Hadiah',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: TemaAplikasi.primary,
-                              ),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              'Kotak Pita Sutra Hitam ME Signature + Kertas Tisu Putih',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: TemaAplikasi.mutedGray,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Switch(
-                      value: _kemasHadiah,
-                      onChanged: (value) {
-                        setState(() {
-                          _kemasHadiah = value;
-                        });
-                      },
-                      activeThumbColor: TemaAplikasi.onPrimary,
-                      activeTrackColor: TemaAplikasi.primary,
-                    ),
-                  ],
-                ),
-                if (_kemasHadiah) ...[
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    color: TemaAplikasi.surfaceWhite,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'KARTU UCAPAN PRIBADI (KALIGRAFI ME)',
-                          style: TextStyle(
-                            fontSize: 10,
-                            letterSpacing: 1.2,
-                            color: TemaAplikasi.secondary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _kartuUcapanController,
-                          maxLines: 2,
-                          decoration: const InputDecoration(
-                            hintText: 'Tuliskan pesan berkesan Anda di sini (maks. 120 kata)...',
-                            border: InputBorder.none,
-                            filled: false,
-                            contentPadding: EdgeInsets.all(8),
-                          ),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: TemaAplikasi.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Text(
-                              'Dicetak pada kartu linen bertekstur 300gsm',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: TemaAplikasi.mutedGray,
-                              ),
-                            ),
-                            Text(
-                              'GRATIS',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: TemaAplikasi.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Shipping Insurance
-          Container(
-            padding: const EdgeInsets.all(14),
-            color: TemaAplikasi.surfaceLight,
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.verified_user,
-                  size: 20,
-                  color: TemaAplikasi.primary,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Proteksi Penuh Pengiriman Mewah',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: TemaAplikasi.primary,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'Garansi ganti rugi 100% atas kerusakan & kehilangan transit',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: TemaAplikasi.secondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'AKTIF',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: TemaAplikasi.primary,
-                      ),
-                    ),
-                    Icon(
-                      Icons.check,
-                      size: 16,
-                      color: TemaAplikasi.primary,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 5. Section: RINGKASAN BARANG SINGKAT
-  Widget _bangunRingkasanBarang() {
-    final items = widget.dataKeranjang.items;
-    if (items.isEmpty) return const SizedBox.shrink();
-
     return Container(
       color: TemaAplikasi.surfaceWhite,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -848,95 +573,74 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'ITEM DIKIRIM (${items.length} PRODUK)',
-                style: const TextStyle(
-                  fontSize: 10,
-                  letterSpacing: 1.2,
-                  color: TemaAplikasi.secondary,
-                ),
+              const Row(
+                children: [
+                  Icon(
+                    Icons.card_giftcard_outlined,
+                    size: 18,
+                    color: TemaAplikasi.primary,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'KEMAS SEBAGAI HADIAH',
+                    style: TextStyle(
+                      fontSize: 11,
+                      letterSpacing: 1.6,
+                      fontWeight: FontWeight.w600,
+                      color: TemaAplikasi.primary,
+                    ),
+                  ),
+                ],
               ),
-              const Text(
-                'Dari Butik ME Plaza Senayan',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: TemaAplikasi.mutedGray,
-                ),
+              Switch(
+                value: _kemasHadiah,
+                onChanged: (value) {
+                  setState(() {
+                    _kemasHadiah = value;
+                  });
+                },
+                activeThumbColor: TemaAplikasi.onPrimary,
+                activeTrackColor: TemaAplikasi.primary,
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 80,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: items.length > 2 ? 2 : items.length,
-              separatorBuilder: (_, index) => const SizedBox(width: 12),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                final gambar = item.gambar != null && item.gambar!.trim().isNotEmpty
-                    ? '${Konstan.storageUrl}/${item.gambar}'
-                    : '${Konstan.storageUrl}/${item.produkId}.jpg';
-
-                return Container(
-                  width: 160,
-                  padding: const EdgeInsets.all(8),
-                  color: TemaAplikasi.surfaceLight,
-                  child: Row(
-                    children: [
-                      ClipRect(
-                        child: Container(
-                          width: 48,
-                          height: 56,
-                          color: TemaAplikasi.surfaceContainer,
-                          child: FotoDummy.bangunGambar(
-                            url: gambar,
-                            fit: BoxFit.cover,
-                            cacheWidth: 144,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              item.namaProduk,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: TemaAplikasi.primary,
-                              ),
-                            ),
-                            Text(
-                              '${item.ukuran} | ${item.warna}',
-                              style: const TextStyle(
-                                fontSize: 9,
-                                color: TemaAplikasi.mutedGray,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                            Text(
-                              formatRupiah(item.hargaSatuan),
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: TemaAplikasi.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+          const SizedBox(height: 4),
+          const Text(
+            'Kotak pita sutra hitam ME Signature dan kertas tisu atelier (Bebas Biaya)',
+            style: TextStyle(
+              fontSize: 11,
+              color: TemaAplikasi.secondary,
             ),
           ),
+          if (_kemasHadiah) ...[
+            const SizedBox(height: 12),
+            TextField(
+              controller: _kartuUcapanController,
+              maxLines: 2,
+              decoration: InputDecoration(
+                hintText: 'Tuliskan pesan kartu ucapan khusus (opsional)...',
+                hintStyle: const TextStyle(
+                  fontSize: 11,
+                  color: TemaAplikasi.mutedGray,
+                ),
+                filled: true,
+                fillColor: TemaAplikasi.surfaceLight,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(2),
+                  borderSide: const BorderSide(color: TemaAplikasi.surfaceContainerHigh),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(2),
+                  borderSide: const BorderSide(color: TemaAplikasi.surfaceContainerHigh),
+                ),
+                contentPadding: const EdgeInsets.all(12),
+              ),
+              style: const TextStyle(
+                fontSize: 12,
+                color: TemaAplikasi.primary,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -953,9 +657,7 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
         _bangunPilihanKurir(),
         const SizedBox(height: 8),
         _bangunLayananGift(),
-        const SizedBox(height: 8),
-        _bangunRingkasanBarang(),
-        const SizedBox(height: 100), // Space for bottom bar
+        const SizedBox(height: 80),
       ],
     );
   }
