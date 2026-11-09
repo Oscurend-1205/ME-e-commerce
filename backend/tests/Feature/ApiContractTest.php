@@ -18,7 +18,7 @@ class ApiContractTest extends TestCase
 
         $this->getJson('/api/produk')
             ->assertOk()
-            ->assertJsonCount(12, 'data')
+            ->assertJsonCount(36, 'data')
             ->assertJsonPath('status', 'sukses');
     }
 
