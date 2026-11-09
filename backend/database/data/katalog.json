@@ -1,6 +1,6 @@
 {
-    "diexport_pada": "2026-11-09T20:34:54+07:00",
-    "total_kategori": 7,
+    "diexport_pada": "2026-11-09T21:29:39+07:00",
+    "total_kategori": 6,
     "total_produk": 36,
     "total_aset": 21,
     "kategoris": [
@@ -10,6 +10,10 @@
         },
         {
             "id": 2,
+            "nama": "Aksesori"
+        },
+        {
+            "id": 3,
             "nama": "Aksesori"
         },
         {
@@ -23,14 +27,6 @@
         {
             "id": 6,
             "nama": "Aksesori"
-        },
-        {
-            "id": 7,
-            "nama": "Aksesori"
-        },
-        {
-            "id": 8,
-            "nama": "Aksesori"
         }
     ],
     "produks": [
@@ -43,49 +39,49 @@
             "deskripsi": "Kaos potongan oversize berbahan 100% katun combed 24s yang sejuk, tebal, dan menyerap keringat dengan baik.",
             "bahan": "Katun Combed 24s",
             "merek": "ME Basics",
-            "gambar": "1.jpg",
+            "gambar": "rBiFRoIeTJikQdhCTy6EUhbESyn6SEJayHbleN6s.png",
             "varian": [
                 {
-                    "id": 199,
-                    "ukuran": "S",
-                    "warna": "Hitam",
-                    "stok": 8,
-                    "sku": "MEB-1-S-BLK"
-                },
-                {
-                    "id": 200,
-                    "ukuran": "S",
-                    "warna": "Putih",
-                    "stok": 13,
-                    "sku": "MEB-1-S-PTH"
-                },
-                {
-                    "id": 201,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 0,
-                    "sku": "MEB-1-M-BLK"
-                },
-                {
-                    "id": 202,
-                    "ukuran": "M",
-                    "warna": "Putih",
-                    "stok": 12,
-                    "sku": "MEB-1-M-WHT"
-                },
-                {
-                    "id": 203,
+                    "id": 5,
                     "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 15,
                     "sku": "MEB-1-L-BLK"
                 },
                 {
-                    "id": 204,
+                    "id": 6,
                     "ukuran": "L",
                     "warna": "Putih",
                     "stok": 20,
                     "sku": "MEB-1-L-WHT"
+                },
+                {
+                    "id": 3,
+                    "ukuran": "M",
+                    "warna": "Hitam",
+                    "stok": 0,
+                    "sku": "MEB-1-M-BLK"
+                },
+                {
+                    "id": 4,
+                    "ukuran": "M",
+                    "warna": "Putih",
+                    "stok": 12,
+                    "sku": "MEB-1-M-WHT"
+                },
+                {
+                    "id": 1,
+                    "ukuran": "S",
+                    "warna": "Hitam",
+                    "stok": 8,
+                    "sku": "MEB-1-S-BLK"
+                },
+                {
+                    "id": 2,
+                    "ukuran": "S",
+                    "warna": "Putih",
+                    "stok": 13,
+                    "sku": "MEB-1-S-PTH"
                 }
             ]
         },
@@ -101,46 +97,46 @@
             "gambar": "yrXDNReXORAuHpAiuVqUG4mV0pFlpdP8QWxaRW24.jpg",
             "varian": [
                 {
-                    "id": 205,
-                    "ukuran": "M",
-                    "warna": "Merah Navy",
-                    "stok": 10,
-                    "sku": "MES-2-M-RED"
-                },
-                {
-                    "id": 206,
-                    "ukuran": "M",
-                    "warna": "Hijau Botol",
-                    "stok": 20,
-                    "sku": "MES-2-M-HBT"
-                },
-                {
-                    "id": 207,
-                    "ukuran": "L",
-                    "warna": "Merah Navy",
-                    "stok": 8,
-                    "sku": "MES-2-L-RED"
-                },
-                {
-                    "id": 208,
+                    "id": 10,
                     "ukuran": "L",
                     "warna": "Hijau Botol",
                     "stok": 20,
                     "sku": "MES-2-L-HBT"
                 },
                 {
-                    "id": 209,
-                    "ukuran": "XL",
+                    "id": 9,
+                    "ukuran": "L",
                     "warna": "Merah Navy",
-                    "stok": 18,
-                    "sku": "MES-2-XL-MNV"
+                    "stok": 8,
+                    "sku": "MES-2-L-RED"
                 },
                 {
-                    "id": 210,
+                    "id": 8,
+                    "ukuran": "M",
+                    "warna": "Hijau Botol",
+                    "stok": 20,
+                    "sku": "MES-2-M-HBT"
+                },
+                {
+                    "id": 7,
+                    "ukuran": "M",
+                    "warna": "Merah Navy",
+                    "stok": 10,
+                    "sku": "MES-2-M-RED"
+                },
+                {
+                    "id": 12,
                     "ukuran": "XL",
                     "warna": "Hijau Botol",
                     "stok": 6,
                     "sku": "MES-2-XL-GRN"
+                },
+                {
+                    "id": 11,
+                    "ukuran": "XL",
+                    "warna": "Merah Navy",
+                    "stok": 18,
+                    "sku": "MES-2-XL-MNV"
                 }
             ]
         },
@@ -153,35 +149,35 @@
             "deskripsi": "Hoodie tebal 380 gsm berbahan fleece lembut dengan saku kangguru dan tali serut tahan lama.",
             "bahan": "Heavyweight Cotton Fleece",
             "merek": "ME Originals",
-            "gambar": "3.jpg",
+            "gambar": "g17bhtKVv29Et3HXvgqumkTo05TSn5vj3sXiSGcy.png",
             "varian": [
                 {
-                    "id": 211,
-                    "ukuran": "M",
-                    "warna": "Abu-abu Misty",
-                    "stok": 14,
-                    "sku": "MEO-3-M-GRY"
-                },
-                {
-                    "id": 212,
-                    "ukuran": "M",
-                    "warna": "Hitam Pekat",
-                    "stok": 12,
-                    "sku": "MEO-3-M-HTM"
-                },
-                {
-                    "id": 213,
+                    "id": 15,
                     "ukuran": "L",
                     "warna": "Abu-abu Misty",
                     "stok": 10,
                     "sku": "MEO-3-L-GRY"
                 },
                 {
-                    "id": 214,
+                    "id": 16,
                     "ukuran": "L",
                     "warna": "Hitam Pekat",
                     "stok": 12,
                     "sku": "MEO-3-L-BLK"
+                },
+                {
+                    "id": 13,
+                    "ukuran": "M",
+                    "warna": "Abu-abu Misty",
+                    "stok": 14,
+                    "sku": "MEO-3-M-GRY"
+                },
+                {
+                    "id": 14,
+                    "ukuran": "M",
+                    "warna": "Hitam Pekat",
+                    "stok": 12,
+                    "sku": "MEO-3-M-HTM"
                 }
             ]
         },
@@ -194,21 +190,21 @@
             "deskripsi": null,
             "bahan": "Non-stretch 13oz Denim",
             "merek": "ME Denim Co.",
-            "gambar": "4.jpg",
+            "gambar": "CpfWadwjqdZcxPbcRaSy799VLAWIqpuv18Sx9Apd.png",
             "varian": [
                 {
-                    "id": 215,
-                    "ukuran": "M",
-                    "warna": "Light Blue Wash",
-                    "stok": 7,
-                    "sku": "MED-4-M-BLU"
-                },
-                {
-                    "id": 216,
+                    "id": 18,
                     "ukuran": "L",
                     "warna": "Light Blue Wash",
                     "stok": 9,
                     "sku": "MED-4-L-BLU"
+                },
+                {
+                    "id": 17,
+                    "ukuran": "M",
+                    "warna": "Light Blue Wash",
+                    "stok": 7,
+                    "sku": "MED-4-M-BLU"
                 }
             ]
         },
@@ -221,35 +217,35 @@
             "deskripsi": "Celana panjang chino potongan straight dengan stretch ringan untuk kenyamanan mobilitas harian.",
             "bahan": "Twill Cotton Stretch",
             "merek": "ME Basics",
-            "gambar": "5.jpg",
+            "gambar": "zD6FaA2tBlteLvQjmEiYd181otX2ghEo8S8R7Gvj.png",
             "varian": [
                 {
-                    "id": 217,
-                    "ukuran": "30",
-                    "warna": "Khaki",
-                    "stok": 10,
-                    "sku": "MEB-5-30-KHK"
-                },
-                {
-                    "id": 218,
+                    "id": 20,
                     "ukuran": "30",
                     "warna": "Hitam",
                     "stok": 14,
                     "sku": "MEB-5-30-HTM"
                 },
                 {
-                    "id": 219,
-                    "ukuran": "32",
+                    "id": 19,
+                    "ukuran": "30",
                     "warna": "Khaki",
-                    "stok": 12,
-                    "sku": "MEB-5-32-KHK"
+                    "stok": 10,
+                    "sku": "MEB-5-30-KHK"
                 },
                 {
-                    "id": 220,
+                    "id": 22,
                     "ukuran": "32",
                     "warna": "Hitam",
                     "stok": 8,
                     "sku": "MEB-5-32-BLK"
+                },
+                {
+                    "id": 21,
+                    "ukuran": "32",
+                    "warna": "Khaki",
+                    "stok": 12,
+                    "sku": "MEB-5-32-KHK"
                 }
             ]
         },
@@ -262,17 +258,17 @@
             "deskripsi": "Rok lipit midi anggun dengan pinggang elastis dan bahan jatuh berkilau lembut.",
             "bahan": "Silk Chiffon Pleat",
             "merek": "ME Studio",
-            "gambar": "6.jpg",
+            "gambar": "3zfcUmsVuZPwx0Lr7yrIVqfnYN7aqncniycGpoun.png",
             "varian": [
                 {
-                    "id": 221,
+                    "id": 23,
                     "ukuran": "All Size",
                     "warna": "Dusty Pink",
                     "stok": 0,
                     "sku": "MES-6-AS-PNK"
                 },
                 {
-                    "id": 222,
+                    "id": 24,
                     "ukuran": "All Size",
                     "warna": "Mocca",
                     "stok": 0,
@@ -289,21 +285,21 @@
             "deskripsi": "Gaun santai lengan pendek dengan kancing depan penuh dan saku tersembunyi samping.",
             "bahan": "Pure French Linen",
             "merek": "ME Minimalist",
-            "gambar": "7.jpg",
+            "gambar": "8mpvLjTKHguQEGAVG80yUtcDfjFY8AJMXVQ4OsJ5.png",
             "varian": [
                 {
-                    "id": 223,
-                    "ukuran": "M",
-                    "warna": "Sage Green",
-                    "stok": 15,
-                    "sku": "MEM-7-M-SGE"
-                },
-                {
-                    "id": 224,
+                    "id": 26,
                     "ukuran": "L",
                     "warna": "Sage Green",
                     "stok": 10,
                     "sku": "MEM-7-L-SGE"
+                },
+                {
+                    "id": 25,
+                    "ukuran": "M",
+                    "warna": "Sage Green",
+                    "stok": 15,
+                    "sku": "MEM-7-M-SGE"
                 }
             ]
         },
@@ -316,17 +312,17 @@
             "deskripsi": "Topi baseball 6-panel dengan pengait besi belakang yang dapat disesuaikan.",
             "bahan": "Cotton Drill 100%",
             "merek": "ME Accessories",
-            "gambar": "huS1jgCtD9l0karNJgXmaWlljDeX4ceytxsTP0Yf.jpg",
+            "gambar": "ERFpiNY96wzPw2OU28remgAsX5r08EXifJK6lCSI.png",
             "varian": [
                 {
-                    "id": 225,
+                    "id": 27,
                     "ukuran": "All Size",
                     "warna": "Hitam",
                     "stok": 25,
                     "sku": "MEA-8-AS-BLK"
                 },
                 {
-                    "id": 226,
+                    "id": 28,
                     "ukuran": "All Size",
                     "warna": "Krem",
                     "stok": 18,
@@ -343,21 +339,21 @@
             "deskripsi": "Tas selempang praktis anti-air berkapasitas lega untuk membawa ponsel, dompet, dan barang esensial.",
             "bahan": "Water-repellent Canvas",
             "merek": "ME Accessories",
-            "gambar": "9.jpg",
+            "gambar": "VTIDIJt6eSKpMglCfLYFBHV1zMleKi1t28DKm2ml.png",
             "varian": [
                 {
-                    "id": 227,
-                    "ukuran": "All Size",
-                    "warna": "Hitam",
-                    "stok": 12,
-                    "sku": "MEA-9-AS-BLK"
-                },
-                {
-                    "id": 228,
+                    "id": 30,
                     "ukuran": "All Size",
                     "warna": "Army",
                     "stok": 14,
                     "sku": "MEA-9-AS-ARM"
+                },
+                {
+                    "id": 29,
+                    "ukuran": "All Size",
+                    "warna": "Hitam",
+                    "stok": 12,
+                    "sku": "MEA-9-AS-BLK"
                 }
             ]
         },
@@ -370,17 +366,17 @@
             "deskripsi": "Ikat pinggang formal elegan dengan gesper perak brushed dan jahitan rapi tepi.",
             "bahan": "Genuine Cowhide Leather",
             "merek": "ME Leatherworks",
-            "gambar": "10.jpg",
+            "gambar": "GoFhgB1w4W6G1Bw1YypxfV4fP1DQVBBeVJVqnucx.png",
             "varian": [
                 {
-                    "id": 229,
+                    "id": 31,
                     "ukuran": "All Size",
                     "warna": "Cokelat Gelap",
                     "stok": 20,
                     "sku": "MEL-10-AS-BRN"
                 },
                 {
-                    "id": 230,
+                    "id": 32,
                     "ukuran": "All Size",
                     "warna": "Hitam",
                     "stok": 22,
@@ -397,10 +393,10 @@
             "deskripsi": "Paket hemat kaus kaki crew bertumit ganda dengan karet nyaman tidak mudah melorot.",
             "bahan": "Combed Cotton + Spandex",
             "merek": "ME Basics",
-            "gambar": "11.jpg",
+            "gambar": "FAO6PCyWciMtgcOWUBE2wMws8f5AXcdejLtFAFgK.png",
             "varian": [
                 {
-                    "id": 231,
+                    "id": 33,
                     "ukuran": "All Size",
                     "warna": "Monokrom Mix",
                     "stok": 30,
@@ -417,17 +413,17 @@
             "deskripsi": "Syal rajut panjang bermotif waffle knit halus untuk menjaga kehangatan leher.",
             "bahan": "Soft Acrylic Wool",
             "merek": "ME Studio",
-            "gambar": "0tcGxwJOvLJsCptyIKh9g6rWpoYcQ3w59uRzzrZc.jpg",
+            "gambar": "TT7T3unhuCGstFcqAV9u8pEKWAO1KWr0YvvVWsMG.png",
             "varian": [
                 {
-                    "id": 232,
+                    "id": 34,
                     "ukuran": "All Size",
                     "warna": "Abu Terang",
                     "stok": 15,
                     "sku": "MES-12-AS-LGR"
                 },
                 {
-                    "id": 233,
+                    "id": 35,
                     "ukuran": "All Size",
                     "warna": "Burgundy",
                     "stok": 11,
@@ -444,70 +440,70 @@
             "deskripsi": "Blouse satin feminin berpotongan longgar elegan dengan kilau lembut mewah, cocok untuk tampilan formal maupun pesta.",
             "bahan": "Satin",
             "merek": "ME Studio",
-            "gambar": "jrdJYseAtwm1QPg0Ve8hfPnNAxyN6mOgM4fzlmc9.jpg",
+            "gambar": "sLEoGK566hyagUYlLavMo48tPySCulaikdlnsCrw.png",
             "varian": [
                 {
-                    "id": 234,
-                    "ukuran": "S",
-                    "warna": "Putih Gading",
-                    "stok": 12,
-                    "sku": "MES-13-S-PTH"
-                },
-                {
-                    "id": 235,
-                    "ukuran": "S",
-                    "warna": "Hitam",
-                    "stok": 22,
-                    "sku": "MES-13-S-HTM"
-                },
-                {
-                    "id": 236,
-                    "ukuran": "S",
-                    "warna": "Dusty Pink",
-                    "stok": 17,
-                    "sku": "MES-13-S-PNK"
-                },
-                {
-                    "id": 237,
-                    "ukuran": "M",
-                    "warna": "Putih Gading",
-                    "stok": 12,
-                    "sku": "MES-13-M-PTH"
-                },
-                {
-                    "id": 238,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 0,
-                    "sku": "MES-13-M-HTM"
-                },
-                {
-                    "id": 239,
-                    "ukuran": "M",
-                    "warna": "Dusty Pink",
-                    "stok": 17,
-                    "sku": "MES-13-M-PNK"
-                },
-                {
-                    "id": 240,
+                    "id": 44,
                     "ukuran": "L",
-                    "warna": "Putih Gading",
-                    "stok": 12,
-                    "sku": "MES-13-L-PTH"
+                    "warna": "Dusty Pink",
+                    "stok": 17,
+                    "sku": "MES-13-L-PNK"
                 },
                 {
-                    "id": 241,
+                    "id": 43,
                     "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 22,
                     "sku": "MES-13-L-HTM"
                 },
                 {
-                    "id": 242,
+                    "id": 42,
                     "ukuran": "L",
+                    "warna": "Putih Gading",
+                    "stok": 12,
+                    "sku": "MES-13-L-PTH"
+                },
+                {
+                    "id": 41,
+                    "ukuran": "M",
                     "warna": "Dusty Pink",
                     "stok": 17,
-                    "sku": "MES-13-L-PNK"
+                    "sku": "MES-13-M-PNK"
+                },
+                {
+                    "id": 40,
+                    "ukuran": "M",
+                    "warna": "Hitam",
+                    "stok": 0,
+                    "sku": "MES-13-M-HTM"
+                },
+                {
+                    "id": 39,
+                    "ukuran": "M",
+                    "warna": "Putih Gading",
+                    "stok": 12,
+                    "sku": "MES-13-M-PTH"
+                },
+                {
+                    "id": 38,
+                    "ukuran": "S",
+                    "warna": "Dusty Pink",
+                    "stok": 17,
+                    "sku": "MES-13-S-PNK"
+                },
+                {
+                    "id": 37,
+                    "ukuran": "S",
+                    "warna": "Hitam",
+                    "stok": 22,
+                    "sku": "MES-13-S-HTM"
+                },
+                {
+                    "id": 36,
+                    "ukuran": "S",
+                    "warna": "Putih Gading",
+                    "stok": 12,
+                    "sku": "MES-13-S-PTH"
                 }
             ]
         },
@@ -520,49 +516,49 @@
             "deskripsi": "Kemeja santai bersiluet loose fit dari bahan linen alami yang adem, bertekstur estetik, dan nyaman seharian.",
             "bahan": "Linen",
             "merek": "ME Minimalist",
-            "gambar": "14.jpg",
+            "gambar": "YTs5HYCeSNnkFxNAxzxIG4g5ZGJZ1RzPMZLEOqIO.png",
             "varian": [
                 {
-                    "id": 243,
-                    "ukuran": "S",
-                    "warna": "Krem",
-                    "stok": 9,
-                    "sku": "MEM-14-S-KRM"
-                },
-                {
-                    "id": 244,
-                    "ukuran": "S",
+                    "id": 50,
+                    "ukuran": "L",
                     "warna": "Hijau Sage",
                     "stok": 9,
-                    "sku": "MEM-14-S-SGE"
+                    "sku": "MEM-14-L-SGE"
                 },
                 {
-                    "id": 245,
-                    "ukuran": "M",
-                    "warna": "Krem",
-                    "stok": 9,
-                    "sku": "MEM-14-M-KRM"
-                },
-                {
-                    "id": 246,
-                    "ukuran": "M",
-                    "warna": "Hijau Sage",
-                    "stok": 9,
-                    "sku": "MEM-14-M-SGE"
-                },
-                {
-                    "id": 247,
+                    "id": 49,
                     "ukuran": "L",
                     "warna": "Krem",
                     "stok": 9,
                     "sku": "MEM-14-L-KRM"
                 },
                 {
-                    "id": 248,
-                    "ukuran": "L",
+                    "id": 48,
+                    "ukuran": "M",
                     "warna": "Hijau Sage",
                     "stok": 9,
-                    "sku": "MEM-14-L-SGE"
+                    "sku": "MEM-14-M-SGE"
+                },
+                {
+                    "id": 47,
+                    "ukuran": "M",
+                    "warna": "Krem",
+                    "stok": 9,
+                    "sku": "MEM-14-M-KRM"
+                },
+                {
+                    "id": 46,
+                    "ukuran": "S",
+                    "warna": "Hijau Sage",
+                    "stok": 9,
+                    "sku": "MEM-14-S-SGE"
+                },
+                {
+                    "id": 45,
+                    "ukuran": "S",
+                    "warna": "Krem",
+                    "stok": 9,
+                    "sku": "MEM-14-S-KRM"
                 }
             ]
         },
@@ -575,49 +571,49 @@
             "deskripsi": "Cardigan rajut dengan potongan crop trendi berdetail kancing depan, memberi nuansa chic dan hangat.",
             "bahan": "Rajut akrilik",
             "merek": "ME Basics",
-            "gambar": "15.jpg",
+            "gambar": "2NqRrZlcQZS8lkOh6eEzMPuqS12HXqh2xofAtsI3.png",
             "varian": [
                 {
-                    "id": 249,
-                    "ukuran": "S",
-                    "warna": "Cokelat Susu",
-                    "stok": 11,
-                    "sku": "MEB-15-S-CSU"
-                },
-                {
-                    "id": 250,
-                    "ukuran": "S",
+                    "id": 56,
+                    "ukuran": "L",
                     "warna": "Abu Muda",
                     "stok": 21,
-                    "sku": "MEB-15-S-ABU"
+                    "sku": "MEB-15-L-ABU"
                 },
                 {
-                    "id": 251,
-                    "ukuran": "M",
-                    "warna": "Cokelat Susu",
-                    "stok": 11,
-                    "sku": "MEB-15-M-CSU"
-                },
-                {
-                    "id": 252,
-                    "ukuran": "M",
-                    "warna": "Abu Muda",
-                    "stok": 21,
-                    "sku": "MEB-15-M-ABU"
-                },
-                {
-                    "id": 253,
+                    "id": 55,
                     "ukuran": "L",
                     "warna": "Cokelat Susu",
                     "stok": 11,
                     "sku": "MEB-15-L-CSU"
                 },
                 {
-                    "id": 254,
-                    "ukuran": "L",
+                    "id": 54,
+                    "ukuran": "M",
                     "warna": "Abu Muda",
                     "stok": 21,
-                    "sku": "MEB-15-L-ABU"
+                    "sku": "MEB-15-M-ABU"
+                },
+                {
+                    "id": 53,
+                    "ukuran": "M",
+                    "warna": "Cokelat Susu",
+                    "stok": 11,
+                    "sku": "MEB-15-M-CSU"
+                },
+                {
+                    "id": 52,
+                    "ukuran": "S",
+                    "warna": "Abu Muda",
+                    "stok": 21,
+                    "sku": "MEB-15-S-ABU"
+                },
+                {
+                    "id": 51,
+                    "ukuran": "S",
+                    "warna": "Cokelat Susu",
+                    "stok": 11,
+                    "sku": "MEB-15-S-CSU"
                 }
             ]
         },
@@ -630,49 +626,49 @@
             "deskripsi": "Tank top katun bertekstur rusuk elastis yang pas memeluk tubuh, esensial untuk dalaman maupun pakaian santai.",
             "bahan": "Katun ribbed",
             "merek": "ME Basics",
-            "gambar": "16.jpg",
+            "gambar": "o4OToOlPyBghqhfyGtxGq60l8rhwqPThSUKDP4le.png",
             "varian": [
                 {
-                    "id": 255,
-                    "ukuran": "S",
-                    "warna": "Hitam",
-                    "stok": 13,
-                    "sku": "MEB-16-S-HTM"
-                },
-                {
-                    "id": 256,
-                    "ukuran": "S",
-                    "warna": "Putih",
-                    "stok": 13,
-                    "sku": "MEB-16-S-PTH"
-                },
-                {
-                    "id": 257,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 13,
-                    "sku": "MEB-16-M-HTM"
-                },
-                {
-                    "id": 258,
-                    "ukuran": "M",
-                    "warna": "Putih",
-                    "stok": 13,
-                    "sku": "MEB-16-M-PTH"
-                },
-                {
-                    "id": 259,
+                    "id": 61,
                     "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 13,
                     "sku": "MEB-16-L-HTM"
                 },
                 {
-                    "id": 260,
+                    "id": 62,
                     "ukuran": "L",
                     "warna": "Putih",
                     "stok": 13,
                     "sku": "MEB-16-L-PTH"
+                },
+                {
+                    "id": 59,
+                    "ukuran": "M",
+                    "warna": "Hitam",
+                    "stok": 13,
+                    "sku": "MEB-16-M-HTM"
+                },
+                {
+                    "id": 60,
+                    "ukuran": "M",
+                    "warna": "Putih",
+                    "stok": 13,
+                    "sku": "MEB-16-M-PTH"
+                },
+                {
+                    "id": 57,
+                    "ukuran": "S",
+                    "warna": "Hitam",
+                    "stok": 13,
+                    "sku": "MEB-16-S-HTM"
+                },
+                {
+                    "id": 58,
+                    "ukuran": "S",
+                    "warna": "Putih",
+                    "stok": 13,
+                    "sku": "MEB-16-S-PTH"
                 }
             ]
         },
@@ -685,49 +681,49 @@
             "deskripsi": "Sweater kerah tinggi hangat bermaterial campuran wool rajut halus yang lembut di kulit dan tidak gatal.",
             "bahan": "Rajut wool blend",
             "merek": "ME Studio",
-            "gambar": "17.jpg",
+            "gambar": "NgFk6j3yrEOzXcy9I0qO2JvXkW5uw0jf8DG9SSic.png",
             "varian": [
                 {
-                    "id": 261,
-                    "ukuran": "S",
-                    "warna": "Maroon",
-                    "stok": 10,
-                    "sku": "MES-17-S-MRN"
-                },
-                {
-                    "id": 262,
-                    "ukuran": "S",
+                    "id": 68,
+                    "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 20,
-                    "sku": "MES-17-S-HTM"
+                    "sku": "MES-17-L-HTM"
                 },
                 {
-                    "id": 263,
-                    "ukuran": "M",
-                    "warna": "Maroon",
-                    "stok": 10,
-                    "sku": "MES-17-M-MRN"
-                },
-                {
-                    "id": 264,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 20,
-                    "sku": "MES-17-M-HTM"
-                },
-                {
-                    "id": 265,
+                    "id": 67,
                     "ukuran": "L",
                     "warna": "Maroon",
                     "stok": 10,
                     "sku": "MES-17-L-MRN"
                 },
                 {
-                    "id": 266,
-                    "ukuran": "L",
+                    "id": 66,
+                    "ukuran": "M",
                     "warna": "Hitam",
                     "stok": 20,
-                    "sku": "MES-17-L-HTM"
+                    "sku": "MES-17-M-HTM"
+                },
+                {
+                    "id": 65,
+                    "ukuran": "M",
+                    "warna": "Maroon",
+                    "stok": 10,
+                    "sku": "MES-17-M-MRN"
+                },
+                {
+                    "id": 64,
+                    "ukuran": "S",
+                    "warna": "Hitam",
+                    "stok": 20,
+                    "sku": "MES-17-S-HTM"
+                },
+                {
+                    "id": 63,
+                    "ukuran": "S",
+                    "warna": "Maroon",
+                    "stok": 10,
+                    "sku": "MES-17-S-MRN"
                 }
             ]
         },
@@ -740,45 +736,45 @@
             "deskripsi": "Kemeja lengan panjang bahan oxford premium dengan kerah button-down berkarakter rapi dan maskulin.",
             "bahan": "Katun oxford",
             "merek": "ME Studio",
-            "gambar": "18.jpg",
+            "gambar": "144GYcxMZNWt92zMTsYcbnuckbfhiLmaddMXisKH.png",
             "varian": [
                 {
-                    "id": 267,
-                    "ukuran": "M",
-                    "warna": "Biru Muda",
-                    "stok": 17,
-                    "sku": "MES-18-M-BLU"
-                },
-                {
-                    "id": 268,
-                    "ukuran": "M",
-                    "warna": "Putih",
-                    "stok": 12,
-                    "sku": "MES-18-M-PTH"
-                },
-                {
-                    "id": 269,
+                    "id": 71,
                     "ukuran": "L",
                     "warna": "Biru Muda",
                     "stok": 17,
                     "sku": "MES-18-L-BLU"
                 },
                 {
-                    "id": 270,
+                    "id": 72,
                     "ukuran": "L",
                     "warna": "Putih",
                     "stok": 12,
                     "sku": "MES-18-L-PTH"
                 },
                 {
-                    "id": 271,
+                    "id": 69,
+                    "ukuran": "M",
+                    "warna": "Biru Muda",
+                    "stok": 17,
+                    "sku": "MES-18-M-BLU"
+                },
+                {
+                    "id": 70,
+                    "ukuran": "M",
+                    "warna": "Putih",
+                    "stok": 12,
+                    "sku": "MES-18-M-PTH"
+                },
+                {
+                    "id": 73,
                     "ukuran": "XL",
                     "warna": "Biru Muda",
                     "stok": 20,
                     "sku": "MES-18-XL-BLU"
                 },
                 {
-                    "id": 272,
+                    "id": 74,
                     "ukuran": "XL",
                     "warna": "Putih",
                     "stok": 15,
@@ -795,66 +791,66 @@
             "deskripsi": "Kaos polo klasik berpori sarang lebah yang sejuk dengan kerah elastis tahan kerut untuk gaya sporty kasual.",
             "bahan": "Katun pique",
             "merek": "ME Basics",
-            "gambar": "19.jpg",
+            "gambar": "EK2Ikk47JkT8ELgpqVshY77FHyw8xbbMxaCc4o2E.png",
             "varian": [
                 {
-                    "id": 273,
-                    "ukuran": "M",
-                    "warna": "Navy",
-                    "stok": 14,
-                    "sku": "MEB-19-M-NVY"
-                },
-                {
-                    "id": 274,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 19,
-                    "sku": "MEB-19-M-HTM"
-                },
-                {
-                    "id": 275,
-                    "ukuran": "M",
-                    "warna": "Putih",
-                    "stok": 19,
-                    "sku": "MEB-19-M-PTH"
-                },
-                {
-                    "id": 276,
-                    "ukuran": "L",
-                    "warna": "Navy",
-                    "stok": 14,
-                    "sku": "MEB-19-L-NVY"
-                },
-                {
-                    "id": 277,
+                    "id": 79,
                     "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 19,
                     "sku": "MEB-19-L-HTM"
                 },
                 {
-                    "id": 278,
+                    "id": 78,
+                    "ukuran": "L",
+                    "warna": "Navy",
+                    "stok": 14,
+                    "sku": "MEB-19-L-NVY"
+                },
+                {
+                    "id": 80,
                     "ukuran": "L",
                     "warna": "Putih",
                     "stok": 19,
                     "sku": "MEB-19-L-PTH"
                 },
                 {
-                    "id": 279,
-                    "ukuran": "XL",
-                    "warna": "Navy",
-                    "stok": 17,
-                    "sku": "MEB-19-XL-NVY"
+                    "id": 76,
+                    "ukuran": "M",
+                    "warna": "Hitam",
+                    "stok": 19,
+                    "sku": "MEB-19-M-HTM"
                 },
                 {
-                    "id": 280,
+                    "id": 75,
+                    "ukuran": "M",
+                    "warna": "Navy",
+                    "stok": 14,
+                    "sku": "MEB-19-M-NVY"
+                },
+                {
+                    "id": 77,
+                    "ukuran": "M",
+                    "warna": "Putih",
+                    "stok": 19,
+                    "sku": "MEB-19-M-PTH"
+                },
+                {
+                    "id": 82,
                     "ukuran": "XL",
                     "warna": "Hitam",
                     "stok": 22,
                     "sku": "MEB-19-XL-HTM"
                 },
                 {
-                    "id": 281,
+                    "id": 81,
+                    "ukuran": "XL",
+                    "warna": "Navy",
+                    "stok": 17,
+                    "sku": "MEB-19-XL-NVY"
+                },
+                {
+                    "id": 83,
                     "ukuran": "XL",
                     "warna": "Putih",
                     "stok": 22,
@@ -871,45 +867,45 @@
             "deskripsi": "Kaos lengan panjang dua warna model sambungan raglan untuk gaya santai bernuansa retro.",
             "bahan": "Katun combed",
             "merek": "ME Basics",
-            "gambar": "20.jpg",
+            "gambar": "daM9BmW3nX4PlbonNNY7Dy0qui7uABa0cLiRgMRr.png",
             "varian": [
                 {
-                    "id": 282,
-                    "ukuran": "M",
-                    "warna": "Abu Misty",
-                    "stok": 16,
-                    "sku": "MEB-20-M-ABU"
-                },
-                {
-                    "id": 283,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 11,
-                    "sku": "MEB-20-M-HTM"
-                },
-                {
-                    "id": 284,
+                    "id": 86,
                     "ukuran": "L",
                     "warna": "Abu Misty",
                     "stok": 16,
                     "sku": "MEB-20-L-ABU"
                 },
                 {
-                    "id": 285,
+                    "id": 87,
                     "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 11,
                     "sku": "MEB-20-L-HTM"
                 },
                 {
-                    "id": 286,
+                    "id": 84,
+                    "ukuran": "M",
+                    "warna": "Abu Misty",
+                    "stok": 16,
+                    "sku": "MEB-20-M-ABU"
+                },
+                {
+                    "id": 85,
+                    "ukuran": "M",
+                    "warna": "Hitam",
+                    "stok": 11,
+                    "sku": "MEB-20-M-HTM"
+                },
+                {
+                    "id": 88,
                     "ukuran": "XL",
                     "warna": "Abu Misty",
                     "stok": 19,
                     "sku": "MEB-20-XL-ABU"
                 },
                 {
-                    "id": 287,
+                    "id": 89,
                     "ukuran": "XL",
                     "warna": "Hitam",
                     "stok": 14,
@@ -926,49 +922,49 @@
             "deskripsi": "Kemeja batik cetak kontemporer bahan katun primisima halus, pas badan dengan motif bernilai seni tinggi.",
             "bahan": "Katun primisima",
             "merek": "ME Originals",
-            "gambar": "21.jpg",
+            "gambar": "2HUPgWVPGlhPjym6qjEJ16mTVpLiGMbyYEAJk63O.png",
             "varian": [
                 {
-                    "id": 288,
-                    "ukuran": "M",
-                    "warna": "Cokelat Sogan",
-                    "stok": 13,
-                    "sku": "MEO-21-M-CSG"
-                },
-                {
-                    "id": 289,
-                    "ukuran": "M",
-                    "warna": "Biru Indigo",
-                    "stok": 18,
-                    "sku": "MEO-21-M-IND"
-                },
-                {
-                    "id": 290,
-                    "ukuran": "L",
-                    "warna": "Cokelat Sogan",
-                    "stok": 13,
-                    "sku": "MEO-21-L-CSG"
-                },
-                {
-                    "id": 291,
+                    "id": 93,
                     "ukuran": "L",
                     "warna": "Biru Indigo",
                     "stok": 18,
                     "sku": "MEO-21-L-IND"
                 },
                 {
-                    "id": 292,
-                    "ukuran": "XL",
+                    "id": 92,
+                    "ukuran": "L",
                     "warna": "Cokelat Sogan",
-                    "stok": 16,
-                    "sku": "MEO-21-XL-CSG"
+                    "stok": 13,
+                    "sku": "MEO-21-L-CSG"
                 },
                 {
-                    "id": 293,
+                    "id": 91,
+                    "ukuran": "M",
+                    "warna": "Biru Indigo",
+                    "stok": 18,
+                    "sku": "MEO-21-M-IND"
+                },
+                {
+                    "id": 90,
+                    "ukuran": "M",
+                    "warna": "Cokelat Sogan",
+                    "stok": 13,
+                    "sku": "MEO-21-M-CSG"
+                },
+                {
+                    "id": 95,
                     "ukuran": "XL",
                     "warna": "Biru Indigo",
                     "stok": 21,
                     "sku": "MEO-21-XL-IND"
+                },
+                {
+                    "id": 94,
+                    "ukuran": "XL",
+                    "warna": "Cokelat Sogan",
+                    "stok": 16,
+                    "sku": "MEO-21-XL-CSG"
                 }
             ]
         },
@@ -981,49 +977,49 @@
             "deskripsi": "Jaket bomber fungsional berbahan parasut windproof dengan lapisan dalam hangat dan resleting logam kokoh.",
             "bahan": "Parasut",
             "merek": "ME Originals",
-            "gambar": "22.jpg",
+            "gambar": "pDbM5RA3iLgNsiFIZRWogMV3bMWl02ZyxPfy1fZ0.png",
             "varian": [
                 {
-                    "id": 294,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 0,
-                    "sku": "MEO-22-M-HTM"
-                },
-                {
-                    "id": 295,
-                    "ukuran": "M",
-                    "warna": "Hijau Army",
-                    "stok": 0,
-                    "sku": "MEO-22-M-ARM"
-                },
-                {
-                    "id": 296,
-                    "ukuran": "L",
-                    "warna": "Hitam",
-                    "stok": 0,
-                    "sku": "MEO-22-L-HTM"
-                },
-                {
-                    "id": 297,
+                    "id": 99,
                     "ukuran": "L",
                     "warna": "Hijau Army",
                     "stok": 0,
                     "sku": "MEO-22-L-ARM"
                 },
                 {
-                    "id": 298,
-                    "ukuran": "XL",
+                    "id": 98,
+                    "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 0,
-                    "sku": "MEO-22-XL-HTM"
+                    "sku": "MEO-22-L-HTM"
                 },
                 {
-                    "id": 299,
+                    "id": 97,
+                    "ukuran": "M",
+                    "warna": "Hijau Army",
+                    "stok": 0,
+                    "sku": "MEO-22-M-ARM"
+                },
+                {
+                    "id": 96,
+                    "ukuran": "M",
+                    "warna": "Hitam",
+                    "stok": 0,
+                    "sku": "MEO-22-M-HTM"
+                },
+                {
+                    "id": 101,
                     "ukuran": "XL",
                     "warna": "Hijau Army",
                     "stok": 0,
                     "sku": "MEO-22-XL-ARM"
+                },
+                {
+                    "id": 100,
+                    "ukuran": "XL",
+                    "warna": "Hitam",
+                    "stok": 0,
+                    "sku": "MEO-22-XL-HTM"
                 }
             ]
         },
@@ -1036,49 +1032,49 @@
             "deskripsi": "Celana kulot lebar berbahan linen sejuk dengan pinggang berkaret belakang yang nyaman untuk aktivitas santai.",
             "bahan": "Linen",
             "merek": "ME Minimalist",
-            "gambar": "23.jpg",
+            "gambar": "ThBsV5g7qPgOwEhTBHuqOLTxEvRHK7tUBzXvO1mY.png",
             "varian": [
                 {
-                    "id": 300,
-                    "ukuran": "S",
-                    "warna": "Hitam",
-                    "stok": 17,
-                    "sku": "MEM-23-S-HTM"
-                },
-                {
-                    "id": 301,
-                    "ukuran": "S",
-                    "warna": "Krem",
-                    "stok": 12,
-                    "sku": "MEM-23-S-KRM"
-                },
-                {
-                    "id": 302,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 17,
-                    "sku": "MEM-23-M-HTM"
-                },
-                {
-                    "id": 303,
-                    "ukuran": "M",
-                    "warna": "Krem",
-                    "stok": 12,
-                    "sku": "MEM-23-M-KRM"
-                },
-                {
-                    "id": 304,
+                    "id": 106,
                     "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 17,
                     "sku": "MEM-23-L-HTM"
                 },
                 {
-                    "id": 305,
+                    "id": 107,
                     "ukuran": "L",
                     "warna": "Krem",
                     "stok": 12,
                     "sku": "MEM-23-L-KRM"
+                },
+                {
+                    "id": 104,
+                    "ukuran": "M",
+                    "warna": "Hitam",
+                    "stok": 17,
+                    "sku": "MEM-23-M-HTM"
+                },
+                {
+                    "id": 105,
+                    "ukuran": "M",
+                    "warna": "Krem",
+                    "stok": 12,
+                    "sku": "MEM-23-M-KRM"
+                },
+                {
+                    "id": 102,
+                    "ukuran": "S",
+                    "warna": "Hitam",
+                    "stok": 17,
+                    "sku": "MEM-23-S-HTM"
+                },
+                {
+                    "id": 103,
+                    "ukuran": "S",
+                    "warna": "Krem",
+                    "stok": 12,
+                    "sku": "MEM-23-S-KRM"
                 }
             ]
         },
@@ -1091,49 +1087,49 @@
             "deskripsi": "Rok mini siluet A-line denim kokoh dengan saku depan fungsional yang memberi tampilan youthful dan kasual.",
             "bahan": "Denim",
             "merek": "ME Denim Co.",
-            "gambar": "24.jpg",
+            "gambar": "4rurXpkf2bDvcHxz2UjoPvN9UlkrrRNPQPASRYQ3.png",
             "varian": [
                 {
-                    "id": 306,
-                    "ukuran": "S",
-                    "warna": "Biru Wash",
-                    "stok": 14,
-                    "sku": "MED-24-S-BLU"
-                },
-                {
-                    "id": 307,
-                    "ukuran": "S",
-                    "warna": "Hitam",
-                    "stok": 9,
-                    "sku": "MED-24-S-HTM"
-                },
-                {
-                    "id": 308,
-                    "ukuran": "M",
-                    "warna": "Biru Wash",
-                    "stok": 14,
-                    "sku": "MED-24-M-BLU"
-                },
-                {
-                    "id": 309,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 9,
-                    "sku": "MED-24-M-HTM"
-                },
-                {
-                    "id": 310,
+                    "id": 112,
                     "ukuran": "L",
                     "warna": "Biru Wash",
                     "stok": 14,
                     "sku": "MED-24-L-BLU"
                 },
                 {
-                    "id": 311,
+                    "id": 113,
                     "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 9,
                     "sku": "MED-24-L-HTM"
+                },
+                {
+                    "id": 110,
+                    "ukuran": "M",
+                    "warna": "Biru Wash",
+                    "stok": 14,
+                    "sku": "MED-24-M-BLU"
+                },
+                {
+                    "id": 111,
+                    "ukuran": "M",
+                    "warna": "Hitam",
+                    "stok": 9,
+                    "sku": "MED-24-M-HTM"
+                },
+                {
+                    "id": 108,
+                    "ukuran": "S",
+                    "warna": "Biru Wash",
+                    "stok": 14,
+                    "sku": "MED-24-S-BLU"
+                },
+                {
+                    "id": 109,
+                    "ukuran": "S",
+                    "warna": "Hitam",
+                    "stok": 9,
+                    "sku": "MED-24-S-HTM"
                 }
             ]
         },
@@ -1146,59 +1142,59 @@
             "deskripsi": "Celana jeans pria pola slim fit dengan serat stretch fleksibel yang leluasa mengikuti pergerakan kaki.",
             "bahan": "Denim stretch",
             "merek": "ME Denim Co.",
-            "gambar": "25.jpg",
+            "gambar": "7Bx6q6qNNxgnOjwRAnMKHRc5iq58DUzCB6UEup4i.png",
             "varian": [
                 {
-                    "id": 312,
+                    "id": 114,
                     "ukuran": "29",
                     "warna": "Biru Tua",
                     "stok": 19,
                     "sku": "MED-25-29-BTU"
                 },
                 {
-                    "id": 313,
+                    "id": 115,
                     "ukuran": "29",
                     "warna": "Hitam",
                     "stok": 19,
                     "sku": "MED-25-29-HTM"
                 },
                 {
-                    "id": 314,
+                    "id": 116,
                     "ukuran": "30",
                     "warna": "Biru Tua",
                     "stok": 19,
                     "sku": "MED-25-30-BTU"
                 },
                 {
-                    "id": 315,
+                    "id": 117,
                     "ukuran": "30",
                     "warna": "Hitam",
                     "stok": 19,
                     "sku": "MED-25-30-HTM"
                 },
                 {
-                    "id": 316,
+                    "id": 118,
                     "ukuran": "31",
                     "warna": "Biru Tua",
                     "stok": 19,
                     "sku": "MED-25-31-BTU"
                 },
                 {
-                    "id": 317,
+                    "id": 119,
                     "ukuran": "31",
                     "warna": "Hitam",
                     "stok": 19,
                     "sku": "MED-25-31-HTM"
                 },
                 {
-                    "id": 318,
+                    "id": 120,
                     "ukuran": "32",
                     "warna": "Biru Tua",
                     "stok": 19,
                     "sku": "MED-25-32-BTU"
                 },
                 {
-                    "id": 319,
+                    "id": 121,
                     "ukuran": "32",
                     "warna": "Hitam",
                     "stok": 0,
@@ -1215,49 +1211,49 @@
             "deskripsi": "Celana jogger berkantong samping cargo dengan ujung kaki berkerut rib yang trendi dan praktis.",
             "bahan": "Katun twill",
             "merek": "ME Originals",
-            "gambar": "26.jpg",
+            "gambar": "VWlHltNOZ2x29BWB6ein253v9HcmLOAqQ9OJL9Se.png",
             "varian": [
                 {
-                    "id": 320,
-                    "ukuran": "M",
-                    "warna": "Olive",
-                    "stok": 8,
-                    "sku": "MEO-26-M-OLV"
-                },
-                {
-                    "id": 321,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 8,
-                    "sku": "MEO-26-M-HTM"
-                },
-                {
-                    "id": 322,
-                    "ukuran": "L",
-                    "warna": "Olive",
-                    "stok": 8,
-                    "sku": "MEO-26-L-OLV"
-                },
-                {
-                    "id": 323,
+                    "id": 125,
                     "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 8,
                     "sku": "MEO-26-L-HTM"
                 },
                 {
-                    "id": 324,
-                    "ukuran": "XL",
+                    "id": 124,
+                    "ukuran": "L",
                     "warna": "Olive",
-                    "stok": 11,
-                    "sku": "MEO-26-XL-OLV"
+                    "stok": 8,
+                    "sku": "MEO-26-L-OLV"
                 },
                 {
-                    "id": 325,
+                    "id": 123,
+                    "ukuran": "M",
+                    "warna": "Hitam",
+                    "stok": 8,
+                    "sku": "MEO-26-M-HTM"
+                },
+                {
+                    "id": 122,
+                    "ukuran": "M",
+                    "warna": "Olive",
+                    "stok": 8,
+                    "sku": "MEO-26-M-OLV"
+                },
+                {
+                    "id": 127,
                     "ukuran": "XL",
                     "warna": "Hitam",
                     "stok": 11,
                     "sku": "MEO-26-XL-HTM"
+                },
+                {
+                    "id": 126,
+                    "ukuran": "XL",
+                    "warna": "Olive",
+                    "stok": 11,
+                    "sku": "MEO-26-XL-OLV"
                 }
             ]
         },
@@ -1270,28 +1266,28 @@
             "deskripsi": "Kacamata bingkai persegi tegas bermaterial acetate ringan yang tahan gores dan nyaman dipakai harian.",
             "bahan": "Acetate",
             "merek": "ME Accessories",
-            "gambar": "27.jpg",
+            "gambar": "TgPwPnMDEiyN37Qy6UhTnICcrT9vdTlTvihT39kf.png",
             "varian": [
                 {
-                    "id": 326,
+                    "id": 130,
+                    "ukuran": "All Size",
+                    "warna": "Bening",
+                    "stok": 11,
+                    "sku": "MEA-27-AS-BNG"
+                },
+                {
+                    "id": 128,
                     "ukuran": "All Size",
                     "warna": "Hitam",
                     "stok": 21,
                     "sku": "MEA-27-AS-HTM"
                 },
                 {
-                    "id": 327,
+                    "id": 129,
                     "ukuran": "All Size",
                     "warna": "Tortoise",
                     "stok": 21,
                     "sku": "MEA-27-AS-TRT"
-                },
-                {
-                    "id": 328,
-                    "ukuran": "All Size",
-                    "warna": "Bening",
-                    "stok": 11,
-                    "sku": "MEA-27-AS-BNG"
                 }
             ]
         },
@@ -1304,17 +1300,17 @@
             "deskripsi": "Kacamata berbingkai bulat tipis gaya vintage dengan material stainless steel antikarat dan nose pad empuk.",
             "bahan": "Stainless steel",
             "merek": "ME Accessories",
-            "gambar": "28.jpg",
+            "gambar": "6s5R48VUerPZ0vjFfosEcZ9weTQbxfv3A22rtscI.png",
             "varian": [
                 {
-                    "id": 329,
+                    "id": 131,
                     "ukuran": "All Size",
                     "warna": "Emas",
                     "stok": 8,
                     "sku": "MEA-28-AS-EMS"
                 },
                 {
-                    "id": 330,
+                    "id": 132,
                     "ukuran": "All Size",
                     "warna": "Perak",
                     "stok": 0,
@@ -1331,49 +1327,49 @@
             "deskripsi": "Ikat pinggang anyam elastis berbahan serat kanvas tangguh dengan gesper pin ganda yang fleksibel.",
             "bahan": "Kanvas",
             "merek": "ME Accessories",
-            "gambar": "29.jpg",
+            "gambar": "PfSTxzjfuypaMXuelwyOXVuZXSFUNfzt2KBqRDRd.png",
             "varian": [
                 {
-                    "id": 331,
-                    "ukuran": "90 cm",
-                    "warna": "Hitam",
-                    "stok": 11,
-                    "sku": "MEA-29-90-HTM"
-                },
-                {
-                    "id": 332,
-                    "ukuran": "90 cm",
-                    "warna": "Khaki",
-                    "stok": 11,
-                    "sku": "MEA-29-90-KHK"
-                },
-                {
-                    "id": 333,
+                    "id": 135,
                     "ukuran": "100 cm",
                     "warna": "Hitam",
                     "stok": 14,
                     "sku": "MEA-29-100-HTM"
                 },
                 {
-                    "id": 334,
+                    "id": 136,
                     "ukuran": "100 cm",
                     "warna": "Khaki",
                     "stok": 14,
                     "sku": "MEA-29-100-KHK"
                 },
                 {
-                    "id": 335,
+                    "id": 137,
                     "ukuran": "110 cm",
                     "warna": "Hitam",
                     "stok": 14,
                     "sku": "MEA-29-110-HTM"
                 },
                 {
-                    "id": 336,
+                    "id": 138,
                     "ukuran": "110 cm",
                     "warna": "Khaki",
                     "stok": 14,
                     "sku": "MEA-29-110-KHK"
+                },
+                {
+                    "id": 133,
+                    "ukuran": "90 cm",
+                    "warna": "Hitam",
+                    "stok": 11,
+                    "sku": "MEA-29-90-HTM"
+                },
+                {
+                    "id": 134,
+                    "ukuran": "90 cm",
+                    "warna": "Khaki",
+                    "stok": 11,
+                    "sku": "MEA-29-90-KHK"
                 }
             ]
         },
@@ -1386,24 +1382,24 @@
             "deskripsi": "Topi bucket katun twill dengan jahitan presisi dan ventilasi udara, cocok untuk perlindungan cuaca luar ruangan.",
             "bahan": "Katun twill",
             "merek": "ME Accessories",
-            "gambar": "30.jpg",
+            "gambar": "kk5NZpsvnEj0tIpydGywnAVKYoCXfbgV6nQJesyf.png",
             "varian": [
                 {
-                    "id": 337,
-                    "ukuran": "All Size",
-                    "warna": "Krem",
-                    "stok": 22,
-                    "sku": "MEA-30-AS-KRM"
-                },
-                {
-                    "id": 338,
+                    "id": 140,
                     "ukuran": "All Size",
                     "warna": "Hitam",
                     "stok": 12,
                     "sku": "MEA-30-AS-HTM"
                 },
                 {
-                    "id": 339,
+                    "id": 139,
+                    "ukuran": "All Size",
+                    "warna": "Krem",
+                    "stok": 22,
+                    "sku": "MEA-30-AS-KRM"
+                },
+                {
+                    "id": 141,
                     "ukuran": "All Size",
                     "warna": "Olive",
                     "stok": 12,
@@ -1420,70 +1416,70 @@
             "deskripsi": "Rok panjang midi satin bersiluet bias cut yang jatuh anggun mengikuti lekuk gerak tubuh.",
             "bahan": "Satin",
             "merek": "ME Studio",
-            "gambar": "31.jpg",
+            "gambar": "nZF3JqjEVFCWgXlH1KpMbj2lh7uPapzU54jQvplP.png",
             "varian": [
                 {
-                    "id": 340,
-                    "ukuran": "S",
-                    "warna": "Champagne",
-                    "stok": 18,
-                    "sku": "MES-31-S-CMP"
-                },
-                {
-                    "id": 341,
-                    "ukuran": "S",
-                    "warna": "Hitam",
-                    "stok": 13,
-                    "sku": "MES-31-S-HTM"
-                },
-                {
-                    "id": 342,
-                    "ukuran": "S",
-                    "warna": "Hijau Botol",
-                    "stok": 13,
-                    "sku": "MES-31-S-HBT"
-                },
-                {
-                    "id": 343,
-                    "ukuran": "M",
-                    "warna": "Champagne",
-                    "stok": 18,
-                    "sku": "MES-31-M-CMP"
-                },
-                {
-                    "id": 344,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 13,
-                    "sku": "MES-31-M-HTM"
-                },
-                {
-                    "id": 345,
-                    "ukuran": "M",
-                    "warna": "Hijau Botol",
-                    "stok": 13,
-                    "sku": "MES-31-M-HBT"
-                },
-                {
-                    "id": 346,
+                    "id": 148,
                     "ukuran": "L",
                     "warna": "Champagne",
                     "stok": 18,
                     "sku": "MES-31-L-CMP"
                 },
                 {
-                    "id": 347,
+                    "id": 150,
+                    "ukuran": "L",
+                    "warna": "Hijau Botol",
+                    "stok": 13,
+                    "sku": "MES-31-L-HBT"
+                },
+                {
+                    "id": 149,
                     "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 13,
                     "sku": "MES-31-L-HTM"
                 },
                 {
-                    "id": 348,
-                    "ukuran": "L",
+                    "id": 145,
+                    "ukuran": "M",
+                    "warna": "Champagne",
+                    "stok": 18,
+                    "sku": "MES-31-M-CMP"
+                },
+                {
+                    "id": 147,
+                    "ukuran": "M",
                     "warna": "Hijau Botol",
                     "stok": 13,
-                    "sku": "MES-31-L-HBT"
+                    "sku": "MES-31-M-HBT"
+                },
+                {
+                    "id": 146,
+                    "ukuran": "M",
+                    "warna": "Hitam",
+                    "stok": 13,
+                    "sku": "MES-31-M-HTM"
+                },
+                {
+                    "id": 142,
+                    "ukuran": "S",
+                    "warna": "Champagne",
+                    "stok": 18,
+                    "sku": "MES-31-S-CMP"
+                },
+                {
+                    "id": 144,
+                    "ukuran": "S",
+                    "warna": "Hijau Botol",
+                    "stok": 13,
+                    "sku": "MES-31-S-HBT"
+                },
+                {
+                    "id": 143,
+                    "ukuran": "S",
+                    "warna": "Hitam",
+                    "stok": 13,
+                    "sku": "MES-31-S-HTM"
                 }
             ]
         },
@@ -1496,49 +1492,49 @@
             "deskripsi": "Rok kerja pensil span bahan scuba tebal elastis dengan aksen lipit rapi yang menunjang siluet profesional.",
             "bahan": "Span scuba",
             "merek": "ME Basics",
-            "gambar": "32.jpg",
+            "gambar": "zypL2GhnfFcafKLNLaFORsuodJoHvoYNmXKQ21HM.png",
             "varian": [
                 {
-                    "id": 349,
-                    "ukuran": "S",
-                    "warna": "Hitam",
-                    "stok": 20,
-                    "sku": "MEB-32-S-HTM"
-                },
-                {
-                    "id": 350,
-                    "ukuran": "S",
+                    "id": 156,
+                    "ukuran": "L",
                     "warna": "Abu Tua",
                     "stok": 15,
-                    "sku": "MEB-32-S-ATU"
+                    "sku": "MEB-32-L-ATU"
                 },
                 {
-                    "id": 351,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 20,
-                    "sku": "MEB-32-M-HTM"
-                },
-                {
-                    "id": 352,
-                    "ukuran": "M",
-                    "warna": "Abu Tua",
-                    "stok": 15,
-                    "sku": "MEB-32-M-ATU"
-                },
-                {
-                    "id": 353,
+                    "id": 155,
                     "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 20,
                     "sku": "MEB-32-L-HTM"
                 },
                 {
-                    "id": 354,
-                    "ukuran": "L",
+                    "id": 154,
+                    "ukuran": "M",
                     "warna": "Abu Tua",
                     "stok": 15,
-                    "sku": "MEB-32-L-ATU"
+                    "sku": "MEB-32-M-ATU"
+                },
+                {
+                    "id": 153,
+                    "ukuran": "M",
+                    "warna": "Hitam",
+                    "stok": 20,
+                    "sku": "MEB-32-M-HTM"
+                },
+                {
+                    "id": 152,
+                    "ukuran": "S",
+                    "warna": "Abu Tua",
+                    "stok": 15,
+                    "sku": "MEB-32-S-ATU"
+                },
+                {
+                    "id": 151,
+                    "ukuran": "S",
+                    "warna": "Hitam",
+                    "stok": 20,
+                    "sku": "MEB-32-S-HTM"
                 }
             ]
         },
@@ -1551,70 +1547,70 @@
             "deskripsi": "Celana palazzo pipa lebar dari bahan katun crinkle bertekstur unik, flowy dan adem dipakai seharian.",
             "bahan": "Crinkle",
             "merek": "ME Minimalist",
-            "gambar": "33.jpg",
+            "gambar": "2Mb9AeGlFzFLDusotMvJXa3xmwxuYY8f5HoecA36.png",
             "varian": [
                 {
-                    "id": 355,
-                    "ukuran": "S",
-                    "warna": "Krem",
-                    "stok": 22,
-                    "sku": "MEM-33-S-KRM"
-                },
-                {
-                    "id": 356,
-                    "ukuran": "S",
-                    "warna": "Hitam",
-                    "stok": 12,
-                    "sku": "MEM-33-S-HTM"
-                },
-                {
-                    "id": 357,
-                    "ukuran": "S",
-                    "warna": "Terakota",
-                    "stok": 12,
-                    "sku": "MEM-33-S-TRK"
-                },
-                {
-                    "id": 358,
-                    "ukuran": "M",
-                    "warna": "Krem",
-                    "stok": 22,
-                    "sku": "MEM-33-M-KRM"
-                },
-                {
-                    "id": 359,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 12,
-                    "sku": "MEM-33-M-HTM"
-                },
-                {
-                    "id": 360,
-                    "ukuran": "M",
-                    "warna": "Terakota",
-                    "stok": 12,
-                    "sku": "MEM-33-M-TRK"
-                },
-                {
-                    "id": 361,
-                    "ukuran": "L",
-                    "warna": "Krem",
-                    "stok": 22,
-                    "sku": "MEM-33-L-KRM"
-                },
-                {
-                    "id": 362,
+                    "id": 164,
                     "ukuran": "L",
                     "warna": "Hitam",
                     "stok": 12,
                     "sku": "MEM-33-L-HTM"
                 },
                 {
-                    "id": 363,
+                    "id": 163,
+                    "ukuran": "L",
+                    "warna": "Krem",
+                    "stok": 22,
+                    "sku": "MEM-33-L-KRM"
+                },
+                {
+                    "id": 165,
                     "ukuran": "L",
                     "warna": "Terakota",
                     "stok": 12,
                     "sku": "MEM-33-L-TRK"
+                },
+                {
+                    "id": 161,
+                    "ukuran": "M",
+                    "warna": "Hitam",
+                    "stok": 12,
+                    "sku": "MEM-33-M-HTM"
+                },
+                {
+                    "id": 160,
+                    "ukuran": "M",
+                    "warna": "Krem",
+                    "stok": 22,
+                    "sku": "MEM-33-M-KRM"
+                },
+                {
+                    "id": 162,
+                    "ukuran": "M",
+                    "warna": "Terakota",
+                    "stok": 12,
+                    "sku": "MEM-33-M-TRK"
+                },
+                {
+                    "id": 158,
+                    "ukuran": "S",
+                    "warna": "Hitam",
+                    "stok": 12,
+                    "sku": "MEM-33-S-HTM"
+                },
+                {
+                    "id": 157,
+                    "ukuran": "S",
+                    "warna": "Krem",
+                    "stok": 22,
+                    "sku": "MEM-33-S-KRM"
+                },
+                {
+                    "id": 159,
+                    "ukuran": "S",
+                    "warna": "Terakota",
+                    "stok": 12,
+                    "sku": "MEM-33-S-TRK"
                 }
             ]
         },
@@ -1627,87 +1623,87 @@
             "deskripsi": "Celana formal bahan wool blend premium berpotongan tailored rapi dengan lipatan presisi depan.",
             "bahan": "Wool blend",
             "merek": "ME Studio",
-            "gambar": "34.jpg",
+            "gambar": "QqJQORp5V1EA8owfHnbtjha1nmcMbbDNaAqrZUR8.png",
             "varian": [
                 {
-                    "id": 364,
-                    "ukuran": "29",
-                    "warna": "Hitam",
-                    "stok": 22,
-                    "sku": "MES-34-29-HTM"
-                },
-                {
-                    "id": 365,
+                    "id": 167,
                     "ukuran": "29",
                     "warna": "Abu Tua",
                     "stok": 17,
                     "sku": "MES-34-29-ATU"
                 },
                 {
-                    "id": 366,
+                    "id": 166,
+                    "ukuran": "29",
+                    "warna": "Hitam",
+                    "stok": 22,
+                    "sku": "MES-34-29-HTM"
+                },
+                {
+                    "id": 168,
                     "ukuran": "29",
                     "warna": "Navy",
                     "stok": 0,
                     "sku": "MES-34-29-NVY"
                 },
                 {
-                    "id": 367,
-                    "ukuran": "30",
-                    "warna": "Hitam",
-                    "stok": 22,
-                    "sku": "MES-34-30-HTM"
-                },
-                {
-                    "id": 368,
+                    "id": 170,
                     "ukuran": "30",
                     "warna": "Abu Tua",
                     "stok": 17,
                     "sku": "MES-34-30-ATU"
                 },
                 {
-                    "id": 369,
+                    "id": 169,
+                    "ukuran": "30",
+                    "warna": "Hitam",
+                    "stok": 22,
+                    "sku": "MES-34-30-HTM"
+                },
+                {
+                    "id": 171,
                     "ukuran": "30",
                     "warna": "Navy",
                     "stok": 17,
                     "sku": "MES-34-30-NVY"
                 },
                 {
-                    "id": 370,
-                    "ukuran": "31",
-                    "warna": "Hitam",
-                    "stok": 22,
-                    "sku": "MES-34-31-HTM"
-                },
-                {
-                    "id": 371,
+                    "id": 173,
                     "ukuran": "31",
                     "warna": "Abu Tua",
                     "stok": 17,
                     "sku": "MES-34-31-ATU"
                 },
                 {
-                    "id": 372,
+                    "id": 172,
+                    "ukuran": "31",
+                    "warna": "Hitam",
+                    "stok": 22,
+                    "sku": "MES-34-31-HTM"
+                },
+                {
+                    "id": 174,
                     "ukuran": "31",
                     "warna": "Navy",
                     "stok": 17,
                     "sku": "MES-34-31-NVY"
                 },
                 {
-                    "id": 373,
-                    "ukuran": "32",
-                    "warna": "Hitam",
-                    "stok": 22,
-                    "sku": "MES-34-32-HTM"
-                },
-                {
-                    "id": 374,
+                    "id": 176,
                     "ukuran": "32",
                     "warna": "Abu Tua",
                     "stok": 17,
                     "sku": "MES-34-32-ATU"
                 },
                 {
-                    "id": 375,
+                    "id": 175,
+                    "ukuran": "32",
+                    "warna": "Hitam",
+                    "stok": 22,
+                    "sku": "MES-34-32-HTM"
+                },
+                {
+                    "id": 177,
                     "ukuran": "32",
                     "warna": "Navy",
                     "stok": 17,
@@ -1724,87 +1720,87 @@
             "deskripsi": "Celana pendek chino selutut dari bahan katun twill kokoh untuk gaya akhir pekan santai dan kasual.",
             "bahan": "Katun twill",
             "merek": "ME Basics",
-            "gambar": "35.jpg",
+            "gambar": "zxYag4LWSWnC0ldCBun8PkRyeHL6uqN7mZMQjqWq.png",
             "varian": [
                 {
-                    "id": 376,
+                    "id": 178,
                     "ukuran": "29",
                     "warna": "Khaki",
                     "stok": 14,
                     "sku": "MEB-35-29-KHK"
                 },
                 {
-                    "id": 377,
+                    "id": 179,
                     "ukuran": "29",
                     "warna": "Navy",
                     "stok": 9,
                     "sku": "MEB-35-29-NVY"
                 },
                 {
-                    "id": 378,
+                    "id": 180,
                     "ukuran": "29",
                     "warna": "Olive",
                     "stok": 14,
                     "sku": "MEB-35-29-OLV"
                 },
                 {
-                    "id": 379,
+                    "id": 181,
                     "ukuran": "30",
                     "warna": "Khaki",
                     "stok": 14,
                     "sku": "MEB-35-30-KHK"
                 },
                 {
-                    "id": 380,
+                    "id": 182,
                     "ukuran": "30",
                     "warna": "Navy",
                     "stok": 9,
                     "sku": "MEB-35-30-NVY"
                 },
                 {
-                    "id": 381,
+                    "id": 183,
                     "ukuran": "30",
                     "warna": "Olive",
                     "stok": 14,
                     "sku": "MEB-35-30-OLV"
                 },
                 {
-                    "id": 382,
+                    "id": 184,
                     "ukuran": "31",
                     "warna": "Khaki",
                     "stok": 14,
                     "sku": "MEB-35-31-KHK"
                 },
                 {
-                    "id": 383,
+                    "id": 185,
                     "ukuran": "31",
                     "warna": "Navy",
                     "stok": 9,
                     "sku": "MEB-35-31-NVY"
                 },
                 {
-                    "id": 384,
+                    "id": 186,
                     "ukuran": "31",
                     "warna": "Olive",
                     "stok": 14,
                     "sku": "MEB-35-31-OLV"
                 },
                 {
-                    "id": 385,
+                    "id": 187,
                     "ukuran": "32",
                     "warna": "Khaki",
                     "stok": 14,
                     "sku": "MEB-35-32-KHK"
                 },
                 {
-                    "id": 386,
+                    "id": 188,
                     "ukuran": "32",
                     "warna": "Navy",
                     "stok": 9,
                     "sku": "MEB-35-32-NVY"
                 },
                 {
-                    "id": 387,
+                    "id": 189,
                     "ukuran": "32",
                     "warna": "Olive",
                     "stok": 14,
@@ -1821,70 +1817,70 @@
             "deskripsi": "Rok mini lipit tenis bergaya sporty preppy dengan furing celana dalaman yang aman dan nyaman bergerak.",
             "bahan": "Poliester",
             "merek": "ME Originals",
-            "gambar": "36.jpg",
+            "gambar": "dLrDEDdLGrXwwU6f23JyNlqtiuck74LHJJgDu8gE.png",
             "varian": [
                 {
-                    "id": 388,
-                    "ukuran": "S",
-                    "warna": "Putih",
-                    "stok": 18,
-                    "sku": "MEO-36-S-PTH"
-                },
-                {
-                    "id": 389,
-                    "ukuran": "S",
-                    "warna": "Navy",
-                    "stok": 13,
-                    "sku": "MEO-36-S-NVY"
-                },
-                {
-                    "id": 390,
-                    "ukuran": "S",
-                    "warna": "Hitam",
-                    "stok": 18,
-                    "sku": "MEO-36-S-HTM"
-                },
-                {
-                    "id": 391,
-                    "ukuran": "M",
-                    "warna": "Putih",
-                    "stok": 18,
-                    "sku": "MEO-36-M-PTH"
-                },
-                {
-                    "id": 392,
-                    "ukuran": "M",
-                    "warna": "Navy",
-                    "stok": 13,
-                    "sku": "MEO-36-M-NVY"
-                },
-                {
-                    "id": 393,
-                    "ukuran": "M",
-                    "warna": "Hitam",
-                    "stok": 18,
-                    "sku": "MEO-36-M-HTM"
-                },
-                {
-                    "id": 394,
+                    "id": 198,
                     "ukuran": "L",
-                    "warna": "Putih",
+                    "warna": "Hitam",
                     "stok": 18,
-                    "sku": "MEO-36-L-PTH"
+                    "sku": "MEO-36-L-HTM"
                 },
                 {
-                    "id": 395,
+                    "id": 197,
                     "ukuran": "L",
                     "warna": "Navy",
                     "stok": 13,
                     "sku": "MEO-36-L-NVY"
                 },
                 {
-                    "id": 396,
+                    "id": 196,
                     "ukuran": "L",
+                    "warna": "Putih",
+                    "stok": 18,
+                    "sku": "MEO-36-L-PTH"
+                },
+                {
+                    "id": 195,
+                    "ukuran": "M",
                     "warna": "Hitam",
                     "stok": 18,
-                    "sku": "MEO-36-L-HTM"
+                    "sku": "MEO-36-M-HTM"
+                },
+                {
+                    "id": 194,
+                    "ukuran": "M",
+                    "warna": "Navy",
+                    "stok": 13,
+                    "sku": "MEO-36-M-NVY"
+                },
+                {
+                    "id": 193,
+                    "ukuran": "M",
+                    "warna": "Putih",
+                    "stok": 18,
+                    "sku": "MEO-36-M-PTH"
+                },
+                {
+                    "id": 192,
+                    "ukuran": "S",
+                    "warna": "Hitam",
+                    "stok": 18,
+                    "sku": "MEO-36-S-HTM"
+                },
+                {
+                    "id": 191,
+                    "ukuran": "S",
+                    "warna": "Navy",
+                    "stok": 13,
+                    "sku": "MEO-36-S-NVY"
+                },
+                {
+                    "id": 190,
+                    "ukuran": "S",
+                    "warna": "Putih",
+                    "stok": 18,
+                    "sku": "MEO-36-S-PTH"
                 }
             ]
         }
