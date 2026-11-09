@@ -48,16 +48,6 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
   bool _tampilkanTombolKeAtas = false;
 
-  // Filter Subkategori untuk Koleksi Baru Tiba di Beranda Landing Page
-  String _subKategoriBaruTiba = 'SEMUA';
-  final List<String> _chipsBaruTiba = const [
-    'SEMUA',
-    'OUTERWEAR',
-    'ATASAN',
-    'CELANA',
-    'AKSESORI',
-  ];
-
   // Mode Tampilan: true = 2-Kolom Grid, false = 1-Kolom Lookbook Editorial
   bool _modeGrid = true;
   String _subKategoriWanita = 'SEMUA';
@@ -270,25 +260,8 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   }
 
   List<Produk> _dapatkanProdukBaruTiba({int batas = 4}) {
-    List<Produk> hasil;
-    if (_subKategoriBaruTiba == 'SEMUA') {
-      hasil = List<Produk>.from(_daftarProduk);
-    } else {
-      hasil = _daftarProduk.where((p) {
-        final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
-        if (_subKategoriBaruTiba == 'OUTERWEAR') {
-          return s.contains('coat') || s.contains('outer') || s.contains('jaket') || s.contains('mantel') || s.contains('blazer');
-        } else if (_subKategoriBaruTiba == 'ATASAN') {
-          return s.contains('kemeja') || s.contains('shirt') || s.contains('top') || s.contains('atasan') || s.contains('rajut') || s.contains('t-shirt');
-        } else if (_subKategoriBaruTiba == 'CELANA') {
-          return s.contains('celana') || s.contains('pant') || s.contains('trouser') || s.contains('rok');
-        } else if (_subKategoriBaruTiba == 'AKSESORI') {
-          return s.contains('tas') || s.contains('kulit') || s.contains('sabuk') || s.contains('syal') || p.kategori.toLowerCase() == 'aksesori';
-        }
-        return true;
-      }).toList();
-    }
-    // Urutkan dari produk terbaru (ID terbesar) dan batasi jumlahnya untuk Beranda
+    final hasil = List<Produk>.from(_daftarProduk);
+    // Urutkan dari produk paling baru (ID terbesar) dan batasi hanya beberapa produk terbaru untuk Beranda
     hasil.sort((a, b) => b.id.compareTo(a.id));
     if (hasil.length > batas) {
       return hasil.sublist(0, batas);
@@ -480,7 +453,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
 
         // 3. Section Koleksi Baru Tiba
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 26, 16, 10),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -531,49 +504,6 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                   fontSize: 12,
                   color: TemaAplikasi.secondary,
                   height: 1.35,
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // Filter Chips Cepat untuk Baru Tiba di Landing Page
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: _chipsBaruTiba.map((chip) {
-                    final aktif = _subKategoriBaruTiba == chip;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: InkWell(
-                        onTap: () {
-                          setState(() {
-                            _subKategoriBaruTiba = chip;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(2),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: aktif ? TemaAplikasi.primary : TemaAplikasi.surfaceWhite,
-                            border: Border.all(
-                              color: aktif ? TemaAplikasi.primary : TemaAplikasi.borderGray,
-                              width: 1,
-                            ),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                          child: Text(
-                            chip,
-                            style: TextStyle(
-                              fontSize: 10,
-                              letterSpacing: 1.2,
-                              fontWeight: aktif ? FontWeight.w700 : FontWeight.w500,
-                              color: aktif ? TemaAplikasi.onPrimary : TemaAplikasi.primary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
                 ),
               ),
             ],
@@ -1127,11 +1057,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
 
     return Container(
       width: double.infinity,
-      height: 430,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
+      height: 440,
+      margin: EdgeInsets.zero,
+      decoration: const BoxDecoration(
         color: TemaAplikasi.primary,
-        borderRadius: BorderRadius.circular(2),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
