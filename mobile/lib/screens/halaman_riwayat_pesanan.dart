@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import '../enums.dart';
 import '../models/pesanan.dart';
 import '../services/layanan_api.dart';
+import '../services/state_pengguna.dart';
 import '../theme.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/widget_keadaan.dart';
+import 'halaman_login.dart';
 import 'halaman_rincian_pesanan.dart';
 
 /// Halaman Riwayat Pesanan — daftar pesanan dari GET /api/pesanan
@@ -26,10 +28,23 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
   @override
   void initState() {
     super.initState();
-    _muatPesanan();
+    if (StatePengguna.isLoggedInNotifier.value) {
+      _muatPesanan();
+    } else {
+      setState(() {
+        _keadaan = KeadaanMuat.kosong;
+      });
+    }
   }
 
   Future<void> _muatPesanan() async {
+    if (!StatePengguna.isLoggedInNotifier.value) {
+      setState(() {
+        _keadaan = KeadaanMuat.kosong;
+      });
+      return;
+    }
+
     setState(() {
       _keadaan = KeadaanMuat.memuat;
     });
@@ -140,11 +155,28 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
       case KeadaanMuat.memuat:
         return const WidgetMemuat();
       case KeadaanMuat.kosong:
+        final belumLogin = !StatePengguna.isLoggedInNotifier.value;
         return WidgetKosong(
-          ikon: Icons.receipt_long_outlined,
-          pesan: 'Belum ada pesanan. Yuk, mulai belanja koleksi ME!',
-          saranAksi: 'LIHAT KATALOG',
-          onAksi: () => Navigator.maybePop(context),
+          ikon: belumLogin ? Icons.lock_outline_rounded : Icons.receipt_long_outlined,
+          pesan: belumLogin
+              ? 'Silakan masuk untuk melihat riwayat pesanan dan status pengiriman Anda.'
+              : 'Belum ada pesanan. Yuk, mulai belanja koleksi ME!',
+          saranAksi: belumLogin ? 'MASUK' : 'LIHAT KATALOG',
+          onAksi: belumLogin
+              ? () async {
+                  final berhasil = await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HalamanLogin()),
+                  );
+                  if (berhasil == true && mounted) {
+                    if (!mounted) return;
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HalamanRiwayatPesanan()),
+                    );
+                  }
+                }
+              : () => Navigator.maybePop(context),
         );
       case KeadaanMuat.galat:
         return WidgetGalat(

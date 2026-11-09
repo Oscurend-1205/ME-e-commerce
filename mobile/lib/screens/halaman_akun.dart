@@ -6,6 +6,7 @@ import '../theme.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/komponen_header.dart';
 import 'halaman_buku_alamat.dart';
+import 'halaman_bukti_transaksi.dart';
 import 'halaman_login.dart';
 import 'halaman_metode_pembayaran.dart';
 import 'halaman_riwayat_pesanan.dart';
@@ -41,6 +42,23 @@ class _HalamanAkunState extends State<HalamanAkun> {
     }
   }
 
+  Future<void> _bukaLoginDanLanjut(Widget halamanTujuan) async {
+    final berhasil = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => const HalamanLogin()),
+    );
+    if (berhasil != true || !mounted) return;
+
+    setState(() {});
+    await StatePengguna.sinkronkanKeranjang();
+
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => halamanTujuan),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,13 +83,8 @@ class _HalamanAkunState extends State<HalamanAkun> {
           tooltip: 'Kembali',
           icon: const Icon(Icons.arrow_back_rounded),
         ),
-        actions: [
-          IconButton(
-            onPressed: () => NavigasiUniversal.kePencarian(context),
-            tooltip: 'Pencarian',
-            icon: const Icon(Icons.search_rounded, size: 22),
-          ),
-          const TombolTasHeader(),
+        actions: const [
+          TombolTasHeader(),
         ],
       ),
       body: SingleChildScrollView(
@@ -85,15 +98,31 @@ class _HalamanAkunState extends State<HalamanAkun> {
                 label: 'Riwayat Pesanan & Pelacakan',
                 badge: '1 Aktif',
                 onTap: () {
+                  if (!StatePengguna.isLoggedInNotifier.value) {
+                    _bukaLoginDanLanjut(const HalamanRiwayatPesanan());
+                    return;
+                  }
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => HalamanRiwayatPesanan()),
+                    MaterialPageRoute(builder: (_) => const HalamanRiwayatPesanan()),
                   );
                 },
               ),
               _bangunItemDaftar(
                 icon: Icons.receipt_long_outlined,
                 label: 'Faktur & Bukti Transaksi',
+                onTap: () {
+                  if (!StatePengguna.isLoggedInNotifier.value) {
+                    _bukaLoginDanLanjut(const HalamanBuktiTransaksi());
+                    return;
+                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const HalamanBuktiTransaksi(),
+                    ),
+                  );
+                },
               ),
             ]),
             _bangunGrupPengaturan('Preferensi & Pengaturan', [

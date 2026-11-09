@@ -37,14 +37,6 @@ class _HalamanMetodePembayaranState extends State<HalamanMetodePembayaran> {
       icon: Icons.qr_code_2_outlined,
       detail: 'QRIS Nasional',
     ),
-    _MetodePembayaranOption(
-      title: 'ME Privé Concierge Pay',
-      subtitle: 'Bayar 30 hari tanpa bunga',
-      badge: 'Limit Aktif',
-      caption: 'Promo khusus member untuk pembelian premium dengan tenor 30 hari tanpa bunga.',
-      icon: Icons.stars_rounded,
-      detail: 'Rp 5.000.000 tersedia',
-    ),
   ];
 
   @override
