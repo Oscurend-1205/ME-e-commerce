@@ -168,6 +168,8 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
             pesananId: pesanan.id,
             snapToken: pesanan.snapToken!,
             redirectUrl: pesanan.redirectUrl,
+            qrUrl: pesanan.qrUrl,
+            qrString: pesanan.qrString,
             nomorPesanan: pesanan.nomorPesanan,
             total: pesanan.total,
           ),

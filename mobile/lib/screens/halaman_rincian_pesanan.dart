@@ -585,6 +585,8 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
                         pesananId: pesanan.id,
                         snapToken: pesanan.snapToken!,
                         redirectUrl: pesanan.redirectUrl,
+                        qrUrl: pesanan.qrUrl,
+                        qrString: pesanan.qrString,
                         nomorPesanan: pesanan.nomorPesanan,
                         total: pesanan.total,
                       ),

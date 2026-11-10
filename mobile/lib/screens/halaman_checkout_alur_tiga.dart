@@ -136,6 +136,8 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
               pesananId: pesananId,
               snapToken: snapToken,
               redirectUrl: redirectUrl,
+              qrUrl: pesananMap['qr_url'] as String?,
+              qrString: pesananMap['qr_string'] as String?,
               nomorPesanan: nomorPesanan,
               total: total,
             ),
