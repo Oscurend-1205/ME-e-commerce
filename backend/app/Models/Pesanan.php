@@ -72,6 +72,8 @@ class Pesanan extends Model
             'detail' => $this->detail->map(function ($d) {
                 return [
                     'id' => $d->id,
+                    'produk_id' => $d->produk_id,
+                    'varian_id' => $d->varian_id,
                     'nama_produk' => $d->nama_produk,
                     'ukuran' => $d->ukuran,
                     'warna' => $d->warna,
