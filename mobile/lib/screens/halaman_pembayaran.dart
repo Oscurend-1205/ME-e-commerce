@@ -301,9 +301,10 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
   Future<void> _handlePaymentComplete() async {
     _pengecekanOtomatisTimer?.cancel();
     try {
+      // Tandai pesanan LUNAS (dibayar) langsung setelah pembayaran online sukses.
       await LayananApi.ubahStatusPesanan(
         widget.pesananId,
-        'menunggu_konfirmasi',
+        'dibayar',
       );
     } catch (_) {}
     if (!mounted) return;

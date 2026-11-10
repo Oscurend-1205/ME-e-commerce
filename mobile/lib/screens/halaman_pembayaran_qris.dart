@@ -40,11 +40,13 @@ class _HalamanPembayaranQrisState extends State<HalamanPembayaranQris> {
   String _statusPembayaran = 'menunggu_pembayaran';
 
   /// Pembayaran online dianggap berhasil begitu gateway mengabarkan
-  /// settlement/capture — backend memindahkannya ke 'menunggu_konfirmasi'
-  /// sebelum admin mengonfirmasi ke 'dibayar'.
+  /// settlement/capture — backend memindahkannya langsung ke 'dibayar' (LUNAS)
+  /// agar admin bisa segera memproses pengemasan di Filament.
   bool get _pembayaranDiterima =>
-      _statusPembayaran == 'menunggu_konfirmasi' ||
-      _statusPembayaran == 'dibayar';
+      _statusPembayaran == 'dibayar' ||
+      _statusPembayaran == 'diproses' ||
+      _statusPembayaran == 'dikirim' ||
+      _statusPembayaran == 'selesai';
 
   @override
   void initState() {
@@ -105,7 +107,10 @@ class _HalamanPembayaranQrisState extends State<HalamanPembayaranQris> {
           _statusPembayaran = statusBaru;
         });
 
-        if (statusBaru == 'menunggu_konfirmasi') {
+        if (statusBaru == 'dibayar' ||
+            statusBaru == 'diproses' ||
+            statusBaru == 'dikirim' ||
+            statusBaru == 'selesai') {
           _timerCekStatus?.cancel();
           _timerHitungMundur?.cancel();
           ScaffoldMessenger.of(context).showSnackBar(
@@ -187,7 +192,7 @@ class _HalamanPembayaranQrisState extends State<HalamanPembayaranQris> {
               setState(() => _sedangMemproses = true);
               await LayananApi.ubahStatusPesanan(
                 widget.pesananId,
-                'menunggu_konfirmasi',
+                'dibayar',
               );
               await _cekStatusPembayaran();
             },

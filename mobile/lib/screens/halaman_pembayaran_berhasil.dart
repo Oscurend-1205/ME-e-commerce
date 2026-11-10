@@ -49,14 +49,14 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
     if (respon.berhasil && respon.data != null) {
       var pesananObj = Pesanan.fromJson(respon.data as Map<String, dynamic>);
 
-      // Pastikan status tersinkronisasi ke 'menunggu_konfirmasi' jika masih
+      // Pastikan status tersinkronisasi ke 'dibayar' (LUNAS) jika masih
       // 'menunggu_pembayaran' â€” pembayaran online berhasil ditandai gateway,
       // lalu admin mengonfirmasi ke 'dibayar'.
       if (pesananObj.status.toLowerCase() == 'menunggu_pembayaran') {
         try {
           await LayananApi.ubahStatusPesanan(
             pesananObj.id,
-            'menunggu_konfirmasi',
+            'dibayar',
           );
           final responUlang =
               await LayananApi.ambilRincianPesanan(widget.pesananId);
