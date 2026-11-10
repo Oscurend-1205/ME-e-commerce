@@ -8,6 +8,7 @@ import '../theme.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/komponen_header.dart';
+import '../widgets/notifikasi_geser.dart';
 import '../widgets/pemilih_varian.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_keranjang.dart';
@@ -125,39 +126,27 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
 
     if (respon.berhasil) {
       StatePengguna.sinkronkanKeranjang();
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-content: Text(
-  '${_produk!.nama} (${_varianTerpilih!.ukuran}, ${_varianTerpilih!.warna}) masuk ke keranjang.',
-),
-duration: const Duration(milliseconds: 1500),
-
-          action: SnackBarAction(
-            label: 'LIHAT',
-            textColor: TemaAplikasi.surfaceWhite,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HalamanKeranjang(),
-                ),
-              );
-            },
-          ),
-          backgroundColor: TemaAplikasi.primary,
-          behavior: SnackBarBehavior.floating,
-        ),
+      NotifikasiGeser.tampilkan(
+        context,
+        pesan:
+            '${_produk!.nama} (${_varianTerpilih!.ukuran}, ${_varianTerpilih!.warna}) masuk ke keranjang.',
+        durasi: const Duration(milliseconds: 2200),
+        labelAksi: 'LIHAT',
+        onAksi: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HalamanKeranjang(),
+            ),
+          );
+        },
       );
     } else {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(respon.message),
-          duration: const Duration(milliseconds: 1500),
-          backgroundColor: TemaAplikasi.errorColor,
-          behavior: SnackBarBehavior.floating,
-        ),
+      NotifikasiGeser.tampilkan(
+        context,
+        pesan: respon.message,
+        warnaLatar: TemaAplikasi.errorColor,
+        durasi: const Duration(milliseconds: 2200),
       );
     }
   }

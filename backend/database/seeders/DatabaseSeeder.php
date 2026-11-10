@@ -54,14 +54,16 @@ class DatabaseSeeder extends Seeder
             'no_telp' => '081234567890',
         ]);
 
-        // 2. Kategori: Atasan, Bawahan, Aksesori (menggantikan Pakaian & Aksesori)
+        // 2. Kategori: Atasan, Bawahan, Outerwear, Aksesori
         $katAtasan = Kategori::create(['nama' => 'Atasan']);
         $katBawahan = Kategori::create(['nama' => 'Bawahan']);
+        $katOuterwear = Kategori::create(['nama' => 'Outerwear']);
         $katAksesori = Kategori::create(['nama' => 'Aksesori']);
 
         $kategoriMap = [
             'Atasan' => $katAtasan,
             'Bawahan' => $katBawahan,
+            'Outerwear' => $katOuterwear,
             'Aksesori' => $katAksesori,
         ];
 
@@ -144,7 +146,7 @@ class DatabaseSeeder extends Seeder
             [
                 'id' => 4,
                 'nama' => 'Jaket Denim Trucker Vintage Wash',
-                'kategori' => 'Atasan',
+                'kategori' => 'Outerwear',
                 'harga' => 349000,
                 'bahan' => 'Non-stretch 13oz Denim',
                 'merek' => 'ME Denim Co.',
@@ -287,7 +289,7 @@ class DatabaseSeeder extends Seeder
             [
                 'id' => 15,
                 'nama' => 'Cardigan Rajut Crop Wanita',
-                'kategori' => 'Atasan',
+                'kategori' => 'Outerwear',
                 'harga' => 179000,
                 'bahan' => 'Rajut akrilik',
                 'merek' => 'ME Basics',
@@ -378,7 +380,7 @@ class DatabaseSeeder extends Seeder
             [
                 'id' => 22,
                 'nama' => 'Jaket Bomber Pria',
-                'kategori' => 'Atasan',
+                'kategori' => 'Outerwear',
                 'harga' => 329000,
                 'bahan' => 'Parasut',
                 'merek' => 'ME Originals',

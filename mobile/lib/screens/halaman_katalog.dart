@@ -10,7 +10,9 @@ import '../widgets/foto_dummy.dart';
 import '../widgets/kartu_produk.dart';
 import '../widgets/komponen_header.dart';
 import '../widgets/modal_pilih_varian.dart';
+import '../widgets/notifikasi_geser.dart';
 import '../widgets/widget_keadaan.dart';
+import '../constants.dart';
 import 'halaman_keranjang.dart';
 import 'halaman_rincian_produk.dart';
 
@@ -72,44 +74,39 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
 
   // Master Stories ME Atelier
   static final List<Map<String, dynamic>> _daftarSemuaStories = [
-    {
-      'label': 'Baru Tiba',
-      'foto': FotoDummy.stories[0],
-      'kat': null,
-    },
-    {
-      'label': 'Wanita',
-      'foto': FotoDummy.stories[1],
-      'kat': null,
-    },
-    {
-      'label': 'Pria',
-      'foto': FotoDummy.stories[2],
-      'kat': null,
-    },
-    {
-      'label': 'Aksesori',
-      'foto': FotoDummy.stories[3],
-      'kat': 'Aksesori',
-    },
-    {
-      'label': 'Lookbook',
-      'foto': FotoDummy.stories[4],
-      'kat': null,
-    },
-    {
-      'label': 'Sale',
-      'foto': FotoDummy.stories[5],
-      'kat': null,
-    },
+    {'label': 'Baru Tiba', 'foto': FotoDummy.stories[0], 'kat': null},
+    {'label': 'Wanita', 'foto': FotoDummy.stories[1], 'kat': null},
+    {'label': 'Pria', 'foto': FotoDummy.stories[2], 'kat': null},
+    {'label': 'Aksesori', 'foto': FotoDummy.stories[3], 'kat': 'Aksesori'},
+    {'label': 'Lookbook', 'foto': FotoDummy.stories[4], 'kat': null},
+    {'label': 'Sale', 'foto': FotoDummy.stories[5], 'kat': null},
   ];
 
-  // 5 Story di Jelajah (Baru Tiba DIHILANGKAN, hanya ada di Beranda)
+  // 5 Story di Jelajah — ganti dari Pria/Wanita menjadi kategori fungsional
   List<Map<String, dynamic>> get _stories {
     if (widget.modeJelajah) {
-      return _daftarSemuaStories
-          .where((s) => s['label'] != 'Baru Tiba')
-          .toList();
+      return [
+        {
+          'label': 'Atasan & Kemeja',
+          'foto': '${Konstan.storageUrl}/story-1.jpg',
+          'kat': 'Atasan',
+        },
+        {
+          'label': 'Bawahan & Celana',
+          'foto': '${Konstan.storageUrl}/story-2.jpg',
+          'kat': 'Bawahan',
+        },
+        {
+          'label': 'Outerwear & Jas',
+          'foto': '${Konstan.storageUrl}/story-3.jpg',
+          'kat': 'Outerwear',
+        },
+        {
+          'label': 'Kulit & Tas',
+          'foto': '${Konstan.storageUrl}/story-4.jpg',
+          'kat': 'Aksesori',
+        },
+      ];
     }
     return _daftarSemuaStories;
   }
@@ -118,8 +115,8 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   void initState() {
     super.initState();
     if (widget.modeJelajah) {
-      _storyTerpilih = widget.storyAwal ?? 'Wanita';
-      _kategoriTerpilih = 'Pakaian';
+      _storyTerpilih = widget.storyAwal ?? 'Atasan & Kemeja';
+      _kategoriTerpilih = 'Atasan';
       _tampilkanPencarian = false;
     } else {
       _storyTerpilih = 'Baru Tiba';
@@ -165,10 +162,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   }
 
   Future<void> _muatData() async {
-    await Future.wait([
-      _muatProduk(),
-      _muatJumlahKeranjang(),
-    ]);
+    await Future.wait([_muatProduk(), _muatJumlahKeranjang()]);
   }
 
   Future<void> _muatProduk() async {
@@ -177,10 +171,16 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     });
 
     final respon = await LayananApi.ambilProduk(
-      kategori: (_storyTerpilih == 'Wanita' || _storyTerpilih == 'Pria')
+      kategori:
+          (_storyTerpilih == 'Atasan & Kemeja' ||
+              _storyTerpilih == 'Bawahan & Celana' ||
+              _storyTerpilih == 'Outerwear & Jas' ||
+              _storyTerpilih == 'Kulit & Tas')
+          ? _kategoriTerpilih
+          : null,
+      cari: _cariController.text.trim().isEmpty
           ? null
-          : (_kategoriTerpilih == 'Semua' ? null : _kategoriTerpilih),
-      cari: _cariController.text.trim().isEmpty ? null : _cariController.text.trim(),
+          : _cariController.text.trim(),
     );
 
     if (!mounted) return;
@@ -193,12 +193,16 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
 
       // Filter khusus Story: Lookbook atau Sale
       if (_storyTerpilih == 'Sale') {
-        produkList = produkList.where((p) => p.harga <= 150000 || p.stok < 30).toList();
+        produkList = produkList
+            .where((p) => p.harga <= 150000 || p.stok < 30)
+            .toList();
       }
 
       setState(() {
         _daftarProduk = produkList;
-        _keadaan = produkList.isEmpty ? KeadaanMuat.kosong : KeadaanMuat.berhasil;
+        _keadaan = produkList.isEmpty
+            ? KeadaanMuat.kosong
+            : KeadaanMuat.berhasil;
       });
     } else {
       setState(() {
@@ -224,11 +228,15 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
 
   void _pilihKategori(String? kategori) {
     setState(() {
-      _kategoriTerpilih = (kategori == null || kategori == 'Semua') ? null : kategori;
+      _kategoriTerpilih = (kategori == null || kategori == 'Semua')
+          ? null
+          : kategori;
       if (_kategoriTerpilih == null) {
-        _storyTerpilih = widget.modeJelajah ? 'Wanita' : 'Baru Tiba';
-      } else if (_kategoriTerpilih == 'Atasan' || _kategoriTerpilih == 'Bawahan' || _kategoriTerpilih == 'Pakaian') {
-        _storyTerpilih = 'Wanita';
+        _storyTerpilih = widget.modeJelajah ? 'Atasan & Kemeja' : 'Baru Tiba';
+      } else if (_kategoriTerpilih == 'Atasan' ||
+          _kategoriTerpilih == 'Bawahan' ||
+          _kategoriTerpilih == 'Pakaian') {
+        _storyTerpilih = widget.modeJelajah ? 'Atasan & Kemeja' : 'Wanita';
       } else if (_kategoriTerpilih == 'Aksesori') {
         _storyTerpilih = 'Aksesori';
       }
@@ -317,37 +325,28 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
         if (respon.berhasil) {
           await _muatJumlahKeranjang();
           if (!mounted) return true;
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
+          NotifikasiGeser.tampilkan(
+            context,
+            pesan:
                 '${produk.nama} (${varian.ukuran}, ${varian.warna}) x$jumlah berhasil ditambahkan ke Tas Belanja.',
-              ),
-              duration: const Duration(milliseconds: 2000),
-              action: SnackBarAction(
-                label: 'LIHAT',
-                textColor: Colors.white,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HalamanKeranjang()),
-                  ).then((_) => _muatJumlahKeranjang());
-                },
-              ),
-              backgroundColor: TemaAplikasi.primary,
-              behavior: SnackBarBehavior.floating,
-            ),
+            durasi: const Duration(milliseconds: 2200),
+            labelAksi: 'LIHAT',
+            onAksi: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HalamanKeranjang(),
+                ),
+              ).then((_) => _muatJumlahKeranjang());
+            },
           );
           return true;
         } else {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(respon.message),
-              duration: const Duration(milliseconds: 2000),
-              backgroundColor: TemaAplikasi.errorColor,
-              behavior: SnackBarBehavior.floating,
-            ),
+          NotifikasiGeser.tampilkan(
+            context,
+            pesan: respon.message,
+            warnaLatar: TemaAplikasi.errorColor,
+            durasi: const Duration(milliseconds: 2200),
           );
           return false;
         }
@@ -543,7 +542,11 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                     ),
                   ),
                   SizedBox(width: 8),
-                  Icon(Icons.arrow_forward, size: 14, color: TemaAplikasi.primary),
+                  Icon(
+                    Icons.arrow_forward,
+                    size: 14,
+                    color: TemaAplikasi.primary,
+                  ),
                 ],
               ),
             ),
@@ -577,20 +580,18 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       return _bangunHasilPencarian();
     }
 
-    switch (_storyTerpilih) {
-      case 'Wanita':
-        return _bangunKatalogWanita();
-      case 'Pria':
-        return _bangunKatalogPria();
-      case 'Aksesori':
-        return _bangunKatalogAksesori();
-      case 'Lookbook':
-        return _bangunKatalogLookbook();
-      case 'Sale':
-        return _bangunKatalogSale();
-      default:
-        return _bangunKatalogWanita();
+    // Navigasi gender dari Beranda tetap membuka katalog khusus Wanita/Pria
+    if (_storyTerpilih == 'Wanita') {
+      return _bangunKatalogWanita();
     }
+    if (_storyTerpilih == 'Pria') {
+      return _bangunKatalogPria();
+    }
+
+    // Semua kategori fungsional (Atasan & Kemeja, Bawahan & Celana,
+    // Outerwear & Jas, Kulit & Tas) memakai daftar produk yang sama;
+    // filter kategori sudah diterapkan server-side lewat _kategoriTerpilih.
+    return _bangunDaftarProdukKatalog(isPria: false);
   }
 
   Widget _bangunHasilPencarian() {
@@ -624,201 +625,6 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
           ),
         ),
         _bangunDaftarProdukKoleksi(_daftarProduk),
-      ],
-    );
-  }
-
-  Widget _bangunKatalogAksesori() {
-    final aksesoris = _daftarProduk.where((p) {
-      final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
-      return s.contains('aksesori') ||
-          s.contains('tas') ||
-          s.contains('kulit') ||
-          s.contains('sabuk') ||
-          s.contains('belt') ||
-          s.contains('sepatu') ||
-          s.contains('syal') ||
-          p.kategori.toLowerCase() == 'aksesori';
-    }).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'ATELIER ACCESSOIRES · 2026',
-                      style: TextStyle(
-                        fontSize: 10,
-                        letterSpacing: 2.0,
-                        fontWeight: FontWeight.w600,
-                        color: TemaAplikasi.secondary,
-                      ),
-                    ),
-                    Text(
-                      '${aksesoris.length} ARTIKEL PILIHAN',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        letterSpacing: 2.0,
-                        fontWeight: FontWeight.w700,
-                        color: TemaAplikasi.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Aksesori & Produk Kulit',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: -0.5,
-                  color: TemaAplikasi.primary,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Koleksi tas kulit sapi Italia olahan tangan, sabuk bersiluet arsitektural, syal kasmir murni, dan ornamen minimalis.',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  color: TemaAplikasi.secondary,
-                  height: 1.45,
-                ),
-              ),
-            ],
-          ),
-        ),
-        _bangunDaftarProdukKoleksi(aksesoris),
-      ],
-    );
-  }
-
-  Widget _bangunKatalogLookbook() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                'LOOKBOOK EDITORIAL // 2026',
-                style: TextStyle(
-                  fontSize: 10,
-                  letterSpacing: 2.0,
-                  fontWeight: FontWeight.w600,
-                  color: TemaAplikasi.secondary,
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                'Siluet & Harmoni Monokrom',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: -0.5,
-                  color: TemaAplikasi.primary,
-                ),
-              ),
-              SizedBox(height: 6),
-              Text(
-                'Visual lookbook kurasi musiman studio Paris & Jakarta.',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  color: TemaAplikasi.secondary,
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
-        ),
-        _bangunCuratedEditorialHighlight(),
-        _bangunManifestoEditorial(),
-        _bangunDaftarProdukKoleksi(_daftarProduk.take(6).toList()),
-      ],
-    );
-  }
-
-  Widget _bangunKatalogSale() {
-    final saleProduk = _daftarProduk.where((p) => p.harga <= 250000 || p.stok < 50).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'ARSIP PRIVATE SALE · ME PRIVÉ',
-                      style: TextStyle(
-                        fontSize: 10,
-                        letterSpacing: 2.0,
-                        fontWeight: FontWeight.w600,
-                        color: TemaAplikasi.errorColor,
-                      ),
-                    ),
-                    Text(
-                      '${saleProduk.length} EDISI ARSIP',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        letterSpacing: 2.0,
-                        fontWeight: FontWeight.w700,
-                        color: TemaAplikasi.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Penjualan Privat & Arsip',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: -0.5,
-                  color: TemaAplikasi.primary,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Akses eksklusif untuk koleksi dari musim sebelumnya dengan harga terkurasi khusus anggota terdaftar.',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  color: TemaAplikasi.secondary,
-                  height: 1.45,
-                ),
-              ),
-            ],
-          ),
-        ),
-        _bangunDaftarProdukKoleksi(saleProduk),
       ],
     );
   }
@@ -866,7 +672,8 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => HalamanRincianProduk(produkId: produk.id),
+                  builder: (context) =>
+                      HalamanRincianProduk(produkId: produk.id),
                 ),
               ).then((_) => _muatJumlahKeranjang());
             },
@@ -933,10 +740,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
           const Spacer(),
         ],
       ),
-      actions: [
-        ..._bangunHeaderActions(),
-        const AvatarHeaderUser(),
-      ],
+      actions: [..._bangunHeaderActions(), const AvatarHeaderUser()],
       bottom: (!widget.modeJelajah)
           ? _HeaderScrollProgress(controller: _scrollController)
           : null,
@@ -1035,8 +839,12 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                       style: TextStyle(
                         fontSize: 10,
                         letterSpacing: 1.0,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                        color: isSelected ? TemaAplikasi.primary : TemaAplikasi.secondary,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        color: isSelected
+                            ? TemaAplikasi.primary
+                            : TemaAplikasi.secondary,
                       ),
                     ),
                   ],
@@ -1052,16 +860,16 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
   // 2. Full-bleed Mobile Hero Editorial Banner (cek-beranda.html)
   Widget _bangunHeroBanner(double posisiScroll) {
     final parallaxOffset = (posisiScroll * 0.35).clamp(0.0, 100.0);
-    final overscrollScale = posisiScroll < 0 ? (-posisiScroll / 350.0).clamp(0.0, 0.25) : 0.0;
+    final overscrollScale = posisiScroll < 0
+        ? (-posisiScroll / 350.0).clamp(0.0, 0.25)
+        : 0.0;
     final textOpacity = (1.0 - (posisiScroll / 300.0)).clamp(0.0, 1.0);
 
     return Container(
       width: double.infinity,
       height: 440,
       margin: EdgeInsets.zero,
-      decoration: const BoxDecoration(
-        color: TemaAplikasi.primary,
-      ),
+      decoration: const BoxDecoration(color: TemaAplikasi.primary),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         fit: StackFit.expand,
@@ -1107,7 +915,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(2),
@@ -1201,7 +1012,9 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                               }
                             },
                             style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.black.withValues(alpha: 0.4),
+                              backgroundColor: Colors.black.withValues(
+                                alpha: 0.4,
+                              ),
                               foregroundColor: Colors.white,
                               side: BorderSide(
                                 color: Colors.white.withValues(alpha: 0.4),
@@ -1288,7 +1101,11 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                       ),
                     ),
                     SizedBox(width: 4),
-                    Icon(Icons.arrow_forward, size: 14, color: TemaAplikasi.primary),
+                    Icon(
+                      Icons.arrow_forward,
+                      size: 14,
+                      color: TemaAplikasi.primary,
+                    ),
                   ],
                 ),
               ),
@@ -1305,10 +1122,34 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
             mainAxisSpacing: 10,
             childAspectRatio: 0.75, // Aspek rasio 3:4 sesuai cek-beranda.html
             children: [
-              _bangunKartuKategoriFoto('01 // ESENSIAL', 'Atasan & Kemeja', FotoDummy.katAtasan, 'Atasan', 'Wanita'),
-              _bangunKartuKategoriFoto('02 // TAILORING', 'Bawahan & Celana', FotoDummy.katBawahan, 'Bawahan', 'Pria'),
-              _bangunKartuKategoriFoto('03 // SUITING', 'Outerwear & Jas', FotoDummy.katOuterwear, 'Atasan', 'Wanita'),
-              _bangunKartuKategoriFoto('04 // AKSESORI', 'Kulit & Tas', FotoDummy.katAksesori, 'Aksesori', 'Aksesori'),
+              _bangunKartuKategoriFoto(
+                '01 // ESENSIAL',
+                'Atasan & Kemeja',
+                FotoDummy.katAtasan,
+                'Atasan',
+                'Wanita',
+              ),
+              _bangunKartuKategoriFoto(
+                '02 // TAILORING',
+                'Bawahan & Celana',
+                FotoDummy.katBawahan,
+                'Bawahan',
+                'Pria',
+              ),
+              _bangunKartuKategoriFoto(
+                '03 // SUITING',
+                'Outerwear & Jas',
+                FotoDummy.katOuterwear,
+                'Atasan',
+                'Wanita',
+              ),
+              _bangunKartuKategoriFoto(
+                '04 // AKSESORI',
+                'Kulit & Tas',
+                FotoDummy.katAksesori,
+                'Aksesori',
+                'Aksesori',
+              ),
             ],
           ),
         ],
@@ -1392,8 +1233,6 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       ),
     );
   }
-
-
 
   // 6. Manifesto Editorial Inset / Campaign Showcase (cek-beranda.html)
   Widget _bangunManifestoEditorial() {
@@ -1655,7 +1494,9 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
       decoration: BoxDecoration(
         color: TemaAplikasi.surfaceWhite,
         borderRadius: BorderRadius.circular(2),
-        border: Border.all(color: TemaAplikasi.borderGray.withValues(alpha: 0.7)),
+        border: Border.all(
+          color: TemaAplikasi.borderGray.withValues(alpha: 0.7),
+        ),
       ),
       child: Row(
         children: [
@@ -1743,13 +1584,21 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                   child: TextField(
                     controller: _emailVipController,
                     keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(fontSize: 12, color: TemaAplikasi.primary),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: TemaAplikasi.primary,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Masukkan alamat email Anda',
-                      hintStyle: const TextStyle(color: TemaAplikasi.mutedGray, fontSize: 12),
+                      hintStyle: const TextStyle(
+                        color: TemaAplikasi.mutedGray,
+                        fontSize: 12,
+                      ),
                       fillColor: TemaAplikasi.surfaceContainerLow,
                       filled: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(2),
                         borderSide: BorderSide.none,
@@ -1809,26 +1658,46 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     if (_storyTerpilih == 'Wanita') {
       if (_subKategoriWanita == 'OUTERWEAR & COAT') {
         final f = hasil.where((p) {
-          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
-          return s.contains('coat') || s.contains('mantel') || s.contains('outer') || s.contains('jaket') || s.contains('blazer');
+          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'
+              .toLowerCase();
+          return s.contains('coat') ||
+              s.contains('mantel') ||
+              s.contains('outer') ||
+              s.contains('jaket') ||
+              s.contains('blazer');
         }).toList();
         if (f.isNotEmpty) hasil = f;
       } else if (_subKategoriWanita == 'SUITING & TAILORED') {
         final f = hasil.where((p) {
-          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
-          return s.contains('suit') || s.contains('setelan') || s.contains('blazer') || s.contains('tailor') || s.contains('celana');
+          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'
+              .toLowerCase();
+          return s.contains('suit') ||
+              s.contains('setelan') ||
+              s.contains('blazer') ||
+              s.contains('tailor') ||
+              s.contains('celana');
         }).toList();
         if (f.isNotEmpty) hasil = f;
       } else if (_subKategoriWanita == 'SILK & DRESSES') {
         final f = hasil.where((p) {
-          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
-          return s.contains('gaun') || s.contains('dress') || s.contains('sutra') || s.contains('silk') || s.contains('rok');
+          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'
+              .toLowerCase();
+          return s.contains('gaun') ||
+              s.contains('dress') ||
+              s.contains('sutra') ||
+              s.contains('silk') ||
+              s.contains('rok');
         }).toList();
         if (f.isNotEmpty) hasil = f;
       } else if (_subKategoriWanita == 'KNITWEAR KASMIR') {
         final f = hasil.where((p) {
-          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
-          return s.contains('rajut') || s.contains('knit') || s.contains('kasmir') || s.contains('sweater') || s.contains('syal');
+          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'
+              .toLowerCase();
+          return s.contains('rajut') ||
+              s.contains('knit') ||
+              s.contains('kasmir') ||
+              s.contains('sweater') ||
+              s.contains('syal');
         }).toList();
         if (f.isNotEmpty) hasil = f;
       } else if (_subKategoriWanita == 'AKSESORI') {
@@ -1840,32 +1709,52 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
     } else if (_storyTerpilih == 'Pria') {
       if (_subKategoriPria == 'SUITING & BLAZER') {
         final f = hasil.where((p) {
-          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
-          return s.contains('blazer') || s.contains('jas') || s.contains('suit') || s.contains('setelan');
+          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'
+              .toLowerCase();
+          return s.contains('blazer') ||
+              s.contains('jas') ||
+              s.contains('suit') ||
+              s.contains('setelan');
         }).toList();
         if (f.isNotEmpty) hasil = f;
       } else if (_subKategoriPria == 'KEMEJA & SHIRTING') {
         final f = hasil.where((p) {
-          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
-          return s.contains('kemeja') || s.contains('shirt') || s.contains('poplin') || s.contains('atasan');
+          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'
+              .toLowerCase();
+          return s.contains('kemeja') ||
+              s.contains('shirt') ||
+              s.contains('poplin') ||
+              s.contains('atasan');
         }).toList();
         if (f.isNotEmpty) hasil = f;
       } else if (_subKategoriPria == 'MANTEL') {
         final f = hasil.where((p) {
-          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
-          return s.contains('mantel') || s.contains('coat') || s.contains('outer') || s.contains('jaket');
+          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'
+              .toLowerCase();
+          return s.contains('mantel') ||
+              s.contains('coat') ||
+              s.contains('outer') ||
+              s.contains('jaket');
         }).toList();
         if (f.isNotEmpty) hasil = f;
       } else if (_subKategoriPria == 'KNITWEAR') {
         final f = hasil.where((p) {
-          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
-          return s.contains('rajut') || s.contains('knit') || s.contains('sweater') || s.contains('kasmir');
+          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'
+              .toLowerCase();
+          return s.contains('rajut') ||
+              s.contains('knit') ||
+              s.contains('sweater') ||
+              s.contains('kasmir');
         }).toList();
         if (f.isNotEmpty) hasil = f;
       } else if (_subKategoriPria == 'CELANA TAILORED') {
         final f = hasil.where((p) {
-          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'.toLowerCase();
-          return s.contains('celana') || s.contains('trouser') || s.contains('pant') || s.contains('pleat');
+          final s = '${p.nama} ${p.deskripsi ?? ''} ${p.kategori}'
+              .toLowerCase();
+          return s.contains('celana') ||
+              s.contains('trouser') ||
+              s.contains('pant') ||
+              s.contains('pleat');
         }).toList();
         if (f.isNotEmpty) hasil = f;
       }
@@ -1904,7 +1793,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -1934,12 +1826,20 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                       style: TextStyle(
                         fontSize: 13,
                         letterSpacing: 1.0,
-                        fontWeight: terpilih ? FontWeight.w700 : FontWeight.w400,
-                        color: terpilih ? TemaAplikasi.primary : TemaAplikasi.secondary,
+                        fontWeight: terpilih
+                            ? FontWeight.w700
+                            : FontWeight.w400,
+                        color: terpilih
+                            ? TemaAplikasi.primary
+                            : TemaAplikasi.secondary,
                       ),
                     ),
                     trailing: terpilih
-                        ? const Icon(Icons.check, size: 18, color: TemaAplikasi.primary)
+                        ? const Icon(
+                            Icons.check,
+                            size: 18,
+                            color: TemaAplikasi.primary,
+                          )
                         : null,
                     onTap: () {
                       setState(() {
@@ -2111,7 +2011,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 decoration: const BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
+                    bottom: BorderSide(
+                      color: TemaAplikasi.borderGray,
+                      width: 0.8,
+                    ),
                   ),
                 ),
                 child: Row(
@@ -2204,7 +2107,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3.5,
+                              ),
                               color: Colors.black.withValues(alpha: 0.75),
                               child: const Text(
                                 '• KAMPANYE UTAMA',
@@ -2253,10 +2159,14 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                                 setState(() {
                                   _subKategoriWanita = 'OUTERWEAR & COAT';
                                 });
-                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                ScaffoldMessenger.of(
+                                  context,
+                                ).hideCurrentSnackBar();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Menampilkan Seri 02: L’Élégance Silencieuse'),
+                                    content: Text(
+                                      'Menampilkan Seri 02: L’Élégance Silencieuse',
+                                    ),
                                     duration: Duration(milliseconds: 1500),
                                     behavior: SnackBarBehavior.floating,
                                   ),
@@ -2275,7 +2185,11 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                                     ),
                                   ),
                                   SizedBox(width: 6),
-                                  Icon(Icons.arrow_forward, size: 14, color: Colors.white),
+                                  Icon(
+                                    Icons.arrow_forward,
+                                    size: 14,
+                                    color: Colors.white,
+                                  ),
                                 ],
                               ),
                             ),
@@ -2308,7 +2222,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                   },
                   borderRadius: BorderRadius.circular(2),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 9,
+                    ),
                     color: isSelected
                         ? TemaAplikasi.primary
                         : TemaAplikasi.surfaceContainerLow,
@@ -2338,7 +2255,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: const BoxDecoration(
               border: Border.symmetric(
-                horizontal: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
+                horizontal: BorderSide(
+                  color: TemaAplikasi.borderGray,
+                  width: 0.8,
+                ),
               ),
             ),
             child: Row(
@@ -2399,7 +2319,11 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                         ),
                       ),
                       const SizedBox(width: 2),
-                      const Icon(Icons.expand_more, size: 16, color: TemaAplikasi.primary),
+                      const Icon(
+                        Icons.expand_more,
+                        size: 16,
+                        color: TemaAplikasi.primary,
+                      ),
                     ],
                   ),
                 ),
@@ -2408,8 +2332,13 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                     IconButton(
                       icon: const Icon(Icons.grid_view, size: 18),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                      color: _modeGrid ? TemaAplikasi.primary : TemaAplikasi.mutedGray,
+                      constraints: const BoxConstraints(
+                        minWidth: 26,
+                        minHeight: 26,
+                      ),
+                      color: _modeGrid
+                          ? TemaAplikasi.primary
+                          : TemaAplikasi.mutedGray,
                       onPressed: () {
                         setState(() {
                           _modeGrid = true;
@@ -2420,8 +2349,13 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                     IconButton(
                       icon: const Icon(Icons.splitscreen, size: 18),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                      color: !_modeGrid ? TemaAplikasi.primary : TemaAplikasi.mutedGray,
+                      constraints: const BoxConstraints(
+                        minWidth: 26,
+                        minHeight: 26,
+                      ),
+                      color: !_modeGrid
+                          ? TemaAplikasi.primary
+                          : TemaAplikasi.mutedGray,
                       onPressed: () {
                         setState(() {
                           _modeGrid = false;
@@ -2496,7 +2430,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 decoration: const BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
+                    bottom: BorderSide(
+                      color: TemaAplikasi.borderGray,
+                      width: 0.8,
+                    ),
                   ),
                 ),
                 child: Row(
@@ -2589,7 +2526,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3.5,
+                              ),
                               color: Colors.black.withValues(alpha: 0.75),
                               child: const Text(
                                 '• KAMPANYE UTAMA',
@@ -2638,10 +2578,14 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                                 setState(() {
                                   _subKategoriPria = 'SUITING & BLAZER';
                                 });
-                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                ScaffoldMessenger.of(
+                                  context,
+                                ).hideCurrentSnackBar();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Menampilkan Seri 01: L’Homme Contemporain'),
+                                    content: Text(
+                                      'Menampilkan Seri 01: L’Homme Contemporain',
+                                    ),
                                     duration: Duration(milliseconds: 1500),
                                     behavior: SnackBarBehavior.floating,
                                   ),
@@ -2660,7 +2604,11 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                                     ),
                                   ),
                                   SizedBox(width: 6),
-                                  Icon(Icons.arrow_forward, size: 14, color: Colors.white),
+                                  Icon(
+                                    Icons.arrow_forward,
+                                    size: 14,
+                                    color: Colors.white,
+                                  ),
                                 ],
                               ),
                             ),
@@ -2693,7 +2641,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                   },
                   borderRadius: BorderRadius.circular(2),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 9,
+                    ),
                     color: isSelected
                         ? TemaAplikasi.primary
                         : TemaAplikasi.surfaceContainerLow,
@@ -2723,7 +2674,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: const BoxDecoration(
               border: Border.symmetric(
-                horizontal: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
+                horizontal: BorderSide(
+                  color: TemaAplikasi.borderGray,
+                  width: 0.8,
+                ),
               ),
             ),
             child: Row(
@@ -2784,7 +2738,11 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                         ),
                       ),
                       const SizedBox(width: 2),
-                      const Icon(Icons.expand_more, size: 16, color: TemaAplikasi.primary),
+                      const Icon(
+                        Icons.expand_more,
+                        size: 16,
+                        color: TemaAplikasi.primary,
+                      ),
                     ],
                   ),
                 ),
@@ -2793,8 +2751,13 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                     IconButton(
                       icon: const Icon(Icons.grid_view, size: 18),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                      color: _modeGrid ? TemaAplikasi.primary : TemaAplikasi.mutedGray,
+                      constraints: const BoxConstraints(
+                        minWidth: 28,
+                        minHeight: 28,
+                      ),
+                      color: _modeGrid
+                          ? TemaAplikasi.primary
+                          : TemaAplikasi.mutedGray,
                       onPressed: () {
                         setState(() {
                           _modeGrid = true;
@@ -2805,8 +2768,13 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                     IconButton(
                       icon: const Icon(Icons.splitscreen, size: 18),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                      color: !_modeGrid ? TemaAplikasi.primary : TemaAplikasi.mutedGray,
+                      constraints: const BoxConstraints(
+                        minWidth: 28,
+                        minHeight: 28,
+                      ),
+                      color: !_modeGrid
+                          ? TemaAplikasi.primary
+                          : TemaAplikasi.mutedGray,
                       onPressed: () {
                         setState(() {
                           _modeGrid = false;
@@ -2940,7 +2908,11 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
               ),
               itemBuilder: (context, index) {
                 final produk = produkList[index];
-                return _bangunKartuEditorial(produk, isPria: isPria, isGrid: true);
+                return _bangunKartuEditorial(
+                  produk,
+                  isPria: isPria,
+                  isGrid: true,
+                );
               },
             ),
           );
@@ -2954,7 +2926,11 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
               separatorBuilder: (_, _) => const SizedBox(height: 32),
               itemBuilder: (context, index) {
                 final produk = produkList[index];
-                return _bangunKartuEditorial(produk, isPria: isPria, isGrid: false);
+                return _bangunKartuEditorial(
+                  produk,
+                  isPria: isPria,
+                  isGrid: false,
+                );
               },
             ),
           );
@@ -3007,7 +2983,10 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                   top: 8,
                   left: 8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 3,
+                    ),
                     color: Colors.white.withValues(alpha: 0.9),
                     child: Text(
                       isPria ? 'EKSLUSIF ATELIER' : 'EKSKLUSIF ATELIER',
@@ -3036,7 +3015,9 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                       child: Icon(
                         isFav ? Icons.favorite : Icons.favorite_border,
                         size: 16,
-                        color: isFav ? TemaAplikasi.errorColor : TemaAplikasi.primary,
+                        color: isFav
+                            ? TemaAplikasi.errorColor
+                            : TemaAplikasi.primary,
                       ),
                     ),
                   ),
@@ -3051,9 +3032,14 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: isPria ? const Color(0xFF1C1B1B) : const Color(0xFF1A1A1A),
+                  color: isPria
+                      ? const Color(0xFF1C1B1B)
+                      : const Color(0xFF1A1A1A),
                   shape: BoxShape.circle,
-                  border: Border.all(color: TemaAplikasi.borderGray, width: 0.5),
+                  border: Border.all(
+                    color: TemaAplikasi.borderGray,
+                    width: 0.5,
+                  ),
                 ),
               ),
               if (isPria) ...[
@@ -3207,10 +3193,7 @@ class _MarqueeRunningTextState extends State<_MarqueeRunningText> {
           return Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                widget.text,
-                style: widget.style,
-              ),
+              child: Text(widget.text, style: widget.style),
             ),
           );
         },
@@ -3221,7 +3204,8 @@ class _MarqueeRunningTextState extends State<_MarqueeRunningText> {
 
 /// Progress bar scroll di header yang hanya me-rebuild dirinya sendiri,
 /// sehingga offset scroll tidak memicu rebuild seluruh halaman.
-class _HeaderScrollProgress extends StatefulWidget implements PreferredSizeWidget {
+class _HeaderScrollProgress extends StatefulWidget
+    implements PreferredSizeWidget {
   const _HeaderScrollProgress({required this.controller});
 
   final ScrollController controller;
