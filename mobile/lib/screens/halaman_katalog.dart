@@ -126,6 +126,7 @@ class _HalamanKatalogState extends State<HalamanKatalog>
     }
 
     _scrollController.addListener(_tanganiScroll);
+    StatePengguna.versiKatalogNotifier.addListener(_muatData);
     _muatData();
   }
 
@@ -154,6 +155,7 @@ class _HalamanKatalogState extends State<HalamanKatalog>
 
   @override
   void dispose() {
+    StatePengguna.versiKatalogNotifier.removeListener(_muatData);
     _scrollController.removeListener(_tanganiScroll);
     _scrollController.dispose();
     _scrollOffset.dispose();
@@ -324,7 +326,8 @@ class _HalamanKatalogState extends State<HalamanKatalog>
         if (!mounted) return false;
 
         if (respon.berhasil) {
-          await _muatJumlahKeranjang();
+          StatePengguna.triggerRefreshKatalog();
+          await _muatData();
           if (!mounted) return true;
           NotifikasiGeser.tampilkan(
             context,
@@ -338,7 +341,7 @@ class _HalamanKatalogState extends State<HalamanKatalog>
                 MaterialPageRoute(
                   builder: (context) => const HalamanKeranjang(),
                 ),
-              ).then((_) => _muatJumlahKeranjang());
+              ).then((_) => _muatData());
             },
           );
           return true;
@@ -676,7 +679,7 @@ class _HalamanKatalogState extends State<HalamanKatalog>
                   builder: (context) =>
                       HalamanRincianProduk(produkId: produk.id),
                 ),
-              ).then((_) => _muatJumlahKeranjang());
+              ).then((_) => _muatData());
             },
           );
         },
@@ -2885,7 +2888,7 @@ class _HalamanKatalogState extends State<HalamanKatalog>
           MaterialPageRoute(
             builder: (context) => HalamanRincianProduk(produkId: produk.id),
           ),
-        ).then((_) => _muatJumlahKeranjang());
+        ).then((_) => _muatData());
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

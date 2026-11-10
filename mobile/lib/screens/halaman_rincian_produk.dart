@@ -126,6 +126,9 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
 
     if (respon.berhasil) {
       StatePengguna.sinkronkanKeranjang();
+      StatePengguna.triggerRefreshKatalog();
+      await _muatRincianProduk();
+      if (!mounted) return;
       NotifikasiGeser.tampilkan(
         context,
         pesan:
@@ -138,7 +141,9 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
             MaterialPageRoute(
               builder: (context) => const HalamanKeranjang(),
             ),
-          );
+          ).then((_) {
+            if (mounted) _muatRincianProduk();
+          });
         },
       );
     } else {

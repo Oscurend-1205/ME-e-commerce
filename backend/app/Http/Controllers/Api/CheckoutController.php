@@ -97,9 +97,9 @@ class CheckoutController extends Controller
         $metode = MetodePembayaran::findOrFail($request->input('metode_pembayaran_id'));
 
         try {
-            // 4. Satu DB Transaction: baca keranjang, kunci stok, simpan pesanan, kurangi stok.
-            //    Keranjang SENGAJA tidak dikosongkan di sini — item baru berkurang dari
-            //    keranjang saat pesanan berstatus 'dibayar' (lihat Keranjang::kurangiUntukPesanan).
+            // 4. Satu DB Transaction: baca keranjang, kunci stok, simpan pesanan, kurangi
+            //    stok, dan kosongkan keranjang — semuanya atomik. Kegagalan pada langkah
+            //    mana pun akan me-rollback perubahan sehingga stok kembali ke keadaan semula.
             $pesananBaru = DB::transaction(function () use ($request, $pelangganId, $kunciIdempoten, $kurir, $metode) {
                 // Keranjang dibaca DI DALAM transaksi dan dikunci, supaya dua checkout bersamaan
                 // dari pelanggan yang sama tidak membuat dua pesanan dari isi keranjang yang sama.
@@ -131,19 +131,13 @@ class CheckoutController extends Controller
                 $subtotal = 0;
                 $daftarDetail = [];
 
-                // 5. Periksa ketersediaan stok setiap varian
+                // 5. Siapkan rincian detail pesanan dari isi keranjang
+                // (Stok varian sudah diamankan/dikurangi saat item ditambahkan ke keranjang)
                 foreach ($itemsKeranjang as $item) {
                     $varian = $varians->get($item->varian_id);
 
                     if (!$varian) {
                         throw new KonflikCheckoutException("Varian produk dengan ID {$item->varian_id} tidak ditemukan.");
-                    }
-
-                    if ($varian->stok < $item->jumlah) {
-                        $namaProduk = $item->produk ? $item->produk->nama : 'Produk';
-                        throw new KonflikCheckoutException(
-                            "Stok untuk {$namaProduk} ukuran {$varian->ukuran} warna {$varian->warna} tidak mencukupi (tersedia: {$varian->stok}, diminta: {$item->jumlah})."
-                        );
                     }
 
                     $hargaSatuan = $item->produk ? (int) $item->produk->harga : 0;
@@ -185,14 +179,10 @@ class CheckoutController extends Controller
                     'kunci_idempoten' => $kunciIdempoten,
                 ]);
 
-                // Simpan detail pesanan & kurangi stok varian secara atomik
+                // Simpan detail pesanan secara atomik
                 foreach ($daftarDetail as $detail) {
                     $detail['pesanan_id'] = $pesanan->id;
                     DetailPesanan::create($detail);
-
-                    // Kurangi stok varian
-                    $varian = $varians->get($detail['varian_id']);
-                    $varian->decrement('stok', $detail['jumlah']);
                 }
 
                 // 8. Kosongkan keranjang pelanggan setelah pesanan berhasil dibuat

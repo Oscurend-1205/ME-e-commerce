@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Keranjang;
 use App\Models\Pesanan;
 use App\Models\VarianProduk;
 use App\Traits\ApiResponse;
@@ -20,19 +19,6 @@ class PesananController extends Controller
     {
         return (int) $request->input('pelanggan_id', 0);
     }
-
-    /**
-     * Tabel aturan perpindahan status yang sah sesuai Bagian 7 PRD
-     */
-    protected array $transisiSah = [
-        'menunggu_pembayaran' => ['dibayar', 'menunggu_konfirmasi', 'dibatalkan'],
-        'menunggu_konfirmasi' => ['dibayar', 'dibatalkan'],
-        'dibayar' => ['diproses'],
-        'diproses' => ['dikirim'],
-        'dikirim' => ['selesai'],
-        'selesai' => [],
-        'dibatalkan' => [],
-    ];
 
     /**
      * GET /api/pesanan — Riwayat pesanan (terbaru dulu)
@@ -132,7 +118,7 @@ class PesananController extends Controller
         }
 
         // 4. Validasi apakah status saat ini memiliki transisi sah
-        $pilihanSah = $this->transisiSah[$statusSaatIni] ?? [];
+        $pilihanSah = $pesanan->pilihanStatusBerikutnya();
 
         if (!in_array($statusBaru, $pilihanSah)) {
             $pesanPilihan = empty($pilihanSah)
@@ -145,19 +131,9 @@ class PesananController extends Controller
         }
 
         return DB::transaction(function () use ($pesanan, $statusBaru) {
-            // Jika pesanan dibatalkan, kembalikan stok varian di dalam transaksi yang sama (PRD Bagian 7)
+            // Jika pesanan dibatalkan, kembalikan stok varian di dalam transaksi yang sama
             if ($statusBaru === 'dibatalkan') {
-                foreach ($pesanan->detail as $item) {
-                    if ($item->varian_id) {
-                        VarianProduk::where('id', $item->varian_id)->increment('stok', $item->jumlah);
-                    }
-                }
-            }
-
-            // Jika pesanan baru berstatus 'dibayar' (mis. verifikasi manual
-            // transfer), porsi terpesan berkurang dari keranjang di sini juga.
-            if ($statusBaru === 'dibayar') {
-                Keranjang::kurangiUntukPesanan($pesanan);
+                $pesanan->kembalikanStok();
             }
 
             $pesanan->status = $statusBaru;

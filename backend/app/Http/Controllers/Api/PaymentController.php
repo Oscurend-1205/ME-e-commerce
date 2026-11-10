@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Keranjang;
 use App\Models\Pesanan;
 use App\Services\MidtransService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
@@ -67,24 +65,24 @@ class PaymentController extends Controller
         }
 
         // Update status pesanan berdasarkan transaction status.
-        // Hanya status yang disepakati PRD yang boleh ditulis ke pesanan.
+        // Hanya transisi yang sah (lihat Pesanan::TRANSISI_SAH) yang boleh diterapkan;
+        // callback duplikat/terlambat yang akan memundurkan status diabaikan.
         $statusBaru = $this->tentukanStatusSah($transactionStatus, $fraudStatus);
 
-        if ($statusBaru) {
+        if ($statusBaru && $pesanan->bolehPindahKe($statusBaru)) {
             $statusLama = $pesanan->status;
-            DB::transaction(function () use ($pesanan, $statusBaru, $statusLama) {
-                $pesanan->update(['status' => $statusBaru]);
-                // Pembayaran dikonfirmasi: porsi terpesan baru berkurang dari keranjang.
-                // Hanya saat transisi KE 'dibayar' — callback duplikat tidak mengurangi dua kali.
-                if ($statusBaru === 'dibayar' && $statusLama !== 'dibayar') {
-                    Keranjang::kurangiUntukPesanan($pesanan);
-                }
-            });
+            $pesanan->update(['status' => $statusBaru]);
 
             Log::info('Status pesanan diperbarui', [
                 'order_id' => $orderId,
                 'status_lama' => $statusLama,
                 'status_baru' => $statusBaru,
+            ]);
+        } elseif ($statusBaru) {
+            Log::info('Callback diabaikan karena transisi tidak sah', [
+                'order_id' => $orderId,
+                'status_saat_ini' => $pesanan->status,
+                'status_diminta' => $statusBaru,
             ]);
         }
 
@@ -95,16 +93,20 @@ class PaymentController extends Controller
      * Petakan transaction status Midtrans ke status pesanan yang sah:
      * menunggu_pembayaran, menunggu_konfirmasi, dibayar, diproses,
      * dikirim, selesai, dibatalkan.
-     * Status di luar daftar (mis. refund) tidak mengubah status pesanan.
+     *
+     * Pembayaran online yang berhasil (capture/settlement) masuk ke
+     * menunggu_konfirmasi — sesuai urutan status yang disepakati — lalu
+     * admin mengonfirmasi ke dibayar. Status di luar daftar (refund dsb.)
+     * tidak mengubah status pesanan.
      */
     private function tentukanStatusSah(string $transactionStatus, ?string $fraudStatus): ?string
     {
         switch ($transactionStatus) {
             case 'capture':
                 // Pembayaran berhasil ditahan gateway; hanya lanjut bila lolos cek fraud
-                return $fraudStatus === 'accept' ? 'dibayar' : 'dibatalkan';
+                return $fraudStatus === 'accept' ? 'menunggu_konfirmasi' : 'dibatalkan';
             case 'settlement':
-                return 'dibayar';
+                return 'menunggu_konfirmasi';
             case 'pending':
                 return 'menunggu_pembayaran';
             case 'deny':
@@ -143,13 +145,8 @@ class PaymentController extends Controller
 
                     if ($trxStatus) {
                         $statusBaru = $this->tentukanStatusSah($trxStatus, $fraudStatus);
-                        if ($statusBaru && $statusBaru !== $pesanan->status) {
-                            DB::transaction(function () use ($pesanan, $statusBaru) {
-                                $pesanan->update(['status' => $statusBaru]);
-                                if ($statusBaru === 'dibayar') {
-                                    Keranjang::kurangiUntukPesanan($pesanan);
-                                }
-                            });
+                        if ($statusBaru && $statusBaru !== $pesanan->status && $pesanan->bolehPindahKe($statusBaru)) {
+                            $pesanan->update(['status' => $statusBaru]);
                         }
                     }
                 }

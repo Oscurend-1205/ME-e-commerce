@@ -186,7 +186,8 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
       if (respon.berhasil && respon.data != null) {
         final data = respon.data as Map<String, dynamic>;
         final statusPesanan = data['status_pesanan'] as String? ?? '';
-        if (statusPesanan == 'dibayar' ||
+        if (statusPesanan == 'menunggu_konfirmasi' ||
+            statusPesanan == 'dibayar' ||
             statusPesanan == 'diproses' ||
             statusPesanan == 'dikirim' ||
             statusPesanan == 'selesai') {
@@ -209,7 +210,8 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
         final data = respon.data as Map<String, dynamic>;
         final statusPesanan = data['status_pesanan'] as String? ?? '';
 
-        if (statusPesanan == 'dibayar' ||
+        if (statusPesanan == 'menunggu_konfirmasi' ||
+            statusPesanan == 'dibayar' ||
             statusPesanan == 'diproses' ||
             statusPesanan == 'dikirim' ||
             statusPesanan == 'selesai') {
@@ -251,14 +253,16 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
     setState(() => _sedangMemeriksa = true);
 
     try {
-      final respon =
-          await LayananApi.ubahStatusPesanan(widget.pesananId, 'dibayar');
+      final respon = await LayananApi.ubahStatusPesanan(
+        widget.pesananId,
+        'menunggu_konfirmasi',
+      );
       if (mounted) {
         if (respon.berhasil) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                'Simulasi berhasil! Status pesanan otomatis diubah menjadi DIBAYAR.',
+                'Simulasi berhasil! Status pesanan diubah menjadi MENUNGGU KONFIRMASI.',
               ),
               backgroundColor: TemaAplikasi.successColor,
               behavior: SnackBarBehavior.floating,
@@ -284,7 +288,10 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
   Future<void> _handlePaymentComplete() async {
     _pengecekanOtomatisTimer?.cancel();
     try {
-      await LayananApi.ubahStatusPesanan(widget.pesananId, 'dibayar');
+      await LayananApi.ubahStatusPesanan(
+        widget.pesananId,
+        'menunggu_konfirmasi',
+      );
     } catch (_) {}
     if (!mounted) return;
 

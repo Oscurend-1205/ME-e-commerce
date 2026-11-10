@@ -39,6 +39,13 @@ class _HalamanPembayaranQrisState extends State<HalamanPembayaranQris> {
   int _detikSisa = 15 * 60; // Default 15 menit validity QRIS
   String _statusPembayaran = 'menunggu_pembayaran';
 
+  /// Pembayaran online dianggap berhasil begitu gateway mengabarkan
+  /// settlement/capture — backend memindahkannya ke 'menunggu_konfirmasi'
+  /// sebelum admin mengonfirmasi ke 'dibayar'.
+  bool get _pembayaranDiterima =>
+      _statusPembayaran == 'menunggu_konfirmasi' ||
+      _statusPembayaran == 'dibayar';
+
   @override
   void initState() {
     super.initState();
@@ -98,7 +105,7 @@ class _HalamanPembayaranQrisState extends State<HalamanPembayaranQris> {
           _statusPembayaran = statusBaru;
         });
 
-        if (statusBaru == 'dibayar') {
+        if (statusBaru == 'menunggu_konfirmasi') {
           _timerCekStatus?.cancel();
           _timerHitungMundur?.cancel();
           ScaffoldMessenger.of(context).showSnackBar(
@@ -139,7 +146,7 @@ class _HalamanPembayaranQrisState extends State<HalamanPembayaranQris> {
       _sedangMemproses = false;
     });
 
-    if (_statusPembayaran == 'dibayar') return;
+    if (_pembayaranDiterima) return;
 
     showDialog(
       context: context,
@@ -178,7 +185,10 @@ class _HalamanPembayaranQrisState extends State<HalamanPembayaranQris> {
             onPressed: () async {
               Navigator.pop(ctx);
               setState(() => _sedangMemproses = true);
-              await LayananApi.ubahStatusPesanan(widget.pesananId, 'dibayar');
+              await LayananApi.ubahStatusPesanan(
+                widget.pesananId,
+                'menunggu_konfirmasi',
+              );
               await _cekStatusPembayaran();
             },
             child: const Text(
@@ -382,18 +392,18 @@ class _HalamanPembayaranQrisState extends State<HalamanPembayaranQris> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: _statusPembayaran == 'dibayar'
+                  color: _pembayaranDiterima
                       ? TemaAplikasi.successColor.withValues(alpha: 0.1)
                       : TemaAplikasi.warningColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(2),
                 ),
                 child: Text(
-                  _statusPembayaran == 'dibayar' ? 'DIBAYAR' : 'MENUNGGU PEMBAYARAN',
+                  _pembayaranDiterima ? 'DIBAYAR' : 'MENUNGGU PEMBAYARAN',
                   style: TextStyle(
                     fontSize: 10,
                     letterSpacing: 0.8,
                     fontWeight: FontWeight.w700,
-                    color: _statusPembayaran == 'dibayar'
+                    color: _pembayaranDiterima
                         ? TemaAplikasi.successColor
                         : TemaAplikasi.warningColor,
                   ),

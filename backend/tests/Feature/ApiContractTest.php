@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Pesanan;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
@@ -26,15 +27,28 @@ class ApiContractTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        $this->patchJson('/api/pesanan/1/status', ['status' => 'dibayar'])
+        // Route status diproteksi auth.pelanggan; pakai identitas statis (X-Pelanggan-Id)
+        // milik pemesan agar validasi transisi yang diuji, bukan kegagalan autentikasi.
+        $pesanan = Pesanan::where('nomor_pesanan', 'ORD-20261105-SAMPLE1')->firstOrFail();
+        $headers = ['X-Pelanggan-Id' => (string) $pesanan->pelanggan_id];
+        $url = "/api/pesanan/{$pesanan->id}/status";
+
+        // menunggu_pembayaran -> dibayar melompati menunggu_konfirmasi: ditolak 409
+        $this->patchJson($url, ['status' => 'dibayar'], $headers)
             ->assertConflict();
 
-        $this->patchJson('/api/pesanan/1/status', ['status' => 'menunggu_konfirmasi'])
+        // menunggu_pembayaran -> menunggu_konfirmasi sah
+        $this->patchJson($url, ['status' => 'menunggu_konfirmasi'], $headers)
             ->assertOk();
 
-        $this->patchJson('/api/pesanan/1/status', ['status' => 'dibayar'])
+        // menunggu_konfirmasi -> dibayar sah
+        $this->patchJson($url, ['status' => 'dibayar'], $headers)
             ->assertOk()
             ->assertJsonPath('data.status', 'dibayar');
+
+        // dibayar -> menunggu_pembayaran mundur: ditolak 409
+        $this->patchJson($url, ['status' => 'menunggu_pembayaran'], $headers)
+            ->assertConflict();
     }
 
     public function test_api_exception_response_does_not_expose_exception_details(): void

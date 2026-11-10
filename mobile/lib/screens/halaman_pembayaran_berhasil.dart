@@ -11,7 +11,7 @@ import '../widgets/komponen_header.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_rincian_pesanan.dart';
 
-/// Halaman Pembayaran Berhasil — konfirmasi pesanan setelah pembayaran
+/// Halaman Pembayaran Berhasil â€” konfirmasi pesanan setelah pembayaran
 /// diterima. Desain mengikuti cek-pembayaran-berhasil.html.
 class HalamanPembayaranBerhasil extends StatefulWidget {
   final int pesananId;
@@ -33,9 +33,10 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
   void initState() {
     super.initState();
     _muatPesanan();
-    // Segarkan badge keranjang: porsi terpesan baru berkurang dari keranjang
-    // setelah pesanan berstatus 'dibayar'.
+    // Segarkan badge keranjang: keranjang sudah dikosongkan server saat
+    // checkout, jadi badge dihitung ulang agar sesuai keadaan terbaru.
     StatePengguna.sinkronkanKeranjang();
+    StatePengguna.triggerRefreshKatalog();
   }
 
   Future<void> _muatPesanan() async {
@@ -48,11 +49,15 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
     if (respon.berhasil && respon.data != null) {
       var pesananObj = Pesanan.fromJson(respon.data as Map<String, dynamic>);
 
-      // Pastikan status tersinkronisasi ke 'dibayar' jika masih 'menunggu_pembayaran'
-      // karena pengguna sudah berada di halaman Pembayaran Berhasil.
+      // Pastikan status tersinkronisasi ke 'menunggu_konfirmasi' jika masih
+      // 'menunggu_pembayaran' â€” pembayaran online berhasil ditandai gateway,
+      // lalu admin mengonfirmasi ke 'dibayar'.
       if (pesananObj.status.toLowerCase() == 'menunggu_pembayaran') {
         try {
-          await LayananApi.ubahStatusPesanan(pesananObj.id, 'dibayar');
+          await LayananApi.ubahStatusPesanan(
+            pesananObj.id,
+            'menunggu_konfirmasi',
+          );
           final responUlang =
               await LayananApi.ambilRincianPesanan(widget.pesananId);
           if (responUlang.berhasil && responUlang.data != null) {
@@ -97,12 +102,12 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
 
   String get _estimasiKedatangan {
     final dibuat = _pesanan?.createdAt;
-    if (dibuat == null) return '± 3 Hari Kerja';
+    if (dibuat == null) return 'Â± 3 Hari Kerja';
     try {
       final tanggal = DateTime.parse(dibuat).add(const Duration(days: 3));
       return DateFormat("d MMMM y, HH:mm", 'id_ID').format(tanggal);
     } catch (_) {
-      return '± 3 Hari Kerja';
+      return 'Â± 3 Hari Kerja';
     }
   }
 
@@ -261,7 +266,7 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
     );
   }
 
-  // "Pesanan #ME-XXXXXX • LUNAS" dengan garis bawah
+  // "Pesanan #ME-XXXXXX â€¢ LUNAS" dengan garis bawah
   Widget _bangunNomorPesanan() {
     final p = _pesanan;
     return Container(
@@ -295,7 +300,7 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
               color: TemaAplikasi.primary,
             ),
           ),
-          const Text('•', style: TextStyle(color: TemaAplikasi.secondary)),
+          const Text('â€¢', style: TextStyle(color: TemaAplikasi.secondary)),
           Text(
             _labelStatus,
             style: const TextStyle(

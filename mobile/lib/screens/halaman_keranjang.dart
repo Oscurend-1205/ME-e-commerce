@@ -59,6 +59,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
       final data = DataKeranjang.fromJson(responKeranjang.data as Map<String, dynamic>);
       final total = data.items.fold<int>(0, (sum, i) => sum + i.jumlah);
       StatePengguna.perbaruiJumlahKeranjang(total);
+      StatePengguna.triggerRefreshKatalog();
 
       List<Produk> rekomendasi = [];
       if (responProduk.berhasil && responProduk.data is List) {
@@ -661,7 +662,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'ATELIER ME · FW24',
+                          'ATELIER ME Â· FW24',
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w600,

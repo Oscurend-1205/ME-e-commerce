@@ -117,6 +117,14 @@ class StatePengguna {
   /// Jumlah total item di keranjang belanja (Reaktif di semua header)
   static final ValueNotifier<int> jumlahKeranjangNotifier = ValueNotifier<int>(0);
 
+  /// Sinyal penyegaran katalog global (kapan pun ada perubahan keranjang / pesanan / stok)
+  static final ValueNotifier<int> versiKatalogNotifier = ValueNotifier<int>(0);
+
+  /// Memicu seluruh layar katalog untuk menyegarkan data produk dan stok dari server
+  static void triggerRefreshKatalog() {
+    versiKatalogNotifier.value++;
+  }
+
   /// Preset Avatar Editorial Kurasi ME Atelier (Wanita & Pria)
   static const List<Map<String, String>> daftarPresetAvatar = [
     {
