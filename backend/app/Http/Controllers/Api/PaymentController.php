@@ -94,19 +94,19 @@ class PaymentController extends Controller
      * menunggu_pembayaran, menunggu_konfirmasi, dibayar, diproses,
      * dikirim, selesai, dibatalkan.
      *
-     * Pembayaran online yang berhasil (capture/settlement) masuk ke
-     * menunggu_konfirmasi — sesuai urutan status yang disepakati — lalu
-     * admin mengonfirmasi ke dibayar. Status di luar daftar (refund dsb.)
-     * tidak mengubah status pesanan.
+     * Pembayaran online yang berhasil (capture/settlement) langsung ditandai
+     * LUNAS ('dibayar') tanpa perlu konfirmasi admin manual — admin cukup
+     * memproses pengemasan lewat tombol "Kemas Barang" di Filament.
+     * Status di luar daftar (refund dsb.) tidak mengubah status pesanan.
      */
     private function tentukanStatusSah(string $transactionStatus, ?string $fraudStatus): ?string
     {
         switch ($transactionStatus) {
             case 'capture':
                 // Pembayaran berhasil ditahan gateway; hanya lanjut bila lolos cek fraud
-                return $fraudStatus === 'accept' ? 'menunggu_konfirmasi' : 'dibatalkan';
+                return $fraudStatus === 'accept' ? 'dibayar' : 'dibatalkan';
             case 'settlement':
-                return 'menunggu_konfirmasi';
+                return 'dibayar';
             case 'pending':
                 return 'menunggu_pembayaran';
             case 'deny':

@@ -150,7 +150,7 @@ class _HalamanKatalogState extends State<HalamanKatalog>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _muatHeroBanner();
+      if (!widget.modeJelajah) _muatHeroBanner();
     }
   }
 
@@ -203,7 +203,9 @@ class _HalamanKatalogState extends State<HalamanKatalog>
     await Future.wait([
       _muatProduk(),
       _muatJumlahKeranjang(),
-      _muatHeroBanner(),
+      // Hero banner hanya tampil di Beranda; instance Jelajah tidak perlu
+      // memuatnya agar tidak ada request dobel ke server.
+      if (!widget.modeJelajah) _muatHeroBanner(),
     ]);
   }
 

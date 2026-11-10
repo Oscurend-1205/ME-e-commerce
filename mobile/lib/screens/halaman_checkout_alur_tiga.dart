@@ -20,6 +20,7 @@ import 'halaman_pembayaran_qris.dart';
 /// langsung tampil tanpa loading.
 class HalamanCheckoutAlurTiga extends StatefulWidget {
   final DataKeranjang dataKeranjang;
+  final List<int> selectedItemIds;
   final Kurir? kurirTerpilih;
   final Alamat alamatTerpilih;
   final List<MetodePembayaran> daftarMetode;
@@ -29,6 +30,7 @@ class HalamanCheckoutAlurTiga extends StatefulWidget {
   const HalamanCheckoutAlurTiga({
     super.key,
     required this.dataKeranjang,
+    required this.selectedItemIds,
     this.kurirTerpilih,
     required this.alamatTerpilih,
     required this.daftarMetode,
@@ -97,6 +99,7 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
       catatan: catatan.isEmpty ? null : catatan,
       kurirId: widget.kurirTerpilih?.id ?? 0,
       metodePembayaranId: _metodeTerpilihFinal!.id,
+      itemKeranjangIds: widget.selectedItemIds,
     );
 
     if (!mounted) return;

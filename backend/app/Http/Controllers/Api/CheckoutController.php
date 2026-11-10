@@ -80,6 +80,8 @@ class CheckoutController extends Controller
             'catatan' => 'nullable|string|max:1000',
             'kurir_id' => 'required|exists:kurir,id',
             'metode_pembayaran_id' => 'required|exists:metode_pembayaran,id',
+            'item_keranjang_ids' => 'sometimes|required|array|min:1',
+            'item_keranjang_ids.*' => 'required|integer|distinct',
         ], [
             'nama.required' => 'Nama penerima wajib diisi.',
             'alamat.required' => 'Alamat pengiriman lengkap wajib diisi.',
@@ -87,6 +89,10 @@ class CheckoutController extends Controller
             'kurir_id.exists' => 'Kurir yang dipilih tidak valid.',
             'metode_pembayaran_id.required' => 'Metode pembayaran wajib dipilih.',
             'metode_pembayaran_id.exists' => 'Metode pembayaran yang dipilih tidak valid.',
+            'item_keranjang_ids.required' => 'Pilih setidaknya satu item untuk checkout.',
+            'item_keranjang_ids.array' => 'Daftar item checkout tidak valid.',
+            'item_keranjang_ids.min' => 'Pilih setidaknya satu item untuk checkout.',
+            'item_keranjang_ids.*.distinct' => 'Item checkout tidak boleh dipilih lebih dari sekali.',
         ]);
 
         if ($validator->fails()) {
@@ -100,14 +106,16 @@ class CheckoutController extends Controller
             // 4. Satu DB Transaction: baca keranjang, kunci stok, simpan pesanan, kurangi
             //    stok, dan kosongkan keranjang — semuanya atomik. Kegagalan pada langkah
             //    mana pun akan me-rollback perubahan sehingga stok kembali ke keadaan semula.
-            $pesananBaru = DB::transaction(function () use ($request, $pelangganId, $kunciIdempoten, $kurir, $metode) {
+            $itemKeranjangIds = $request->input('item_keranjang_ids');
+            $pesananBaru = DB::transaction(function () use ($request, $pelangganId, $kunciIdempoten, $kurir, $metode, $itemKeranjangIds) {
                 // Keranjang dibaca DI DALAM transaksi dan dikunci, supaya dua checkout bersamaan
-                // dari pelanggan yang sama tidak membuat dua pesanan dari isi keranjang yang sama.
-                $itemsKeranjang = Keranjang::with('produk')
+                // dari pelanggan yang sama tidak membuat dua pesanan dari item yang sama.
+                $queryItemsKeranjang = Keranjang::with('produk')
                     ->where('pelanggan_id', $pelangganId)
+                    ->when($itemKeranjangIds !== null, fn ($query) => $query->whereIn('id', $itemKeranjangIds))
                     ->orderBy('id', 'asc')
-                    ->lockForUpdate()
-                    ->get();
+                    ->lockForUpdate();
+                $itemsKeranjang = $queryItemsKeranjang->get();
 
                 // Permintaan dengan kunci sama yang menunggu kunci di atas: pesanan sudah dibuat pemenangnya
                 $sudahAda = $this->cariPesananDenganKunci($pelangganId, $kunciIdempoten);
@@ -116,7 +124,15 @@ class CheckoutController extends Controller
                 }
 
                 if ($itemsKeranjang->isEmpty()) {
-                    throw new KonflikCheckoutException('Keranjang belanja Anda kosong.');
+                    throw new KonflikCheckoutException(
+                        $itemKeranjangIds === null
+                            ? 'Keranjang belanja Anda kosong.'
+                            : 'Item terpilih tidak ditemukan di keranjang. Muat ulang keranjang Anda.'
+                    );
+                }
+
+                if ($itemKeranjangIds !== null && $itemsKeranjang->count() !== count($itemKeranjangIds)) {
+                    throw new KonflikCheckoutException('Sebagian item terpilih sudah tidak tersedia di keranjang. Muat ulang keranjang Anda.');
                 }
 
                 $varianIds = $itemsKeranjang->pluck('varian_id')->unique()->all();
@@ -185,8 +201,10 @@ class CheckoutController extends Controller
                     DetailPesanan::create($detail);
                 }
 
-                // 8. Kosongkan keranjang pelanggan setelah pesanan berhasil dibuat
-                Keranjang::where('pelanggan_id', $pelangganId)->delete();
+                // Hapus hanya item yang sudah dibayar; item lain tetap di keranjang.
+                Keranjang::where('pelanggan_id', $pelangganId)
+                    ->when($itemKeranjangIds !== null, fn ($query) => $query->whereIn('id', $itemKeranjangIds))
+                    ->delete();
 
                 return $pesanan;
             });

@@ -346,6 +346,7 @@ class LayananApi {
     required int kurirId,
     required int metodePembayaranId,
     required String kunciIdempoten,
+    required List<int> itemKeranjangIds,
   }) async {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/checkout');
@@ -356,6 +357,7 @@ class LayananApi {
         if (catatan != null && catatan.isNotEmpty) 'catatan': catatan,
         'kurir_id': kurirId,
         'metode_pembayaran_id': metodePembayaranId,
+        'item_keranjang_ids': itemKeranjangIds,
       };
 
       final respons = await _client

@@ -15,12 +15,14 @@ import 'halaman_tambah_alamat.dart';
 /// Desain mengikuti cek-checkout2.html (list alamat + kurir, bukan form)
 class HalamanCheckoutAlurDua extends StatefulWidget {
   final DataKeranjang dataKeranjang;
+  final List<int> selectedItemIds;
   final List<Kurir> daftarKurir;
   final List<MetodePembayaran> daftarMetode;
 
   const HalamanCheckoutAlurDua({
     super.key,
     required this.dataKeranjang,
+    required this.selectedItemIds,
     required this.daftarKurir,
     required this.daftarMetode,
   });
@@ -120,6 +122,7 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
       ruteGeser(
         HalamanCheckoutAlurTiga(
           dataKeranjang: widget.dataKeranjang,
+          selectedItemIds: widget.selectedItemIds,
           kurirTerpilih: _kurirTerpilih,
           alamatTerpilih: _alamatTerpilih!,
           daftarMetode: widget.daftarMetode,

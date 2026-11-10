@@ -32,6 +32,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
 
   DataKeranjang? _dataKeranjang;
   List<Produk> _daftarRekomendasi = [];
+  final Set<int> _itemTerpilihIds = {};
+  bool _seleksiDiinisialisasi = false;
   bool _sedangMemperbarui = false;
 
   @override
@@ -71,8 +73,23 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
             .toList();
       }
 
+      final idsItemTerbaru = data.items.map((item) => item.id).toSet();
+      final idsItemSebelumnya =
+          _dataKeranjang?.items.map((item) => item.id).toSet() ?? <int>{};
+      final idsTerpilih = Set<int>.from(_itemTerpilihIds)
+        ..removeWhere((id) => !idsItemTerbaru.contains(id));
+      if (!_seleksiDiinisialisasi) {
+        idsTerpilih.addAll(idsItemTerbaru);
+      } else {
+        idsTerpilih.addAll(idsItemTerbaru.difference(idsItemSebelumnya));
+      }
+
       setState(() {
         _dataKeranjang = data;
+        _itemTerpilihIds
+          ..clear()
+          ..addAll(idsTerpilih);
+        _seleksiDiinisialisasi = true;
         _daftarRekomendasi = rekomendasi.isNotEmpty ? rekomendasi : _daftarRekomendasi;
         _keadaan = KeadaanMuat.berhasil;
       });
@@ -285,11 +302,44 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     }
   }
 
-  int get _subtotal => _dataKeranjang?.subtotal ?? 0;
+  int get _subtotal =>
+      _dataKeranjang?.items
+          .where((item) => _itemTerpilihIds.contains(item.id))
+          .fold<int>(0, (total, item) => total + item.subtotalItem) ??
+      0;
 
   int get _jumlahItem {
     if (_dataKeranjang == null) return 0;
-    return _dataKeranjang!.items.fold<int>(0, (sum, i) => sum + i.jumlah);
+    return _dataKeranjang!.items
+        .where((item) => _itemTerpilihIds.contains(item.id))
+        .fold<int>(0, (sum, item) => sum + item.jumlah);
+  }
+
+  bool get _semuaItemTerpilih =>
+      _dataKeranjang?.items.isNotEmpty == true &&
+      _dataKeranjang!.items.every((item) => _itemTerpilihIds.contains(item.id));
+
+  void _ubahPilihanSemua() {
+    final items = _dataKeranjang?.items ?? [];
+    setState(() {
+      if (_semuaItemTerpilih) {
+        _itemTerpilihIds.clear();
+      } else {
+        _itemTerpilihIds
+          ..clear()
+          ..addAll(items.map((item) => item.id));
+      }
+    });
+  }
+
+  void _ubahPilihanItem(ItemKeranjang item, bool terpilih) {
+    setState(() {
+      if (terpilih) {
+        _itemTerpilihIds.add(item.id);
+      } else {
+        _itemTerpilihIds.remove(item.id);
+      }
+    });
   }
 
   @override
@@ -469,19 +519,35 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
               _bangunNotifikasiBebasOngkir(),
 
               if (items.isNotEmpty) ...[
-                // Checkout memproses seluruh item di keranjang.
+                // Pilih item yang akan dimasukkan ke checkout.
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'SEMUA ITEM (${items.length})',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.0,
-                          color: TemaAplikasi.primary,
+                      InkWell(
+                        onTap: _ubahPilihanSemua,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Checkbox(
+                              value: _semuaItemTerpilih,
+                              onChanged: (_) => _ubahPilihanSemua(),
+                              activeColor: TemaAplikasi.primary,
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            Text(
+                              'PILIH SEMUA (${items.length})',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.0,
+                                color: TemaAplikasi.primary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Row(
@@ -628,6 +694,17 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Checkbox(
+                value: _itemTerpilihIds.contains(item.id),
+                onChanged: _sedangMemperbarui
+                    ? null
+                    : (terpilih) =>
+                          _ubahPilihanItem(item, terpilih ?? false),
+                activeColor: TemaAplikasi.primary,
+                visualDensity: VisualDensity.compact,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              const SizedBox(width: 4),
               // Foto Item Rasio 3:4 dari Backend Storage
               Container(
                 width: 82,
@@ -1226,7 +1303,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text(
-                      'SUBTOTAL DARI SERVER',
+                      'SUBTOTAL ITEM TERPILIH',
                       style: TextStyle(
                         fontSize: 10,
                         letterSpacing: 1.5,
@@ -1329,7 +1406,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
 
   // 8. Sticky Bottom Floating Action Bar untuk Checkout (cek-keranjangBelanja.html)
   Widget _bangunStickyBottomBar() {
-    final adaItem = _dataKeranjang?.items.isNotEmpty ?? false;
+    final adaItem = _itemTerpilihIds.isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -1384,7 +1461,11 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                         }
                         Navigator.push(
                           context,
-                          ruteGeser(const HalamanCheckoutAlurSatu()),
+                          ruteGeser(
+                            HalamanCheckoutAlurSatu(
+                              selectedItemIds: _itemTerpilihIds.toList(),
+                            ),
+                          ),
                         ).then((_) => _muatKeranjang());
                       }
                     : null,

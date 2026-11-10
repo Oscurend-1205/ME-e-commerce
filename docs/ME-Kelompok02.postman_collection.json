@@ -384,7 +384,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nama\": \"Auril Aditya\",\n  \"alamat\": \"Jalan Merdeka No. 10, Kecamatan Coblong, Bandung\",\n  \"kurir_id\": 1,\n  \"metode_pembayaran_id\": 1\n}",
+              "raw": "{\n  \"nama\": \"Auril Aditya\",\n  \"alamat\": \"Jalan Merdeka No. 10, Kecamatan Coblong, Bandung\",\n  \"kurir_id\": 1,\n  \"metode_pembayaran_id\": 1,\n  \"item_keranjang_ids\": [1]\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -392,7 +392,7 @@
               "host": ["{{base_url}}"],
               "path": ["checkout"]
             },
-            "description": "POST /api/checkout — 201, 409, 422. Wajib header X-Kunci-Idempoten. Kirim dua kali dengan kunci sama untuk membuktikan idempotent replay."
+            "description": "POST /api/checkout — 201, 409, 422. item_keranjang_ids opsional; isi dengan ID item dari GET /api/keranjang untuk checkout hanya item terpilih. Tanpa field ini, semua item keranjang diproses. Wajib header X-Kunci-Idempoten."
           },
           "event": [
             {

@@ -18,7 +18,12 @@ import 'halaman_checkout_alur_dua.dart';
 /// Menampilkan ringkasan item, alamat (placeholder), kurir & pembayaran
 /// terpilih, voucher, dan ringkasan tagihan sebelum lanjut ke langkah 02.
 class HalamanCheckoutAlurSatu extends StatefulWidget {
-  const HalamanCheckoutAlurSatu({super.key});
+  final List<int> selectedItemIds;
+
+  const HalamanCheckoutAlurSatu({
+    super.key,
+    required this.selectedItemIds,
+  });
 
   @override
   State<HalamanCheckoutAlurSatu> createState() => _HalamanCheckoutAlurSatuState();
@@ -78,8 +83,18 @@ class _HalamanCheckoutAlurSatuState extends State<HalamanCheckoutAlurSatu> {
       return;
     }
 
-    final dataKeranjang = DataKeranjang.fromJson(
+    final keranjangLengkap = DataKeranjang.fromJson(
       responKeranjang.data as Map<String, dynamic>,
+    );
+    final itemsTerpilih = keranjangLengkap.items
+        .where((item) => widget.selectedItemIds.contains(item.id))
+        .toList();
+    final dataKeranjang = DataKeranjang(
+      items: itemsTerpilih,
+      subtotal: itemsTerpilih.fold<int>(
+        0,
+        (total, item) => total + item.subtotalItem,
+      ),
     );
 
     if (dataKeranjang.items.isEmpty) {
@@ -116,6 +131,7 @@ class _HalamanCheckoutAlurSatuState extends State<HalamanCheckoutAlurSatu> {
       ruteGeser(
         HalamanCheckoutAlurDua(
           dataKeranjang: _dataKeranjang!,
+          selectedItemIds: widget.selectedItemIds,
           daftarKurir: _daftarKurir,
           daftarMetode: _daftarMetode,
         ),

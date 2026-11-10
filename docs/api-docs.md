@@ -64,7 +64,7 @@ Sumber: `backend/routes/api.php`. Seluruh respons memakai pembungkus seragam:
 | 9 | DELETE `/api/keranjang/{id}` | Hapus satu item | path `id` | 200, 404 |
 | 10 | GET `/api/kurir` | Daftar kurir dan tarif wilayah | tidak ada | 200 |
 | 11 | GET `/api/metode-pembayaran` | Daftar metode pembayaran | tidak ada | 200 |
-| 12 | POST `/api/checkout` | Buat pesanan dari isi keranjang | header `X-Kunci-Idempoten` (wajib); body: `nama`, `alamat`, `kurir_id`, `metode_pembayaran_id` | 201 (baru), 200 (ulangan dengan kunci sama), 409 (stok kurang atau keranjang kosong), 422 |
+| 12 | POST `/api/checkout` | Buat pesanan dari isi atau item terpilih di keranjang | header `X-Kunci-Idempoten` (wajib); body: `nama`, `alamat`, `kurir_id`, `metode_pembayaran_id`, opsional `item_keranjang_ids` (array ID dari `GET /api/keranjang`) | 201 (baru), 200 (ulangan dengan kunci sama), 409 (stok kurang, keranjang kosong, atau item terpilih berubah), 422 |
 | 13 | GET `/api/pesanan` | Riwayat pesanan, terbaru dulu | header `X-Pelanggan-Id` | 200 |
 | 14 | GET `/api/pesanan/{id}` | Rincian pesanan beserta item | path `id` | 200, 404 |
 | 15 | PATCH `/api/pesanan/{id}/status` | Ubah status pesanan | path `id`; body `status` | 200, 404, 409 (perpindahan tidak sah), 422 |
@@ -217,9 +217,12 @@ Permintaan, dengan header tambahan `X-Kunci-Idempoten: 5b1d3c1e-7a42-4a8e-9d11-0
   "nama": "Budi Santoso",
   "alamat": "Jl. Mawar No. 1, Malang",
   "kurir_id": 1,
-  "metode_pembayaran_id": 1
+  "metode_pembayaran_id": 1,
+  "item_keranjang_ids": [3, 5]
 }
 ```
+
+`item_keranjang_ids` berisi ID item keranjang yang dipilih. Hanya item tersebut yang masuk ke pesanan dan dihapus dari keranjang; item lain tetap ada. Jika field tidak dikirim, API tetap memproses seluruh item untuk kompatibilitas klien lama.
 
 Balasan sukses:
 
@@ -352,7 +355,7 @@ Pembatalan pesanan (`dibatalkan`) mengembalikan stok varian di dalam transaksi y
 1. Flutter membuat satu nilai acak (UUID v4) untuk percobaan checkout dan mengirimnya pada header `X-Kunci-Idempoten`. Nilai yang sama dipakai ulang bila pengguna menekan tombol coba lagi.
 2. Server menolak permintaan tanpa header ini dengan 422.
 3. Server mencari pesanan milik pelanggan tersebut dengan kunci yang sama. Jika ada, server membalas pesanan itu dengan kode 200 dan **tidak** membuat pesanan baru maupun mengurangi stok lagi.
-4. Jika belum ada, server menjalankan seluruh proses dalam satu transaksi basis data: mengunci baris varian (`lockForUpdate`, diurutkan menurut id untuk mencegah deadlock), memeriksa stok, menyimpan pesanan beserta kunci idempoten, menyimpan detail pesanan, mengurangi stok, dan mengosongkan keranjang. Kegagalan di langkah mana pun membatalkan seluruh perubahan.
+4. Jika belum ada, server menjalankan seluruh proses dalam satu transaksi basis data: mengunci item keranjang yang dipilih dan baris varian (`lockForUpdate`, diurutkan menurut id untuk mencegah deadlock), memeriksa stok, menyimpan pesanan beserta kunci idempoten, menyimpan detail pesanan, dan menghapus hanya item terpilih dari keranjang. Tanpa ID terpilih, API memproses seluruh isi keranjang. Kegagalan di langkah mana pun membatalkan seluruh perubahan.
 5. Kunci unik `(pelanggan_id, kunci_idempoten)` pada tabel `pesanan` menjadi pagar terakhir di tingkat basis data.
 
 Skenario yang dilindungi: balasan 201 tidak sampai karena jaringan putus, lalu klien mengulang permintaan dengan kunci yang sama dan memperoleh pesanan yang sama.

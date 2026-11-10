@@ -268,14 +268,14 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
     try {
       final respon = await LayananApi.ubahStatusPesanan(
         widget.pesananId,
-        'menunggu_konfirmasi',
+        'dibayar',
       );
       if (mounted) {
         if (respon.berhasil) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                'Simulasi berhasil! Status pesanan diubah menjadi MENUNGGU KONFIRMASI.',
+                'Simulasi berhasil! Status pesanan diubah menjadi LUNAS (Dibayar).',
               ),
               backgroundColor: TemaAplikasi.successColor,
               behavior: SnackBarBehavior.floating,

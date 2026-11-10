@@ -102,7 +102,7 @@ composer run setup
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-SQLite dipakai secara default agar backend dapat dicoba tanpa memasang MySQL. Untuk memakai MySQL, sesuaikan `DB_CONNECTION` dan variabel `DB_*` di `backend/.env`, buat database `me_store`, lalu jalankan `php artisan migrate --seed`.
+SQLite dipakai secara default untuk setup baru. Pada konfigurasi lokal yang memakai MySQL, jalankan MySQL di Laragon/XAMPP terlebih dahulu. Launcher `jalankan_server.bat` membersihkan cache konfigurasi, menguji koneksi database dari `backend/.env`, dan hanya menjalankan API jika koneksi berhasil. Untuk memeriksa koneksi secara manual, jalankan `php artisan db:show` dari folder `backend`. Saat memakai MySQL, pastikan `DB_DATABASE` di `.env` menunjuk ke database yang sudah dibuat; jalankan `php artisan migrate --seed` hanya saat menyiapkan database baru.
 
 ---
 
