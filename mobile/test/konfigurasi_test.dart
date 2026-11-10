@@ -21,8 +21,15 @@ void main() {
     expect(Konstan.baseUrl, 'http://192.168.1.10:8000/api');
   });
 
+  test('custom host without scheme is normalized before use', () {
+    Konstan.customHost = '192.168.1.10:8000';
+
+    expect(Konstan.baseUrl, 'http://192.168.1.10:8000/api');
+  });
+
   test('network errors map to the no-connection screen state', () {
     expect(tentukanJenisGalat('NO_CONNECTION'), JenisGalat.tidakAdaSambungan);
     expect(tentukanJenisGalat('NETWORK'), JenisGalat.tidakAdaSambungan);
+    expect(tentukanJenisGalat('network'), JenisGalat.tidakAdaSambungan);
   });
 }

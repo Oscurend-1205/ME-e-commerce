@@ -10,7 +10,7 @@ Proyek Tugas Pengganti UTS Berkelompok untuk mata kuliah **Pemrograman Aplikasi 
   - Auril Aditya 24102018 — Full Stack Developer (Backend Skema & Flutter)
   - Melany Kresna 24102015 — Frontend, Project Manager / Project Leader
   - Devia Amanda Prameswari 24102007 — UI/UX Designer
-  - Viqro Tunada Hanunnisa 24102022 — Database Developer
+  - Viqro Tunada Hanunnisa 24102022 — Database Support
   - Audina Ike Wati 24102028 - API Developer & Technical Documentation
   - Syani Carissa Syawaluna 24102038 - Application Developer & Documentation
   - Fichri Aditya Nugraha 24102010 - Database Developer
@@ -182,6 +182,9 @@ Dokumentasi detail endpoint dan koleksi Postman: [api-docs (1).md](api-docs%20(1
   - update README.md
   - membuat catalog produk
   - memperbaiki bug
+  - merapikan laporan
+  - analisis dan performa
+  - Perancangan & Dokumentasi
     
   
     
