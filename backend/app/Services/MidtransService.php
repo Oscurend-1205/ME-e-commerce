@@ -172,4 +172,62 @@ class MidtransService
     {
         return config('services.midtrans.client_key', env('MIDTRANS_CLIENT_KEY'));
     }
+
+    /**
+     * Cek status kesehatan konektivitas layanan Midtrans API
+     * Mengembalikan status operasional atau gangguan untuk mekanisme auto fallback
+     */
+    public function checkHealth(): array
+    {
+        $serverKey = config('services.midtrans.server_key', env('MIDTRANS_SERVER_KEY'));
+        if (empty($serverKey)) {
+            return [
+                'status' => 'offline',
+                'tersedia' => false,
+                'pesan' => 'Kunci server Midtrans belum dikonfigurasi.',
+                'fallback_ke_cod' => true,
+            ];
+        }
+
+        try {
+            $isProduction = config('services.midtrans.is_production', false);
+            $baseUrl = $isProduction ? 'https://api.midtrans.com/v2' : 'https://api.sandbox.midtrans.com/v2';
+            $response = \Illuminate\Support\Facades\Http::timeout(3)
+                ->withBasicAuth($serverKey, '')
+                ->get("{$baseUrl}/token");
+
+            // Midtrans endpoint token merespons 400 Bad Request jika parameter kosong tapi koneksi & autentikasi sukses
+            if ($response->status() === 401) {
+                return [
+                    'status' => 'unauthorized',
+                    'tersedia' => false,
+                    'pesan' => 'Autentikasi Midtrans gagal (Server Key tidak valid).',
+                    'fallback_ke_cod' => true,
+                ];
+            }
+
+            if ($response->serverError()) {
+                return [
+                    'status' => 'degraded',
+                    'tersedia' => false,
+                    'pesan' => 'Server Midtrans sedang mengalami gangguan (HTTP ' . $response->status() . ').',
+                    'fallback_ke_cod' => true,
+                ];
+            }
+
+            return [
+                'status' => 'operational',
+                'tersedia' => true,
+                'pesan' => 'Layanan Midtrans Payment Gateway operasional.',
+                'fallback_ke_cod' => false,
+            ];
+        } catch (\Throwable $th) {
+            return [
+                'status' => 'offline',
+                'tersedia' => false,
+                'pesan' => 'Koneksi ke gateway Midtrans terputus: ' . $th->getMessage(),
+                'fallback_ke_cod' => true,
+            ];
+        }
+    }
 }

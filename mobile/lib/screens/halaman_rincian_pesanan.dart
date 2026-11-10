@@ -427,6 +427,75 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
                         color: TemaAplikasi.secondary,
                       ),
                     ),
+                    if (pesanan.metodePembayaran != null &&
+                        (pesanan.metodePembayaran!.toLowerCase().contains('cod') ||
+                            pesanan.metodePembayaran!.toLowerCase().contains('tunai'))) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9F7F5),
+                          borderRadius: BorderRadius.circular(2),
+                          border: Border.all(color: const Color(0xFFE2DDD8)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.info_outline, size: 16, color: TemaAplikasi.primary),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Siapkan uang pas ${formatRupiah(pesanan.total)} saat kurir tiba.',
+                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: TemaAplikasi.primary),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else if (pesanan.status == 'menunggu_pembayaran' && pesanan.total <= 2500000) ...[
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          final bool? konfirmasi = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Ganti ke Tunai di Tempat (COD)?'),
+                              content: const Text(
+                                'Pesanan ini akan dialihkan ke metode Cash on Delivery (COD). Anda dapat membayar tunai kepada kurir saat barang tiba.',
+                              ),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('BATAL')),
+                                ElevatedButton(
+                                  onPressed: () => Navigator.pop(ctx, true),
+                                  style: ElevatedButton.styleFrom(backgroundColor: TemaAplikasi.primary),
+                                  child: const Text('GANTI KE COD'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (konfirmasi == true && mounted) {
+                            final respon = await LayananApi.fallbackCod(
+                              pesananId: pesanan.id,
+                              alasan: 'Pengalihan manual ke COD dari halaman rincian pesanan',
+                            );
+                            if (respon.berhasil && mounted) {
+                              _muatRincianPesanan();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Pesanan berhasil dialihkan ke metode Tunai di Tempat (COD).'),
+                                  backgroundColor: TemaAplikasi.primary,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.local_shipping_outlined, size: 14),
+                        label: const Text('GANTI KE BAYAR DI TEMPAT (COD)', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: TemaAplikasi.primary,
+                          side: const BorderSide(color: TemaAplikasi.primary),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

@@ -32,6 +32,9 @@ class DatabaseSeeder extends Seeder
         // 0b. Aset Tampilan (Gambar Banner/Beranda) yang dapat diedit dari Filament
         $this->call(AsetTampilanSeeder::class);
 
+        // 0c. Pengaturan Toko & Lokasi Asal Gudang RajaOngkir
+        \App\Models\PengaturanToko::getPengaturan();
+
         // Nonaktifkan foreign keys dan bersihkan tabel transaksi & katalog agar seeder bersifat idempoten
         Schema::disableForeignKeyConstraints();
         DetailPesanan::query()->delete();

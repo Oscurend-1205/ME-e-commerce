@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\PengaturanToko;
 use App\Services\RajaOngkirService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -26,12 +27,11 @@ class OngkirController extends Controller
     public function cekOngkir(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'origin' => 'required|string|max:10',
+            'origin' => 'nullable|string|max:10',
             'destination' => 'required|string|max:10',
             'weight' => 'required|integer|min:1|max:30000',
             'courier' => 'nullable|string|max:100',
         ], [
-            'origin.required' => 'ID kota asal wajib diisi.',
             'destination.required' => 'ID kota tujuan wajib diisi.',
             'weight.required' => 'Berat paket (gram) wajib diisi.',
             'weight.integer' => 'Berat harus berupa angka.',
@@ -43,34 +43,46 @@ class OngkirController extends Controller
             return $this->gagal('Validasi gagal.', 422, $validator->errors());
         }
 
-        $courier = $request->input('courier', 'jne,sicepat,jnt,anteraja');
+        $pengaturan = PengaturanToko::getPengaturan();
+        $originId = $request->input('origin') ?: (string) ($pengaturan->kota_id ?: '501');
+        $courier = $request->input('courier') ?: (string) ($pengaturan->kurir_aktif ?: 'jne,sicepat,jnt,pos');
 
         $hasil = $this->rajaOngkir->cekOngkir(
-            originId: $request->input('origin'),
+            originId: $originId,
             destinationId: $request->input('destination'),
             weight: (int) $request->input('weight'),
             courier: $courier,
         );
 
-        if (!isset($hasil['status']) || !$hasil['status']) {
+        if (isset($hasil['status']) && $hasil['status'] === false) {
             return $this->gagal(
                 $hasil['message'] ?? 'Gagal menghitung ongkir',
                 400
             );
         }
 
+        $statusCode = $hasil['rajaongkir']['status']['code'] ?? null;
+        if ($statusCode !== null && (int) $statusCode !== 200) {
+            return $this->gagal(
+                $hasil['rajaongkir']['status']['description'] ?? 'Gagal menghitung ongkir',
+                400
+            );
+        }
+
         // Format data hasil ongkir
         $daftarOngkir = [];
-        foreach ($hasil['data'] ?? [] as $kurirData) {
+        $daftarKurir = $hasil['rajaongkir']['results'] ?? $hasil['data'] ?? [];
+        foreach ($daftarKurir as $kurirData) {
             $namaKurir = $kurirData['name'] ?? '';
             foreach ($kurirData['costs'] ?? [] as $cost) {
+                $costDetail = $cost['cost'][0] ?? [];
                 $daftarOngkir[] = [
-                    'id' => strtolower(str_replace(' ', '_', $namaKurir)) . '_' . md5($cost['service'] . $cost['description'] . $cost['cost'][0]['value'] ?? ''),
+                    'id' => strtolower(str_replace(' ', '_', $namaKurir)) . '_' . md5(($cost['service'] ?? '') . ($cost['description'] ?? '') . ($costDetail['value'] ?? 0)),
                     'nama' => $namaKurir,
                     'service' => $cost['service'] ?? '',
                     'deskripsi' => $cost['description'] ?? '',
-                    'tarif' => (int) ($cost['cost'][0]['value'] ?? 0),
-                    'estimasi' => $cost['etd'] ?? '',
+                    'tarif' => (int) ($costDetail['value'] ?? 0),
+                    'estimasi' => $costDetail['etd'] ?? ($cost['etd'] ?? ''),
                     'tipe' => $cost['type'] ?? 'reguler',
                 ];
             }
@@ -87,7 +99,7 @@ class OngkirController extends Controller
         $search = $request->query('search');
         $hasil = $this->rajaOngkir->getKota($search);
 
-        if (!isset($hasil['status']) || !$hasil['status']) {
+        if (isset($hasil['status']) && $hasil['status'] === false) {
             return $this->gagal(
                 $hasil['message'] ?? 'Gagal mengambil daftar kota',
                 400
@@ -115,7 +127,7 @@ class OngkirController extends Controller
     {
         $hasil = $this->rajaOngkir->getProvinsi();
 
-        if (!isset($hasil['status']) || !$hasil['status']) {
+        if (isset($hasil['status']) && $hasil['status'] === false) {
             return $this->gagal(
                 $hasil['message'] ?? 'Gagal mengambil daftar provinsi',
                 400
@@ -147,7 +159,7 @@ class OngkirController extends Controller
 
         $hasil = $this->rajaOngkir->getKecamatan($cityId);
 
-        if (!isset($hasil['status']) || !$hasil['status']) {
+        if (isset($hasil['status']) && $hasil['status'] === false) {
             return $this->gagal(
                 $hasil['message'] ?? 'Gagal mengambil daftar kecamatan',
                 400
@@ -167,5 +179,14 @@ class OngkirController extends Controller
         }
 
         return $this->sukses($daftarKecamatan, 'Daftar kecamatan berhasil diambil', 200);
+    }
+
+    /**
+     * GET /api/pengaturan-toko - Ambil data profil toko dan lokasi gudang/asal pengiriman
+     */
+    public function getPengaturanToko(): JsonResponse
+    {
+        $pengaturan = PengaturanToko::getPengaturan();
+        return $this->sukses($pengaturan, 'Pengaturan toko berhasil diambil', 200);
     }
 }

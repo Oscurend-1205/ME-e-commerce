@@ -389,29 +389,120 @@ class LayananApi {
     }
   }
 
+  /// GET /api/payment/status-midtrans — Cek status kesehatan gateway Midtrans
+  static Future<ApiResponse> cekStatusMidtrans() async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/payment/status-midtrans');
+
+      final respons = await _client
+          .get(uri, headers: _headers())
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
+
+  /// POST /api/pesanan/{id}/fallback-cod — Alihkan pesanan online yang gagal ke COD
+  static Future<ApiResponse> fallbackCod({
+    required int pesananId,
+    String? alasan,
+  }) async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/pesanan/$pesananId/fallback-cod');
+
+      final body = {
+        if (alasan != null && alasan.isNotEmpty) 'alasan': alasan,
+      };
+
+      final respons = await _client
+          .post(uri, headers: _headers(), body: jsonEncode(body))
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
+
+  /// POST /api/checkout/cod — Checkout langsung menggunakan metode COD
+  static Future<ApiResponse> checkoutCod({
+    required String nama,
+    required String alamat,
+    String? catatan,
+    required int kurirId,
+    required String kunciIdempoten,
+    required List<int> itemKeranjangIds,
+  }) async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/checkout/cod');
+
+      final body = {
+        'nama': nama,
+        'alamat': alamat,
+        if (catatan != null && catatan.isNotEmpty) 'catatan': catatan,
+        'kurir_id': kurirId,
+        'item_keranjang_ids': itemKeranjangIds,
+      };
+
+      final respons = await _client
+          .post(
+            uri,
+            headers: _headers(tambahan: {'X-Kunci-Idempoten': kunciIdempoten}),
+            body: jsonEncode(body),
+          )
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
+
   // =====================================================================
   //  ONGKIR (RAJAONGKIR)
   // =====================================================================
 
   /// POST /api/ongkir — Cek ongkir real-time dari RajaOngkir
+  /// Jika origin tidak diisi, backend otomatis menggunakan lokasi asal toko dari Pengaturan Toko
   static Future<ApiResponse> cekOngkir({
-    required String origin,
+    String? origin,
     required String destination,
     required int weight,
-    String courier = 'jne,sicepat,jnt,anteraja',
+    String? courier,
   }) async {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/ongkir');
 
-      final body = {
-        'origin': origin,
+      final body = <String, dynamic>{
         'destination': destination,
         'weight': weight,
-        'courier': courier,
       };
+      if (origin != null && origin.isNotEmpty) {
+        body['origin'] = origin;
+      }
+      if (courier != null && courier.isNotEmpty) {
+        body['courier'] = courier;
+      }
 
       final respons = await _client
           .post(uri, headers: _headers(), body: jsonEncode(body))
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
+
+  /// GET /api/pengaturan-toko — Ambil profil toko dan lokasi gudang/origin RajaOngkir
+  static Future<ApiResponse> ambilPengaturanToko() async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/pengaturan-toko');
+
+      final respons = await _client
+          .get(uri, headers: _headers())
           .timeout(Konstan.batasWaktu);
 
       return _prosesRespons(respons);

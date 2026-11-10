@@ -13,16 +13,17 @@ class Pesanan extends Model
 
     /**
      * Tabel perpindahan status pesanan yang sah (satu-satunya sumber kebenaran).
-     * Urutan: menunggu_pembayaran -> menunggu_konfirmasi -> dibayar -> diproses
-     * -> dikirim -> selesai. Status dibatalkan hanya dapat dicapai dari dua
-     * status pertama. Perpindahan di luar tabel ini ditolak server dengan 409.
+     * Urutan online: menunggu_pembayaran -> menunggu_konfirmasi -> dibayar -> diproses -> dikirim -> selesai.
+     * Urutan COD: menunggu_verifikasi -> diproses -> dikirim -> selesai.
+     * Fallback: menunggu_pembayaran -> menunggu_verifikasi (jika Midtrans gagal).
      */
     public const TRANSISI_SAH = [
-        'menunggu_pembayaran' => ['menunggu_konfirmasi', 'dibayar', 'dibatalkan'],
-        'menunggu_konfirmasi' => ['dibayar', 'dibatalkan'],
+        'menunggu_pembayaran' => ['menunggu_konfirmasi', 'menunggu_verifikasi', 'dibayar', 'dibatalkan'],
+        'menunggu_verifikasi' => ['diproses', 'dibatalkan'],
+        'menunggu_konfirmasi' => ['dibayar', 'diproses', 'dibatalkan'],
         'dibayar' => ['diproses'],
-        'diproses' => ['dikirim'],
-        'dikirim' => ['selesai'],
+        'diproses' => ['dikirim', 'dibatalkan'],
+        'dikirim' => ['selesai', 'dibatalkan'],
         'selesai' => [],
         'dibatalkan' => [],
     ];
@@ -98,8 +99,17 @@ class Pesanan extends Model
         }
     }
 
+    public function isCod(): bool
+    {
+        $kode = strtolower((string) ($this->metodePembayaran?->kode ?? ''));
+        return in_array($kode, ['tunai_di_tempat', 'cod', 'cash_on_delivery'], true);
+    }
+
     public function formatLengkap(): array
     {
+        $isCod = $this->isCod();
+        $metodeKode = $this->metodePembayaran ? $this->metodePembayaran->kode : null;
+
         return [
             'id' => $this->id,
             'nomor_pesanan' => $this->nomor_pesanan,
@@ -127,6 +137,18 @@ class Pesanan extends Model
                     : '2-4 Hari Kerja',
             ] : null,
             'metode_pembayaran' => $this->metodePembayaran ? $this->metodePembayaran->nama : null,
+            'metode_kode' => $metodeKode,
+            'is_cod' => $isCod,
+            'instruksi_cod' => $isCod ? [
+                'judul' => 'Instruksi Pembayaran Tunai di Tempat (COD)',
+                'poin' => [
+                    'Siapkan uang tunai pas sebesar Rp ' . number_format((int) $this->total, 0, ',', '.') . ' saat kurir tiba.',
+                    'Pastikan nomor telepon penerima aktif untuk konfirmasi pengiriman oleh kurir.',
+                    'Periksa kemasan paket segel atelier sebelum melakukan pembayaran ke kurir.',
+                    'Simpan bukti tanda terima pembayaran dari kurir sebagai bukti transaksi sah.',
+                ],
+            ] : null,
+            'fallback_cod_tersedia' => !$isCod && $this->status === 'menunggu_pembayaran' && (int) $this->total <= 2500000,
             'snap_token' => $this->snap_token,
             'redirect_url' => !empty($this->snap_token)
                 ? (config('services.midtrans.is_production', false)

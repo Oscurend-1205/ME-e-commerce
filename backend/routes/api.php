@@ -51,18 +51,24 @@ Route::middleware('auth.pelanggan')->group(function () {
 Route::get('/kurir', [KurirController::class, 'index']);
 Route::get('/metode-pembayaran', [MetodePembayaranController::class, 'index']);
 
-// 3.5 Endpoint Ongkir Real-time (RajaOngkir) — dapat diakses guest
+// 3.5 Endpoint Ongkir Real-time (RajaOngkir) & Profil Toko — dapat diakses guest
+Route::get('/pengaturan-toko', [OngkirController::class, 'getPengaturanToko']);
 Route::post('/ongkir', [OngkirController::class, 'cekOngkir']);
 Route::get('/kota', [OngkirController::class, 'getKota']);
 Route::get('/provinsi', [OngkirController::class, 'getProvinsi']);
 Route::get('/kecamatan', [OngkirController::class, 'getKecamatan']);
 
 // 4. Endpoint Checkout (Transaksi atomik, lockForUpdate, idempotensi) — butuh login
-Route::middleware('auth.pelanggan')->post('/checkout', [CheckoutController::class, 'store']);
+Route::middleware('auth.pelanggan')->group(function () {
+    Route::post('/checkout', [CheckoutController::class, 'store']);
+    Route::post('/checkout/cod', [CheckoutController::class, 'storeCod']);
+    Route::post('/pesanan/{id}/fallback-cod', [CheckoutController::class, 'fallbackCod']);
+});
 
-// 4.5 Endpoint Payment (Midtrans callback) — publik (dari server Midtrans)
+// 4.5 Endpoint Payment (Midtrans callback & status gateway) — publik
 Route::post('/payment/callback', [PaymentController::class, 'callback']);
 Route::get('/payment/status/{orderId}', [PaymentController::class, 'checkStatus']);
+Route::get('/payment/status-midtrans', [PaymentController::class, 'statusMidtrans']);
 
 // 5. Endpoint Pesanan & Ubah Status — butuh login
 Route::middleware('auth.pelanggan')->group(function () {

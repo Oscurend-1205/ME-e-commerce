@@ -142,7 +142,8 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
   // Filter Kategori Tab
   List<Pesanan> get _pesananProses => _daftarSemuaPesanan.where((p) {
     final s = p.status.toLowerCase();
-    return s == 'menunggu_pembayaran' ||
+    return s == 'menunggu_verifikasi' ||
+        s == 'menunggu_pembayaran' ||
         s == 'menunggu_konfirmasi' ||
         s == 'dibayar' ||
         s == 'diproses' ||
@@ -942,6 +943,11 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
       case 'diproses':
         warna = const Color(0xFF168AAD);
         teks = 'DIPROSES ATELIER';
+        adaPulse = true;
+        break;
+      case 'menunggu_verifikasi':
+        warna = const Color(0xFFC77700);
+        teks = 'VERIFIKASI COD';
         adaPulse = true;
         break;
       case 'menunggu_pembayaran':

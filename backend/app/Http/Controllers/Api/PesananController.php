@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLogPembayaran;
 use App\Models\Pesanan;
 use App\Models\VarianProduk;
 use App\Traits\ApiResponse;
@@ -142,6 +143,13 @@ class PesananController extends Controller
             // Jika pesanan dibatalkan, kembalikan stok varian di dalam transaksi yang sama
             if ($statusBaru === 'dibatalkan') {
                 $pesanan->kembalikanStok();
+                if ($pesanan->isCod()) {
+                    AuditLogPembayaran::catat('cod_dibatalkan', $pesanan, 'tunai_di_tempat', 'Pesanan COD dibatalkan dan stok produk dikembalikan ke sistem');
+                }
+            }
+
+            if ($statusBaru === 'selesai' && $pesanan->isCod()) {
+                AuditLogPembayaran::catat('cod_selesai_lunas', $pesanan, 'tunai_di_tempat', 'Pesanan COD diterima pembeli dan pembayaran tunai berhasil lunas');
             }
 
             $pesanan->status = $statusBaru;

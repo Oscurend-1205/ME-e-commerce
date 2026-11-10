@@ -48,6 +48,7 @@ class PesananResource extends Resource
      */
     public const STATUS = [
         'menunggu_pembayaran' => 'Menunggu Pembayaran',
+        'menunggu_verifikasi' => 'Menunggu Verifikasi (COD)',
         'menunggu_konfirmasi' => 'Menunggu Konfirmasi',
         'dibayar' => 'Dibayar',
         'diproses' => 'Diproses',
@@ -213,6 +214,32 @@ class PesananResource extends Resource
                     ->options(self::STATUS),
             ])
             ->recordActions([
+                Action::make('verifikasi_cod')
+                    ->label('Verifikasi COD')
+                    ->icon(Heroicon::OutlinedShieldCheck)
+                    ->color('success')
+                    ->visible(fn (Pesanan $record): bool => $record->status === 'menunggu_verifikasi' && $record->isCod())
+                    ->requiresConfirmation()
+                    ->modalHeading('Verifikasi Pesanan COD')
+                    ->modalDescription(fn (Pesanan $record) => "Verifikasi pesanan #{$record->nomor_pesanan} untuk metode Tunai di Tempat (COD)? Status akan diubah ke Diproses (pengemasan).")
+                    ->modalSubmitActionLabel('Verifikasi & Proses')
+                    ->action(function (Pesanan $record): void {
+                        $record->status = 'diproses';
+                        $record->save();
+
+                        \App\Models\AuditLogPembayaran::catat(
+                            jenisKejadian: 'verifikasi_cod',
+                            pesanan: $record,
+                            metode: 'tunai_di_tempat',
+                            pesanError: 'Pesanan COD diverifikasi oleh Admin Filament'
+                        );
+
+                        Notification::make()
+                            ->title('Pesanan COD Diverifikasi')
+                            ->body("Pesanan #{$record->nomor_pesanan} berhasil diverifikasi dan siap dikemas.")
+                            ->success()
+                            ->send();
+                    }),
                 Action::make('konfirmasi')
                     ->label('Konfirmasi Pembayaran')
                     ->icon(Heroicon::OutlinedCheckBadge)
@@ -297,6 +324,32 @@ class PesananResource extends Resource
                         Notification::make()
                             ->title('Pesanan Telah Dikirim')
                             ->body("Pesanan #{$record->nomor_pesanan} kini berstatus Dikirim (barang sedang proses pengiriman).")
+                            ->success()
+                            ->send();
+                    }),
+                Action::make('selesai_cod')
+                    ->label('Tandai Lunas COD')
+                    ->icon(Heroicon::OutlinedBanknotes)
+                    ->color('success')
+                    ->visible(fn (Pesanan $record): bool => $record->status === 'dikirim' && $record->isCod())
+                    ->requiresConfirmation()
+                    ->modalHeading('Konfirmasi Penerimaan & Pembayaran Tunai (COD)')
+                    ->modalDescription(fn (Pesanan $record) => "Konfirmasi bahwa uang tunai sebesar Rp " . number_format($record->total, 0, ',', '.') . " telah diserahkan kurir ke kas toko dan paket #{$record->nomor_pesanan} telah diterima pemesan?")
+                    ->modalSubmitActionLabel('Konfirmasi Lunas & Selesai')
+                    ->action(function (Pesanan $record): void {
+                        $record->status = 'selesai';
+                        $record->save();
+
+                        \App\Models\AuditLogPembayaran::catat(
+                            jenisKejadian: 'cod_selesai_lunas',
+                            pesanan: $record,
+                            metode: 'tunai_di_tempat',
+                            pesanError: 'Pembayaran tunai COD diterima dari kurir dan pesanan selesai diverifikasi admin'
+                        );
+
+                        Notification::make()
+                            ->title('Pesanan COD Selesai')
+                            ->body("Pesanan #{$record->nomor_pesanan} telah ditandai LUNAS dan Selesai.")
                             ->success()
                             ->send();
                     }),

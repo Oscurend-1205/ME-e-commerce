@@ -10,6 +10,9 @@ class Pesanan {
   final String? catatan;
   final String? namaKurir;
   final String? metodePembayaran;
+  final String? metodeKode;
+  final bool isCod;
+  final bool fallbackCodTersedia;
   final String? snapToken;
   final String? redirectUrl;
   final String? qrUrl;
@@ -29,6 +32,9 @@ class Pesanan {
     this.catatan,
     this.namaKurir,
     this.metodePembayaran,
+    this.metodeKode,
+    this.isCod = false,
+    this.fallbackCodTersedia = false,
     this.snapToken,
     this.redirectUrl,
     this.qrUrl,
@@ -46,6 +52,12 @@ class Pesanan {
             ? 'https://app.sandbox.midtrans.com/snap/v4/redirection/$token'
             : null);
 
+    final bool isCod = json['is_cod'] == true ||
+        (json['metode_pembayaran']?.toString().toLowerCase().contains('tunai') ?? false) ||
+        (json['metode_pembayaran']?.toString().toLowerCase().contains('cod') ?? false) ||
+        (json['metode_kode']?.toString().toLowerCase().contains('cod') ?? false) ||
+        (json['metode_kode']?.toString().toLowerCase().contains('tunai') ?? false);
+
     return Pesanan(
       id: json['id'] ?? 0,
       nomorPesanan: json['nomor_pesanan'] ?? '',
@@ -58,6 +70,9 @@ class Pesanan {
       catatan: json['catatan'],
       namaKurir: json['nama_kurir'],
       metodePembayaran: json['metode_pembayaran'],
+      metodeKode: json['metode_kode'],
+      isCod: isCod,
+      fallbackCodTersedia: json['fallback_cod_tersedia'] ?? false,
       snapToken: token,
       redirectUrl: computedRedirect,
       qrUrl: json['qr_url'],

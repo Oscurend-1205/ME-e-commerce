@@ -10,6 +10,7 @@ import '../constants.dart';
 import '../services/layanan_api.dart';
 import '../theme.dart';
 import '../widgets/format_rupiah.dart';
+import 'halaman_konfirmasi_cod.dart';
 import 'halaman_pembayaran_berhasil.dart';
 
 /// Halaman pembayaran resmi Midtrans Snap
@@ -742,6 +743,85 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
     );
   }
 
+  Future<void> _gantiKeCod() async {
+    final bool? konfirmasi = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: TemaAplikasi.surfaceWhite,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        title: const Row(
+          children: [
+            Icon(Icons.local_shipping_outlined, color: TemaAplikasi.primary, size: 22),
+            SizedBox(width: 8),
+            Text(
+              'Ganti ke Bayar di Tempat (COD)?',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: TemaAplikasi.primary),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Metode pembayaran online akan diganti menjadi Tunai di Tempat (COD). Anda dapat membayar langsung kepada kurir saat barang tiba.',
+          style: TextStyle(fontSize: 13, color: TemaAplikasi.secondary, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('BATAL', style: TextStyle(color: TemaAplikasi.secondary)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: TemaAplikasi.primary,
+              foregroundColor: TemaAplikasi.onPrimary,
+            ),
+            child: const Text('YA, GANTI KE COD'),
+          ),
+        ],
+      ),
+    );
+
+    if (konfirmasi != true || !mounted) return;
+
+    setState(() => _sedangMemeriksa = true);
+    _pengecekanOtomatisTimer?.cancel();
+
+    try {
+      final respon = await LayananApi.fallbackCod(
+        pesananId: widget.pesananId,
+        alasan: 'Pengguna memilih fallback ke COD dari halaman pembayaran',
+      );
+
+      if (!mounted) return;
+      setState(() => _sedangMemeriksa = false);
+
+      if (respon.berhasil) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HalamanKonfirmasiCod(
+              pesananId: widget.pesananId,
+              dataPesananAwal: respon.data as Map<String, dynamic>?,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(respon.message),
+            backgroundColor: TemaAplikasi.errorColor,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _sedangMemeriksa = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal mengganti ke COD: $e'), backgroundColor: TemaAplikasi.errorColor),
+        );
+      }
+    }
+  }
+
   /// Bilah Aksi Bawah: Verifikasi & Simulasi Dev
   Widget _bangunBilahBawah() {
     return Container(
@@ -761,54 +841,78 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
       ),
       child: SafeArea(
         top: false,
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _sedangMemeriksa ? null : _periksaStatusManual,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: TemaAplikasi.primary,
-                  side: const BorderSide(color: TemaAplikasi.borderGray),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(2),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _sedangMemeriksa ? null : _periksaStatusManual,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: TemaAplikasi.primary,
+                      side: const BorderSide(color: TemaAplikasi.borderGray),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    icon: const Icon(Icons.verified_outlined, size: 16),
+                    label: const Text(
+                      'CEK STATUS',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
                   ),
                 ),
-                icon: const Icon(Icons.verified_outlined, size: 16),
-                label: const Text(
-                  'CEK STATUS',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: _sedangMemeriksa ? null : _simulasiBayarDev,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: TemaAplikasi.primary,
+                      foregroundColor: TemaAplikasi.onPrimary,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    icon: const Icon(Icons.bolt, size: 16),
+                    label: const Text(
+                      'SIMULASI BAYAR',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if ((widget.total ?? 0) <= 2500000) ...[
+              const SizedBox(height: 6),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: _sedangMemeriksa ? null : _gantiKeCod,
+                  icon: const Icon(Icons.local_shipping_outlined, size: 15, color: TemaAplikasi.primary),
+                  label: const Text(
+                    'Kendala pembayaran? Ganti ke Bayar di Tempat (COD)',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: TemaAplikasi.primary,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: _sedangMemeriksa ? null : _simulasiBayarDev,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: TemaAplikasi.primary,
-                  foregroundColor: TemaAplikasi.onPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                icon: const Icon(Icons.bolt, size: 16),
-                label: const Text(
-                  'SIMULASI BAYAR',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-              ),
-            ),
+            ],
           ],
         ),
       ),

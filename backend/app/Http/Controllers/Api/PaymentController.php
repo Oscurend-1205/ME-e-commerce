@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLogPembayaran;
 use App\Models\Pesanan;
 use App\Services\MidtransService;
 use App\Traits\ApiResponse;
@@ -156,18 +157,47 @@ class PaymentController extends Controller
                         if ($bisaPindah) {
                             $pesanan->update(['status' => $statusBaru]);
                         }
+
+                        if (in_array($trxStatus, ['deny', 'cancel', 'expire', 'failure'])) {
+                            AuditLogPembayaran::catat(
+                                jenisKejadian: 'midtrans_error',
+                                pesanan: $pesanan,
+                                metode: 'midtrans',
+                                pesanError: "Status transaksi Midtrans: {$trxStatus}"
+                            );
+                        }
                     }
                 }
             } catch (\Throwable $e) {
                 Log::info('Cek status Midtrans silent error: ' . $e->getMessage());
+                AuditLogPembayaran::catat(
+                    jenisKejadian: 'midtrans_error',
+                    pesanan: $pesanan,
+                    metode: 'midtrans',
+                    pesanError: $e->getMessage()
+                );
             }
         }
 
+        $isCod = $pesanan->isCod();
+
         return $this->sukses([
             'order_id' => $pesanan->nomor_pesanan,
+            'pesanan_id' => $pesanan->id,
             'status_pesanan' => $pesanan->status,
             'total' => $pesanan->total,
+            'is_cod' => $isCod,
+            'fallback_cod_tersedia' => !$isCod && $pesanan->status === 'menunggu_pembayaran' && (int) $pesanan->total <= 2500000,
             'created_at' => $pesanan->created_at->format('Y-m-d H:i:s'),
         ], 'Status pembayaran berhasil dicek');
+    }
+
+    /**
+     * GET /api/payment/status-midtrans - Cek kesehatan konektivitas gateway Midtrans
+     */
+    public function statusMidtrans(): JsonResponse
+    {
+        $health = $this->midtrans->checkHealth();
+        return $this->sukses($health, 'Pemeriksaan status gateway Midtrans berhasil.');
     }
 }

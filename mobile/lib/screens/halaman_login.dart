@@ -261,48 +261,6 @@ class _HalamanLoginState extends State<HalamanLogin> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 40),
-
-                // Info akun demo
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: TemaAplikasi.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(2),
-                    border: Border.all(color: TemaAplikasi.borderGray),
-                  ),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'AKUN DEMO',
-                        style: TextStyle(
-                          fontSize: 9,
-                          letterSpacing: 1.5,
-                          fontWeight: FontWeight.w700,
-                          color: TemaAplikasi.secondary,
-                        ),
-                      ),
-                      SizedBox(height: 6),
-                      Text(
-                        'Email: auril@toko-me.test',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: TemaAplikasi.primary,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'Password: password',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: TemaAplikasi.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
