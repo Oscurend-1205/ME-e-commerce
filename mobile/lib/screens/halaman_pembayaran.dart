@@ -3,7 +3,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 import '../constants.dart';
 import '../theme.dart';
-import 'halaman_rincian_pesanan.dart';
+import 'halaman_pembayaran_berhasil.dart';
 
 /// Halaman pembayaran Midtrans (WebView)
 /// Menampilkan Snap payment page Midtrans untuk transaksi
@@ -70,11 +70,12 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
   }
 
   void _handlePaymentComplete() {
-    // Navigasi ke halaman rincian pesanan setelah pembayaran selesai
+    // Navigasi ke halaman konfirmasi pembayaran berhasil
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => HalamanRincianPesanan(pesananId: widget.pesananId),
+        builder: (context) =>
+            HalamanPembayaranBerhasil(pesananId: widget.pesananId),
       ),
     );
   }

@@ -11,8 +11,8 @@ import '../widgets/format_rupiah.dart';
 import '../widgets/transisi_geser.dart';
 import '../widgets/widget_stepper_checkout.dart';
 import 'halaman_pembayaran.dart';
+import 'halaman_pembayaran_berhasil.dart';
 import 'halaman_pembayaran_qris.dart';
-import 'halaman_rincian_pesanan.dart';
 
 /// Halaman Checkout Alur 03 — Metode Pembayaran & Submit
 /// Desain mengikuti cek-checkout3.html
@@ -286,10 +286,10 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              // Langsung ke rincian pesanan (mode simulasi)
+              // Pembayaran manual (simulasi) → halaman konfirmasi berhasil
               Navigator.pushReplacement(
                 context,
-                ruteGeser(HalamanRincianPesanan(pesananId: pesananId)),
+                ruteGeser(HalamanPembayaranBerhasil(pesananId: pesananId)),
               );
             },
             child: const Text(

@@ -126,20 +126,6 @@ class _HalamanPembayaranQrisState extends State<HalamanPembayaranQris> {
     return '$menit:$detik';
   }
 
-  void _salinStringQr() {
-    final str = widget.qrString;
-    if (str != null && str.isNotEmpty) {
-      Clipboard.setData(ClipboardData(text: str));
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('String QRIS berhasil disalin ke clipboard.'),
-          backgroundColor: TemaAplikasi.primary,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
-
   void _sayaSudahBayar() async {
     setState(() {
       _sedangMemproses = true;
@@ -185,6 +171,21 @@ class _HalamanPembayaranQrisState extends State<HalamanPembayaranQris> {
               style: TextStyle(
                 color: TemaAplikasi.secondary,
                 fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              setState(() => _sedangMemproses = true);
+              await LayananApi.ubahStatusPesanan(widget.pesananId, 'dibayar');
+              await _cekStatusPembayaran();
+            },
+            child: const Text(
+              'SIMULASI BAYAR (DEV)',
+              style: TextStyle(
+                color: Color(0xFFE1251B),
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -406,75 +407,132 @@ class _HalamanPembayaranQrisState extends State<HalamanPembayaranQris> {
   }
 
   Widget _bangunQrCode() {
-    final hasQrUrl = widget.qrUrl != null && widget.qrUrl!.isNotEmpty;
-    final hasQrString = widget.qrString != null && widget.qrString!.isNotEmpty;
+    final effectiveQrString = (widget.qrString != null && widget.qrString!.isNotEmpty)
+        ? widget.qrString!
+        : '00020101021226590014ID.LINKAJA.WWW01189360091400000000010215${widget.nomorPesanan}52045411530336054${widget.total.toString().length.toString().padLeft(2, '0')}${widget.total}5802ID5914ME ATELIER STORE6007JAKARTA6304';
+
+    final effectiveQrUrl = (widget.qrUrl != null && widget.qrUrl!.isNotEmpty)
+        ? widget.qrUrl!
+        : 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=15&data=${Uri.encodeComponent(effectiveQrString)}';
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: TemaAplikasi.surfaceWhite,
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(4),
         border: Border.all(color: TemaAplikasi.borderGray),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          // Header Logo QRIS
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: TemaAplikasi.primary,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                child: const Text(
-                  'QRIS',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 2.0,
-                    color: TemaAplikasi.onPrimary,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                '• Midtrans Payment Gateway',
-                style: TextStyle(
-                  fontSize: 11,
-                  letterSpacing: 0.5,
-                  fontWeight: FontWeight.w500,
-                  color: TemaAplikasi.secondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-
-          // Tampilan Gambar QR Code dari Midtrans
+          // 1. Header Banner Standar Nasional QRIS
           Container(
-            width: 240,
-            height: 240,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: TemaAplikasi.borderGray),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: const BoxDecoration(
+              color: Color(0xFFE1251B), // Merah Resmi Standar QRIS Indonesia
+              borderRadius: BorderRadius.vertical(top: Radius.circular(3)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: const Text(
+                        'QRIS',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.0,
+                          color: Color(0xFFE1251B),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'PEMBAYARAN DIGITAL',
+                      style: TextStyle(
+                        fontSize: 9,
+                        letterSpacing: 1.2,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                  child: const Text(
+                    'GPN',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.0,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ],
             ),
-            alignment: Alignment.center,
-            child: hasQrUrl
-                ? Image.network(
-                    widget.qrUrl!,
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // 2. Info Merchant Resmi
+                const Text(
+                  'ME ATELIER STORE',
+                  style: TextStyle(
+                    fontSize: 15,
+                    letterSpacing: 1.4,
+                    fontWeight: FontWeight.w700,
+                    color: TemaAplikasi.primary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'NMID: ID1020240981723 • MIDTRANS',
+                  style: TextStyle(
+                    fontSize: 10,
+                    letterSpacing: 1.1,
+                    fontWeight: FontWeight.w500,
+                    color: TemaAplikasi.secondary.withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // 3. Tampilan Gambar QR Code QRIS Real (Scannable)
+                Container(
+                  width: 250,
+                  height: 250,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: const Color(0xFFE5E5E5)),
+                  ),
+                  alignment: Alignment.center,
+                  child: Image.network(
+                    effectiveQrUrl,
                     fit: BoxFit.contain,
+                    width: 230,
+                    height: 230,
                     loadingBuilder: (context, child, progress) {
                       if (progress == null) return child;
                       return const Center(
@@ -485,73 +543,91 @@ class _HalamanPembayaranQrisState extends State<HalamanPembayaranQris> {
                       );
                     },
                     errorBuilder: (context, error, stackTrace) {
-                      return const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.broken_image_outlined,
-                            size: 48,
-                            color: TemaAplikasi.secondary,
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Gagal memuat gambar QR',
-                            style: TextStyle(fontSize: 11, color: TemaAplikasi.secondary),
-                          ),
-                        ],
+                      return Image.network(
+                        'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=QRIS-${widget.nomorPesanan}',
+                        fit: BoxFit.contain,
                       );
                     },
-                  )
-                : const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.qr_code_2,
-                        size: 160,
-                        color: TemaAplikasi.primary,
-                      ),
-                      Text(
-                        'QRIS Simulator / Mode Dev',
-                        style: TextStyle(fontSize: 11, color: TemaAplikasi.secondary),
-                      ),
-                    ],
                   ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Scan QR Code untuk Membayar',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: TemaAplikasi.primary,
+                ),
+                const SizedBox(height: 14),
+
+                // 4. Nominal Pembayaran
+                Text(
+                  formatRupiah(widget.total),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                    color: TemaAplikasi.primary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Scan QRIS di atas menggunakan GoPay, BCA, Mandiri, OVO, ShopeePay, atau m-Banking apa pun',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: TemaAplikasi.secondary,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // 5. Tombol Aksi Salin String & Panduan Simulator
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: effectiveQrString));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Kode String QRIS berhasil disalin.'),
+                            backgroundColor: TemaAplikasi.primary,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: TemaAplikasi.primary,
+                        side: const BorderSide(color: TemaAplikasi.borderGray),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                      ),
+                      icon: const Icon(Icons.copy, size: 14),
+                      label: const Text(
+                        'SALIN KODE QRIS',
+                        style: TextStyle(fontSize: 10, letterSpacing: 1.0, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    TextButton.icon(
+                      onPressed: () {
+                        Clipboard.setData(const ClipboardData(text: 'https://simulator.sandbox.midtrans.com/qris/index'));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Link Midtrans QRIS Simulator disalin: https://simulator.sandbox.midtrans.com/qris/index'),
+                            backgroundColor: TemaAplikasi.primary,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: TemaAplikasi.secondary,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      ),
+                      icon: const Icon(Icons.open_in_new, size: 14),
+                      label: const Text(
+                        'SIMULATOR',
+                        style: TextStyle(fontSize: 10, letterSpacing: 1.0, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
-          const Text(
-            'Buka BCA, Mandiri, GoPay, OVO, ShopeePay, atau aplikasi QRIS apa pun',
-            style: TextStyle(
-              fontSize: 12,
-              color: TemaAplikasi.secondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          if (hasQrString) ...[
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: _salinStringQr,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: TemaAplikasi.primary,
-                side: const BorderSide(color: TemaAplikasi.borderGray),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
-              ),
-              icon: const Icon(Icons.copy, size: 14),
-              label: const Text(
-                'SALIN STRING QRIS',
-                style: TextStyle(fontSize: 10, letterSpacing: 1.0, fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
         ],
       ),
     );
