@@ -17,25 +17,8 @@ class PesananController extends Controller
 
     protected function getPelangganId(Request $request): int
     {
-        $id = $request->header('X-Pelanggan-Id');
-        if ($id && is_numeric($id)) {
-            return (int) $id;
-        }
-        return 1;
+        return (int) $request->input('pelanggan_id', 0);
     }
-
-    /**
-     * Tabel aturan perpindahan status yang sah sesuai Bagian 7 PRD
-     */
-    protected array $transisiSah = [
-        'menunggu_pembayaran' => ['menunggu_konfirmasi', 'dibatalkan'],
-        'menunggu_konfirmasi' => ['dibayar', 'dibatalkan'],
-        'dibayar' => ['diproses'],
-        'diproses' => ['dikirim'],
-        'dikirim' => ['selesai'],
-        'selesai' => [],
-        'dibatalkan' => [],
-    ];
 
     /**
      * GET /api/pesanan — Riwayat pesanan (terbaru dulu)
@@ -44,10 +27,21 @@ class PesananController extends Controller
     {
         $pelangganId = $this->getPelangganId($request);
 
-        $pesanans = Pesanan::with(['kurir', 'metodePembayaran', 'detail'])
-            ->where('pelanggan_id', $pelangganId)
-            ->orderBy('id', 'desc')
-            ->get();
+        $query = Pesanan::with(['pelanggan', 'kurir', 'metodePembayaran', 'detail.produk'])
+            ->where('pelanggan_id', $pelangganId);
+
+        // Filter status dinamis (mis: ?status=dikirim atau ?status=diproses,dikirim)
+        if ($request->has('status')) {
+            $statusParam = $request->input('status');
+            if (str_contains($statusParam, ',')) {
+                $statuses = array_map('trim', explode(',', $statusParam));
+                $query->whereIn('status', $statuses);
+            } else {
+                $query->where('status', $statusParam);
+            }
+        }
+
+        $pesanans = $query->orderBy('id', 'desc')->get();
 
         $data = $pesanans->map(function ($p) {
             return $p->formatLengkap();
@@ -59,26 +53,37 @@ class PesananController extends Controller
     /**
      * GET /api/pesanan/{id} — Rincian pesanan
      */
-    public function show(int $id): JsonResponse
+    public function show(Request $request, int $id): JsonResponse
     {
-        $pesanan = Pesanan::with(['kurir', 'metodePembayaran', 'detail'])->find($id);
+        $pelangganId = $this->getPelangganId($request);
+        $pesanan = Pesanan::with(['pelanggan', 'kurir', 'metodePembayaran', 'detail.produk'])->find($id);
 
         if (!$pesanan) {
             return $this->gagal('Pesanan tidak ditemukan.', 404);
+        }
+
+        if ($pelangganId > 0 && $pesanan->pelanggan_id !== $pelangganId) {
+            return $this->gagal('Anda tidak memiliki izin untuk melihat pesanan ini.', 403);
         }
 
         return $this->sukses($pesanan->formatLengkap(), 'Rincian pesanan berhasil diambil', 200);
     }
 
     /**
-     * PATCH /api/pesanan/{id}/status — Ubah status pesanan dengan validasi transisi
+     * PATCH /api/pesanan/{id}/status — Ubah status pesanan dengan validasi transisi & aturan akses
      */
     public function updateStatus(Request $request, int $id): JsonResponse
     {
-        $pesanan = Pesanan::with('detail')->find($id);
+        $pelangganId = $this->getPelangganId($request);
+        $pesanan = Pesanan::with(['pelanggan', 'kurir', 'metodePembayaran', 'detail'])->find($id);
 
         if (!$pesanan) {
             return $this->gagal('Pesanan tidak ditemukan.', 404);
+        }
+
+        // 1. Verifikasi kepemilikan pesanan: Pelanggan hanya boleh mengubah pesanan miliknya sendiri
+        if ($pelangganId > 0 && $pesanan->pelanggan_id !== $pelangganId) {
+            return $this->gagal('Anda tidak memiliki izin untuk mengubah pesanan ini.', 403);
         }
 
         $validator = Validator::make($request->all(), [
@@ -94,8 +99,34 @@ class PesananController extends Controller
         $statusSaatIni = strtolower($pesanan->status);
         $statusBaru = strtolower(trim($request->input('status')));
 
-        // Validasi apakah status saat ini memiliki transisi sah
-        $pilihanSah = $this->transisiSah[$statusSaatIni] ?? [];
+        // 2. Aturan Hak Akses: Pemrosesan "kemas barang" (diproses) dan "kirim ke kurir" (dikirim)
+        // HANYA dapat dilakukan oleh admin Filament di backend. Sisi pengguna mobile ditolak (403 Forbidden).
+        if (in_array($statusBaru, ['diproses', 'dikirim'])) {
+            return $this->gagal(
+                'Akses ditolak: Pemrosesan "kemas barang" dan "kirim ke kurir" hanya dapat dilakukan oleh Admin Filament di backend.',
+                403
+            );
+        }
+
+        // 3. Hak akses pengguna untuk konfirmasi terima:
+        // Konfirmasi 'selesai' hanya dapat dilakukan jika barang saat ini sedang dikirim ('dikirim')
+        if ($statusBaru === 'selesai' && $statusSaatIni !== 'dikirim') {
+            return $this->gagal(
+                "Pesanan belum dapat diselesaikan karena status saat ini masih '{$statusSaatIni}'. Konfirmasi selesai hanya berlaku saat barang dalam proses pengiriman (dikirim).",
+                409
+            );
+        }
+
+        // 3b. Aturan metode pembayaran manual: transfer manual tidak boleh langsung melompat ke 'dibayar'
+        if ($statusSaatIni === 'menunggu_pembayaran' && $statusBaru === 'dibayar' && $pesanan->metodePembayaran?->kode === 'transfer_manual') {
+            return $this->gagal(
+                "Perpindahan status dari 'menunggu_pembayaran' ke 'dibayar' untuk metode transfer manual tidak diizinkan. Pembeli harus melalui 'menunggu_konfirmasi'.",
+                409
+            );
+        }
+
+        // 4. Validasi apakah status saat ini memiliki transisi sah
+        $pilihanSah = $pesanan->pilihanStatusBerikutnya();
 
         if (!in_array($statusBaru, $pilihanSah)) {
             $pesanPilihan = empty($pilihanSah)
@@ -108,19 +139,15 @@ class PesananController extends Controller
         }
 
         return DB::transaction(function () use ($pesanan, $statusBaru) {
-            // Jika pesanan dibatalkan, kembalikan stok varian di dalam transaksi yang sama (PRD Bagian 7)
+            // Jika pesanan dibatalkan, kembalikan stok varian di dalam transaksi yang sama
             if ($statusBaru === 'dibatalkan') {
-                foreach ($pesanan->detail as $item) {
-                    if ($item->varian_id) {
-                        VarianProduk::where('id', $item->varian_id)->increment('stok', $item->jumlah);
-                    }
-                }
+                $pesanan->kembalikanStok();
             }
 
             $pesanan->status = $statusBaru;
             $pesanan->save();
 
-            $pesanan->load(['kurir', 'metodePembayaran', 'detail']);
+            $pesanan->load(['pelanggan', 'kurir', 'metodePembayaran', 'detail.produk']);
 
             return $this->sukses(
                 $pesanan->formatLengkap(),

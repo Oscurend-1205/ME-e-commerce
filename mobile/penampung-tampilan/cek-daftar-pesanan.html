@@ -1,0 +1,981 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      name="viewport"
+    />
+    <meta content="mobile_tab" name="shell-type" />
+    <title>ME Fashion Store</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-bright": "#f9f9f9",
+              secondary: "#5e5e5e",
+              "primary-container": "#1c1b1b",
+              "primary-fixed": "#e5e2e1",
+              "inverse-on-surface": "#f0f1f1",
+              "surface-dim": "#dadada",
+              "outline-variant": "#c4c7c7",
+              "surface-container": "#eeeeee",
+              "on-secondary-container": "#646464",
+              "on-primary": "#ffffff",
+              "on-error-container": "#93000a",
+              "on-tertiary-container": "#868381",
+              "on-secondary-fixed-variant": "#464747",
+              "error-container": "#ffdad6",
+              "on-primary-fixed": "#1c1b1b",
+              "primary-fixed-dim": "#c8c6c5",
+              "on-primary-fixed-variant": "#474646",
+              background: "#f9f9f9",
+              surface: "#f9f9f9",
+              "on-primary-container": "#858383",
+              "on-secondary": "#ffffff",
+              "secondary-container": "#e3e2e2",
+              "surface-container-lowest": "#ffffff",
+              "border-gray": "#E5E5E5",
+              "surface-light": "#F7F7F7",
+              primary: "#000000",
+              "on-secondary-fixed": "#1b1c1c",
+              outline: "#747878",
+              "secondary-fixed": "#e3e2e2",
+              "surface-container-highest": "#e2e2e2",
+              "on-surface-variant": "#444748",
+              "surface-tint": "#5f5e5e",
+              "on-error": "#ffffff",
+              error: "#ba1a1a",
+              "tertiary-fixed": "#e6e1df",
+              "tertiary-container": "#1d1b1a",
+              "surface-variant": "#e2e2e2",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed-variant": "#484645",
+              "surface-container-high": "#e8e8e8",
+              "on-background": "#1a1c1c",
+              tertiary: "#000000",
+              "on-tertiary-fixed": "#1d1b1a",
+              "secondary-fixed-dim": "#c7c6c6",
+              "muted-gray": "#767676",
+              "inverse-surface": "#2f3131",
+              "surface-container-low": "#f3f3f4",
+              "on-surface": "#1a1c1c",
+              "inverse-primary": "#c8c6c5",
+              "tertiary-fixed-dim": "#cac6c3",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              gutter: "1rem",
+              margin: "1rem",
+              "space-lg": "1.5rem",
+              "space-md": "1rem",
+              "space-sm": "0.5rem",
+              "margin-desktop": "3rem",
+              "space-xs": "0.25rem",
+              "gutter-desktop": "1.5rem",
+              "space-xl": "2.5rem",
+              "margin-tablet": "2rem",
+            },
+            fontFamily: {
+              "label-md": ["Inter"],
+              "headline-lg": ["Playfair Display"],
+              "label-lg": ["Inter"],
+              "body-lg": ["Inter"],
+              "headline-xl": ["Playfair Display"],
+              "headline-xl-mobile": ["Playfair Display"],
+              "label-sm": ["Inter"],
+              "body-md": ["Inter"],
+              "headline-lg-mobile": ["Playfair Display"],
+              "headline-sm": ["Playfair Display"],
+              "headline-md": ["Playfair Display"],
+              "body-sm": ["Inter"],
+            },
+            fontSize: {
+              "label-md": [
+                "11px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.16em",
+                  fontWeight: "500",
+                },
+              ],
+              "headline-lg": [
+                "40px",
+                {
+                  lineHeight: "48px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "label-lg": [
+                "13px",
+                {
+                  lineHeight: "18px",
+                  letterSpacing: "0.14em",
+                  fontWeight: "500",
+                },
+              ],
+              "body-lg": [
+                "16px",
+                {
+                  lineHeight: "26px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-xl": [
+                "56px",
+                {
+                  lineHeight: "64px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-xl-mobile": [
+                "36px",
+                {
+                  lineHeight: "44px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "label-sm": [
+                "10px",
+                {
+                  lineHeight: "14px",
+                  letterSpacing: "0.18em",
+                  fontWeight: "600",
+                },
+              ],
+              "body-md": [
+                "14px",
+                {
+                  lineHeight: "22px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-lg-mobile": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "400" },
+              ],
+              "headline-sm": [
+                "22px",
+                { lineHeight: "30px", fontWeight: "500" },
+              ],
+              "headline-md": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "400" },
+              ],
+              "body-sm": [
+                "12px",
+                {
+                  lineHeight: "18px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "400",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      @layer base {
+        html,
+        body {
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          min-height: 100%;
+        }
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .pt-safe {
+          padding-top: env(safe-area-inset-top, 0px);
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-surface-container-lowest text-on-surface antialiased flex flex-col min-h-screen"
+  >
+    <header
+      class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.03)]"
+    >
+      <div
+        class="h-14 px-margin flex items-center justify-between border-b border-surface-container bg-surface-container-lowest/95 backdrop-blur-xl"
+      >
+        <div class="flex items-center">
+          <button
+            aria-label="Kembali"
+            class="w-10 h-10 -ml-2 flex items-center justify-center text-primary transition-opacity hover:opacity-60 active:scale-95"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[22px]"
+              >arrow_back</span
+            >
+          </button>
+        </div>
+        <div class="flex-1 text-center px-space-xs">
+          <h1
+            class="font-headline-sm text-[16px] text-primary tracking-widest uppercase font-medium line-clamp-1"
+          >
+            Profil &amp; Pengaturan
+          </h1>
+        </div>
+        <div class="flex items-center gap-1">
+          <button
+            aria-label="Pencarian"
+            class="w-10 h-10 flex items-center justify-center text-primary transition-opacity hover:opacity-60"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[20px]"
+              >search</span
+            ></button
+          ><button
+            aria-label="Tas Belanja"
+            class="w-10 h-10 relative flex items-center justify-center text-primary transition-opacity hover:opacity-60"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[20px]"
+              >shopping_bag</span
+            ><span
+              class="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-on-primary text-[9px] font-medium rounded-full flex items-center justify-center leading-none"
+              >2</span
+            >
+          </button>
+        </div>
+      </div>
+    </header>
+    <main class="flex-1 w-full bg-surface-container-lowest pt-16 pb-20">
+      <div class="flex flex-col w-full pb-10">
+        <!-- Status & Quick Search Header Bar -->
+        <section class="px-margin pt-4 pb-2">
+          <div class="flex items-baseline justify-between">
+            <div>
+              <span
+                class="font-label-sm text-label-sm text-secondary uppercase tracking-[0.2em] block mb-1"
+                >Arsip Pembelian</span
+              >
+              <h2
+                class="font-headline-sm text-headline-sm text-on-surface font-medium"
+              >
+                Pesanan Saya
+              </h2>
+            </div>
+            <button
+              aria-label="Cari arsip pesanan"
+              class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low text-on-surface hover:bg-surface-container active:scale-95 transition-all"
+              type="button"
+            >
+              <span class="material-symbols-outlined text-[20px]">search</span>
+            </button>
+          </div>
+        </section>
+        <!-- Editorial Minimalist Tabs -->
+        <nav
+          aria-label="Status Pesanan"
+          class="sticky top-14 z-20 bg-surface-container-lowest/95 backdrop-blur-md px-margin pt-2 shadow-sm"
+        >
+          <div
+            class="flex items-center gap-6 overflow-x-auto no-scrollbar"
+            id="orderTabNav"
+          >
+            <button
+              class="tab-indicator relative pb-3 text-left focus:outline-none transition-colors group"
+              id="tabBtn-proses"
+              onclick="switchOrderTab('proses')"
+              type="button"
+            >
+              <div class="flex items-center gap-2">
+                <span
+                  class="font-label-md text-label-md tracking-widest uppercase font-semibold text-primary"
+                  id="tabText-proses"
+                  >Dalam Proses</span
+                >
+                <span
+                  class="px-1.5 py-0.5 text-[10px] leading-tight font-medium bg-primary text-on-primary rounded-full"
+                  >2</span
+                >
+              </div>
+              <span
+                class="tab-line absolute bottom-0 left-0 right-0 h-[2px] bg-primary transition-all duration-300"
+              ></span>
+            </button>
+            <button
+              class="tab-indicator relative pb-3 text-left focus:outline-none transition-colors group"
+              id="tabBtn-selesai"
+              onclick="switchOrderTab('selesai')"
+              type="button"
+            >
+              <div class="flex items-center gap-2">
+                <span
+                  class="font-label-md text-label-md tracking-widest uppercase font-medium text-secondary hover:text-primary transition-colors"
+                  id="tabText-selesai"
+                  >Selesai</span
+                >
+                <span
+                  class="px-1.5 py-0.5 text-[10px] leading-tight font-medium bg-surface-container-high text-secondary rounded-full"
+                  >5</span
+                >
+              </div>
+              <span
+                class="tab-line absolute bottom-0 left-0 right-0 h-[2px] bg-transparent transition-all duration-300"
+              ></span>
+            </button>
+            <button
+              class="tab-indicator relative pb-3 text-left focus:outline-none transition-colors group"
+              id="tabBtn-dibatalkan"
+              onclick="switchOrderTab('dibatalkan')"
+              type="button"
+            >
+              <div class="flex items-center gap-2">
+                <span
+                  class="font-label-md text-label-md tracking-widest uppercase font-medium text-secondary hover:text-primary transition-colors"
+                  id="tabText-dibatalkan"
+                  >Dibatalkan</span
+                >
+                <span
+                  class="px-1.5 py-0.5 text-[10px] leading-tight font-medium bg-surface-container-high text-secondary rounded-full"
+                  >0</span
+                >
+              </div>
+              <span
+                class="tab-line absolute bottom-0 left-0 right-0 h-[2px] bg-transparent transition-all duration-300"
+              ></span>
+            </button>
+          </div>
+        </nav>
+        <!-- CONTENT PANELS -->
+        <div class="px-margin pt-5 flex flex-col gap-5">
+          <!-- SECTION: DALAM PROSES (ACTIVE TAB CONTENT) -->
+          <div
+            class="flex flex-col gap-5 transition-opacity duration-300"
+            id="panel-proses"
+          >
+            <!-- Card #1: In Transit -->
+            <article
+              class="bg-surface-container-lowest shadow-sm rounded-none p-4 flex flex-col gap-4"
+            >
+              <!-- Order Meta & Badge -->
+              <div class="flex items-center justify-between">
+                <div class="flex flex-col">
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-wider text-muted-gray"
+                    >24 Mei 2024</span
+                  >
+                  <span
+                    class="font-body-sm text-body-sm font-semibold tracking-wider text-primary"
+                    >#ME-892401</span
+                  >
+                </div>
+                <div
+                  class="flex items-center gap-1.5 bg-surface-container-low px-2.5 py-1"
+                >
+                  <span
+                    class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"
+                  ></span>
+                  <span
+                    class="font-label-sm text-label-sm text-primary uppercase font-semibold"
+                    >Sedang Dikirim</span
+                  >
+                </div>
+              </div>
+              <!-- Product Preview Row -->
+              <div
+                class="flex gap-3.5 items-start bg-surface-container-low/40 p-3"
+              >
+                <div
+                  class="w-20 h-24 bg-surface-container-high flex-shrink-0 relative overflow-hidden"
+                >
+                  <img
+                    class="w-full h-full object-cover"
+                    data-alt="Editorial close-up of a luxurious tailored double-breasted wool blazer in charcoal black, hung against a clean studio backdrop with soft dramatic rim lighting and fine sartorial details."
+                    loading="lazy"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-BZkmLJj3hc4k2LM3VbqlNM8gQA9W5C1oWigxsruVGHJQFvkA5ibNiduF9wTSgYuE_F6P5hVDza-Tr_OKMgYud7t2C-Ih4hVYMLLiCs5Hbl9jISkUR08XqTHNhr07D5kKGfMUq1ynfsaArmZSnlOowZLpqW4Atcsoa5HVifMS6PXQM_doMiQaiyjXCPe5iyVrIu_TYJBgZNtMfBoyjR2odY30iv77VvJBAensdYho"
+                  />
+                </div>
+                <div
+                  class="flex-1 min-w-0 flex flex-col justify-between self-stretch"
+                >
+                  <div>
+                    <p
+                      class="font-label-sm text-label-sm text-muted-gray uppercase tracking-widest"
+                    >
+                      Koleksi Utama
+                    </p>
+                    <h3
+                      class="font-headline-sm text-[16px] leading-snug text-primary truncate font-medium mt-0.5"
+                    >
+                      Double-Breasted Wool Blazer
+                    </h3>
+                    <p class="font-body-sm text-body-sm text-secondary mt-1">
+                      Charcoal Noir • Size M • 1 Item
+                    </p>
+                  </div>
+                  <div class="mt-2 flex items-center gap-1.5">
+                    <span
+                      class="font-label-sm text-[10px] text-muted-gray uppercase tracking-wider"
+                      >+1 item aksesori lainnya</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <!-- Tracking Banner & Delivery ETA -->
+              <div
+                class="bg-surface-container-low p-3 flex items-start gap-2.5"
+              >
+                <span
+                  class="material-symbols-outlined text-[18px] text-primary mt-0.5"
+                  >local_shipping</span
+                >
+                <div class="flex-1">
+                  <p
+                    class="font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wider"
+                  >
+                    Kurir Atelier Express
+                  </p>
+                  <p class="font-body-sm text-body-sm text-secondary mt-0.5">
+                    Estimasi tiba:
+                    <span class="font-medium text-primary"
+                      >Besok, 25 Mei (Sebelum 18:00)</span
+                    >
+                  </p>
+                </div>
+              </div>
+              <!-- Summary & Actions -->
+              <div class="pt-2 flex flex-col gap-3">
+                <div class="flex justify-between items-baseline">
+                  <span
+                    class="font-label-md text-label-md text-muted-gray uppercase tracking-wider"
+                    >Total Pembayaran</span
+                  >
+                  <span
+                    class="font-headline-sm text-[18px] text-primary font-semibold"
+                    >Rp 3.640.000</span
+                  >
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    class="w-full py-3 bg-surface-container-high text-primary font-label-md text-label-md uppercase tracking-widest text-center hover:bg-surface-container active:scale-[0.99] transition-transform"
+                    type="button"
+                  >
+                    Detail Pesanan
+                  </button>
+                  <button
+                    class="w-full py-3 bg-primary text-on-primary font-label-md text-label-md uppercase tracking-widest text-center hover:bg-primary-container active:scale-[0.99] transition-transform"
+                    type="button"
+                  >
+                    Lacak Pengiriman
+                  </button>
+                </div>
+              </div>
+            </article>
+            <!-- Card #2: Processing -->
+            <article
+              class="bg-surface-container-lowest shadow-sm rounded-none p-4 flex flex-col gap-4"
+            >
+              <!-- Order Meta & Badge -->
+              <div class="flex items-center justify-between">
+                <div class="flex flex-col">
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-wider text-muted-gray"
+                    >23 Mei 2024</span
+                  >
+                  <span
+                    class="font-body-sm text-body-sm font-semibold tracking-wider text-primary"
+                    >#ME-892318</span
+                  >
+                </div>
+                <div
+                  class="flex items-center gap-1.5 bg-surface-container-low px-2.5 py-1"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  <span
+                    class="font-label-sm text-label-sm text-secondary uppercase font-semibold"
+                    >Diproses Atelier</span
+                  >
+                </div>
+              </div>
+              <!-- Product Preview Row -->
+              <div
+                class="flex gap-3.5 items-start bg-surface-container-low/40 p-3"
+              >
+                <div
+                  class="w-20 h-24 bg-surface-container-high flex-shrink-0 relative overflow-hidden"
+                >
+                  <img
+                    class="w-full h-full object-cover"
+                    data-alt="Macro luxury catalog photograph of a handcrafted solid sterling silver cuff bracelet resting on textured matte ivory marble, delicate soft reflection, minimalist editorial composition."
+                    loading="lazy"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmJKdULZQOfTKEjmWEonZQTmxFLu8mRYfWREcbwGEtD2d0JI9xFn7w1hFm_z3qZt0_h3K1IBUC2wnVE9cXuapsn5TzIhXqAAudmQoV72M-VNHYhKM-cajq3fzV3WAquruchwuKwxNFZekYEuRQ29qinFNEYD1OS9MKsKCI-rcfo7C19_5yJqLMFMSV8oB2fdRnPTR425q7RLuV9w4Y2TD2W8eZ4KS6xbImaYf7KvwN"
+                  />
+                </div>
+                <div
+                  class="flex-1 min-w-0 flex flex-col justify-between self-stretch"
+                >
+                  <div>
+                    <p
+                      class="font-label-sm text-label-sm text-muted-gray uppercase tracking-widest"
+                    >
+                      Atelier Jewelry
+                    </p>
+                    <h3
+                      class="font-headline-sm text-[16px] leading-snug text-primary truncate font-medium mt-0.5"
+                    >
+                      Solid Sterling Silver Cuff
+                    </h3>
+                    <p class="font-body-sm text-body-sm text-secondary mt-1">
+                      Silver 925 • Standard • 1 Item
+                    </p>
+                  </div>
+                  <div class="mt-2 flex items-center gap-1">
+                    <span
+                      class="material-symbols-outlined text-[14px] text-muted-gray"
+                      >verified</span
+                    >
+                    <span
+                      class="font-label-sm text-[10px] text-muted-gray uppercase tracking-wider"
+                      >Tahap Quality Inspection</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <!-- Summary & Actions -->
+              <div class="pt-2 flex flex-col gap-3">
+                <div class="flex justify-between items-baseline">
+                  <span
+                    class="font-label-md text-label-md text-muted-gray uppercase tracking-wider"
+                    >Total Pembayaran</span
+                  >
+                  <span
+                    class="font-headline-sm text-[18px] text-primary font-semibold"
+                    >Rp 650.000</span
+                  >
+                </div>
+                <div class="flex gap-2 pt-1">
+                  <button
+                    class="w-full py-3 bg-surface-container-high text-primary font-label-md text-label-md uppercase tracking-widest text-center hover:bg-surface-container active:scale-[0.99] transition-transform"
+                    type="button"
+                  >
+                    Rincian &amp; Bantuan
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+          <!-- SECTION: SELESAI (ACCESSIBLE VIA TAB SWITCH OR DIRECT VIEW) -->
+          <div
+            class="flex flex-col gap-5 hidden transition-opacity duration-300"
+            id="panel-selesai"
+          >
+            <!-- Card #3: Completed / Delivered -->
+            <article
+              class="bg-surface-container-lowest shadow-sm rounded-none p-4 flex flex-col gap-4"
+            >
+              <!-- Order Meta & Badge -->
+              <div class="flex items-center justify-between">
+                <div class="flex flex-col">
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-wider text-muted-gray"
+                    >12 Mei 2024</span
+                  >
+                  <span
+                    class="font-body-sm text-body-sm font-semibold tracking-wider text-primary"
+                    >#ME-884102</span
+                  >
+                </div>
+                <div
+                  class="flex items-center gap-1.5 bg-surface-container-high px-2.5 py-1"
+                >
+                  <span
+                    class="material-symbols-outlined text-[13px] text-primary"
+                    >check_circle</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm text-primary uppercase font-semibold"
+                    >Selesai Diterima</span
+                  >
+                </div>
+              </div>
+              <!-- Product Preview Row -->
+              <div
+                class="flex gap-3.5 items-start bg-surface-container-low/40 p-3"
+              >
+                <div
+                  class="w-20 h-24 bg-surface-container-high flex-shrink-0 relative overflow-hidden"
+                >
+                  <img
+                    class="w-full h-full object-cover"
+                    data-alt="Editorial product shot of a minimalist structured calfskin leather tote bag in deep nero noir black with architectural silhouette, sharp craftsmanship and studio soft lighting."
+                    loading="lazy"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuB39gbHlyiS-F-E7or68JLenty3ssAsGYSR3ux8YUurrqZS7692fYFP_PJnesg-h76i1euLQDh9oep0q2H9KjlxKL5zKVwtwBZyQtuKWzNmm7bIstKcNS5qwU8KU6MgBy3NPC_j0f3d8BC2jJrVwQbpdnhQIrU8C6rHar0ZwvUgk5WJSBW1JT6XLqpGevkJCO9eQztdd1YEf4gItpksL54mEoTWlsdqeSyTCTRbQo7T"
+                  />
+                </div>
+                <div
+                  class="flex-1 min-w-0 flex flex-col justify-between self-stretch"
+                >
+                  <div>
+                    <p
+                      class="font-label-sm text-label-sm text-muted-gray uppercase tracking-widest"
+                    >
+                      Aksesori Kulit
+                    </p>
+                    <h3
+                      class="font-headline-sm text-[16px] leading-snug text-primary truncate font-medium mt-0.5"
+                    >
+                      Structured Leather Tote
+                    </h3>
+                    <p class="font-body-sm text-body-sm text-secondary mt-1">
+                      Nero Noir • One Size • 1 Item
+                    </p>
+                  </div>
+                  <div class="mt-2">
+                    <span
+                      class="font-body-sm text-body-sm text-muted-gray italic"
+                      >Diterima oleh Pelanggan pada 14 Mei</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <!-- Summary & Actions -->
+              <div class="pt-2 flex flex-col gap-3">
+                <div class="flex justify-between items-baseline">
+                  <span
+                    class="font-label-md text-label-md text-muted-gray uppercase tracking-wider"
+                    >Total Pembayaran</span
+                  >
+                  <span
+                    class="font-headline-sm text-[18px] text-primary font-semibold"
+                    >Rp 1.250.000</span
+                  >
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    class="w-full py-3 bg-surface-container-high text-primary font-label-md text-label-md uppercase tracking-widest text-center hover:bg-surface-container active:scale-[0.99] transition-transform"
+                    type="button"
+                  >
+                    Beri Ulasan
+                  </button>
+                  <button
+                    class="w-full py-3 bg-primary text-on-primary font-label-md text-label-md uppercase tracking-widest text-center hover:bg-primary-container active:scale-[0.99] transition-transform"
+                    type="button"
+                  >
+                    Beli Lagi
+                  </button>
+                </div>
+              </div>
+            </article>
+            <!-- Card #4: Additional Finished Order for Depth -->
+            <article
+              class="bg-surface-container-lowest shadow-sm rounded-none p-4 flex flex-col gap-4"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex flex-col">
+                  <span
+                    class="font-label-sm text-label-sm uppercase tracking-wider text-muted-gray"
+                    >28 April 2024</span
+                  >
+                  <span
+                    class="font-body-sm text-body-sm font-semibold tracking-wider text-primary"
+                    >#ME-879940</span
+                  >
+                </div>
+                <div
+                  class="flex items-center gap-1.5 bg-surface-container-high px-2.5 py-1"
+                >
+                  <span
+                    class="material-symbols-outlined text-[13px] text-primary"
+                    >check_circle</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm text-primary uppercase font-semibold"
+                    >Selesai Diterima</span
+                  >
+                </div>
+              </div>
+              <div
+                class="flex gap-3.5 items-start bg-surface-container-low/40 p-3"
+              >
+                <div
+                  class="w-20 h-24 bg-surface-container-high flex-shrink-0 relative overflow-hidden"
+                >
+                  <img
+                    class="w-full h-full object-cover"
+                    data-alt="Editorial look of a high neck ribbed silk knit sweater in muted off-white ecru, draped cleanly with high contrast shadows and ultra luxury textile texture."
+                    loading="lazy"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsbw3yjxE3yyKgVCfV2puL27wBomNDpeflvZMBtvhM7GqDP5lYKQ5et1fqatd2rNzxAFyEswocjru46AyUPzmzZz1IIBaNIOjWMJlriTPN0V-JiYFb2cggADXZQOT6Jscq0yRzKUUFae0KGeYpI_A9zOCFv-y5fvyXIntTL2XB2u2eD92Vx4gcXZavcd60afqE7Rp0gv8XLwenk-W81oRzUvYuGM1GWtVpYSxpDwer"
+                  />
+                </div>
+                <div
+                  class="flex-1 min-w-0 flex flex-col justify-between self-stretch"
+                >
+                  <div>
+                    <p
+                      class="font-label-sm text-label-sm text-muted-gray uppercase tracking-widest"
+                    >
+                      Knitwear
+                    </p>
+                    <h3
+                      class="font-headline-sm text-[16px] leading-snug text-primary truncate font-medium mt-0.5"
+                    >
+                      Ribbed Silk Turtleneck
+                    </h3>
+                    <p class="font-body-sm text-body-sm text-secondary mt-1">
+                      Ecru Raw • Size S • 1 Item
+                    </p>
+                  </div>
+                  <div class="mt-2 flex items-center gap-1 text-primary">
+                    <span class="material-symbols-outlined text-[14px]"
+                      >star</span
+                    >
+                    <span
+                      class="font-label-sm text-[11px] font-medium tracking-wide"
+                      >Ulasan Diberikan (5/5)</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="pt-2 flex flex-col gap-3">
+                <div class="flex justify-between items-baseline">
+                  <span
+                    class="font-label-md text-label-md text-muted-gray uppercase tracking-wider"
+                    >Total Pembayaran</span
+                  >
+                  <span
+                    class="font-headline-sm text-[18px] text-primary font-semibold"
+                    >Rp 890.000</span
+                  >
+                </div>
+                <div class="pt-1">
+                  <button
+                    class="w-full py-3 bg-primary text-on-primary font-label-md text-label-md uppercase tracking-widest text-center hover:bg-primary-container active:scale-[0.99] transition-transform"
+                    type="button"
+                  >
+                    Beli Lagi
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+          <!-- SECTION: DIBATALKAN (EMPTY STATE WITH DELIGHT) -->
+          <div
+            class="flex flex-col items-center justify-center text-center p-8 bg-surface-container-lowest shadow-sm hidden"
+            id="panel-dibatalkan"
+          >
+            <div
+              class="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center mb-4 text-secondary"
+            >
+              <span class="material-symbols-outlined text-[28px]"
+                >assignment_turned_in</span
+              >
+            </div>
+            <h3 class="font-headline-sm text-[18px] text-primary font-medium">
+              Tidak Ada Pesanan Dibatalkan
+            </h3>
+            <p class="font-body-md text-body-md text-secondary mt-2 max-w-xs">
+              Seluruh pesanan Anda tercatat diproses dengan sempurna oleh
+              Atelier ME tanpa pembatalan.
+            </p>
+            <button
+              class="mt-5 px-6 py-2.5 bg-surface-container-high text-primary font-label-md text-label-md uppercase tracking-widest"
+              onclick="switchOrderTab('proses')"
+              type="button"
+            >
+              Lihat Pesanan Aktif
+            </button>
+          </div>
+          <!-- SECTION: ATELIER CONCIERGE & GUARANTEE BANNER -->
+          <div
+            class="mt-3 bg-surface-container-low p-5 flex flex-col gap-3.5 relative overflow-hidden"
+          >
+            <div class="flex items-center gap-3">
+              <div
+                class="w-9 h-9 bg-primary text-on-primary flex items-center justify-center flex-shrink-0"
+              >
+                <span class="material-symbols-outlined text-[20px]"
+                  >support_agent</span
+                >
+              </div>
+              <div>
+                <h4
+                  class="font-headline-sm text-[15px] font-medium text-primary tracking-wide"
+                >
+                  ME Private Concierge
+                </h4>
+                <p
+                  class="font-label-sm text-label-sm text-muted-gray uppercase tracking-widest"
+                >
+                  Layanan Pelanggan 24/7
+                </p>
+              </div>
+            </div>
+            <p class="font-body-sm text-body-sm text-secondary leading-relaxed">
+              Memerlukan bantuan pengiriman khusus, perubahan alamat atelier,
+              atau jadwal penyesuaian ukuran pakaian? Asisten mode pribadi kami
+              siap mendampingi Anda.
+            </p>
+            <div class="flex items-center justify-between pt-1">
+              <button
+                class="inline-flex items-center gap-2 font-label-md text-label-md uppercase font-semibold text-primary hover:opacity-75 transition-opacity tracking-widest"
+                type="button"
+              >
+                <span>Hubungi Concierge</span>
+                <span class="material-symbols-outlined text-[16px]"
+                  >arrow_forward</span
+                >
+              </button>
+              <span
+                class="font-label-sm text-[10px] text-muted-gray tracking-widest uppercase"
+                >Response time &lt; 5m</span
+              >
+            </div>
+          </div>
+          <!-- Atelier Philosophy Footer Tag -->
+          <div class="text-center pt-2 pb-4">
+            <p class="font-headline-sm text-[13px] italic text-muted-gray">
+              "Keanggunan yang abadi, dijahit dengan ketelitian sempurna."
+            </p>
+            <span
+              class="font-label-sm text-[9px] text-muted-gray uppercase tracking-[0.25em] block mt-1"
+              >ME Ateliers • Paris • Jakarta</span
+            >
+          </div>
+        </div>
+      </div>
+      <script>
+        function switchOrderTab(tabKey) {
+          const tabs = ["proses", "selesai", "dibatalkan"];
+
+          tabs.forEach((t) => {
+            const panel = document.getElementById("panel-" + t);
+            const btn = document.getElementById("tabBtn-" + t);
+            const label = document.getElementById("tabText-" + t);
+            const line = btn ? btn.querySelector(".tab-line") : null;
+
+            if (t === tabKey) {
+              if (panel) panel.classList.remove("hidden");
+              if (label) {
+                label.classList.add("text-primary", "font-semibold");
+                label.classList.remove("text-secondary", "font-medium");
+              }
+              if (line) {
+                line.classList.remove("bg-transparent");
+                line.classList.add("bg-primary");
+              }
+            } else {
+              if (panel) panel.classList.add("hidden");
+              if (label) {
+                label.classList.remove("text-primary", "font-semibold");
+                label.classList.add("text-secondary", "font-medium");
+              }
+              if (line) {
+                line.classList.remove("bg-primary");
+                line.classList.add("bg-transparent");
+              }
+            }
+          });
+        }
+      </script>
+    </main>
+    <nav
+      class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_-1px_8px_rgba(0,0,0,0.03)]"
+      data-active-classes="text-primary font-semibold"
+    >
+      <div
+        class="flex justify-around items-center h-16 px-space-xs border-t border-surface-container bg-surface-container-lowest/95 backdrop-blur-xl"
+      >
+        <a
+          class="flex-1 flex flex-col items-center justify-center h-full text-secondary hover:text-primary transition-colors"
+          data-path="beranda"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]">home</span
+          ><span class="font-label-sm text-[10px] uppercase tracking-wider mt-1"
+            >Beranda</span
+          ></a
+        ><a
+          class="flex-1 flex flex-col items-center justify-center h-full text-secondary hover:text-primary transition-colors"
+          data-path="jelajah"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]">grid_view</span
+          ><span class="font-label-sm text-[10px] uppercase tracking-wider mt-1"
+            >Jelajah</span
+          ></a
+        ><a
+          class="flex-1 flex flex-col items-center justify-center h-full text-secondary hover:text-primary transition-colors"
+          data-path="wishlist"
+          href="#"
+          ><span class="material-symbols-outlined text-[22px]">favorite</span
+          ><span class="font-label-sm text-[10px] uppercase tracking-wider mt-1"
+            >Wishlist</span
+          ></a
+        ><a
+          class="flex-1 flex flex-col items-center justify-center h-full text-secondary hover:text-primary transition-colors"
+          data-path="akun"
+          href="#"
+          ><span
+            class="material-symbols-outlined text-[22px] [font-variation-settings:'FILL'_1]"
+            >person</span
+          ><span
+            class="font-label-sm text-[10px] uppercase tracking-wider mt-1 text-primary font-semibold"
+            >Akun</span
+          ><span
+            class="w-1 h-1 rounded-full bg-primary absolute bottom-1.5"
+          ></span
+        ></a>
+      </div>
+    </nav>
+  </body>
+</html>

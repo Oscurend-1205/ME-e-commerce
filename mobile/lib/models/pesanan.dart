@@ -7,8 +7,13 @@ class Pesanan {
   final int total;
   final String namaPenerima;
   final String alamat;
+  final String? catatan;
   final String? namaKurir;
   final String? metodePembayaran;
+  final String? snapToken;
+  final String? redirectUrl;
+  final String? qrUrl;
+  final String? qrString;
   final String? createdAt;
   final List<DetailPesanan>? detail;
 
@@ -21,13 +26,26 @@ class Pesanan {
     required this.total,
     required this.namaPenerima,
     required this.alamat,
+    this.catatan,
     this.namaKurir,
     this.metodePembayaran,
+    this.snapToken,
+    this.redirectUrl,
+    this.qrUrl,
+    this.qrString,
     this.createdAt,
     this.detail,
   });
 
   factory Pesanan.fromJson(Map<String, dynamic> json) {
+    final token = json['snap_token'] as String?;
+    final rawRedirect = json['redirect_url'] as String?;
+    final computedRedirect = (rawRedirect != null && rawRedirect.isNotEmpty)
+        ? rawRedirect
+        : (token != null && token.isNotEmpty
+            ? 'https://app.sandbox.midtrans.com/snap/v4/redirection/$token'
+            : null);
+
     return Pesanan(
       id: json['id'] ?? 0,
       nomorPesanan: json['nomor_pesanan'] ?? '',
@@ -37,8 +55,13 @@ class Pesanan {
       total: json['total'] ?? 0,
       namaPenerima: json['nama_penerima'] ?? '',
       alamat: json['alamat'] ?? '',
+      catatan: json['catatan'],
       namaKurir: json['nama_kurir'],
       metodePembayaran: json['metode_pembayaran'],
+      snapToken: token,
+      redirectUrl: computedRedirect,
+      qrUrl: json['qr_url'],
+      qrString: json['qr_string'],
       createdAt: json['created_at'],
       detail: json['detail'] != null
           ? (json['detail'] as List)
@@ -51,6 +74,8 @@ class Pesanan {
 
 class DetailPesanan {
   final int id;
+  final int? produkId;
+  final int? varianId;
   final String namaProduk;
   final String ukuran;
   final String warna;
@@ -61,6 +86,8 @@ class DetailPesanan {
 
   DetailPesanan({
     required this.id,
+    this.produkId,
+    this.varianId,
     required this.namaProduk,
     required this.ukuran,
     required this.warna,
@@ -73,6 +100,8 @@ class DetailPesanan {
   factory DetailPesanan.fromJson(Map<String, dynamic> json) {
     return DetailPesanan(
       id: json['id'] ?? 0,
+      produkId: json['produk_id'],
+      varianId: json['varian_id'],
       namaProduk: json['nama_produk'] ?? '',
       ukuran: json['ukuran'] ?? '',
       warna: json['warna'] ?? '',

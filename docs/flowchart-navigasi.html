@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Diagram Alur Navigasi — Aplikasi ME Atelier</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --primary: #1a1a1a;
+    --accent: #2563eb;
+    --surface: #ffffff;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --bg: #f7f7f8;
+    --good: #16a34a;
+    --warn: #d97706;
+    --danger: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--primary);
+    margin: 0;
+    padding: 0;
+    line-height: 1.55;
+  }
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 32px 40px;
+  }
+  header h1 { margin: 0 0 6px 0; font-size: 26px; letter-spacing: .5px; }
+  header p { margin: 0; color: #cfcfd6; font-size: 14px; }
+  main { max-width: 1200px; margin: 0 auto; padding: 28px 24px 80px; }
+  section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.03);
+  }
+  section h2 {
+    margin: 0 0 6px 0;
+    font-size: 19px;
+    border-left: 4px solid var(--accent);
+    padding-left: 12px;
+  }
+  section .subtitle { color: var(--muted); font-size: 13.5px; margin-bottom: 18px; }
+  .mermaid {
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    overflow-x: auto;
+    text-align: center;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 12px;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: #f3f4f6; font-weight: 600; }
+  code {
+    background: #f3f4f6;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 14px; font-size: 12.5px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; display: inline-block; border: 1px solid #999; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .tag-ok { background: #dcfce7; color: #166534; }
+  .tag-warn { background: #fef3c7; color: #92400e; }
+  .tag-err { background: #fee2e2; color: #991b1b; }
+  .note { background: #fffbeb; border-left: 3px solid #d97706; padding: 10px 14px; border-radius: 4px; font-size: 13px; margin-top: 12px; }
+  .ok { color: var(--good); font-weight: 600; }
+  .bad { color: var(--danger); font-weight: 600; }
+  .footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Diagram Alur Navigasi — Aplikasi ME Atelier</h1>
+  <p>Dokumen audit konektivitas seluruh halaman & modul aplikasi mobile Flutter. Entry: <code>main.dart</code> → <code>HalamanUtamaNavigasi</code>.</p>
+</header>
+
+<main>
+
+<!-- ============== LEGENDA ============== -->
+<section>
+  <h2>Legenda Diagram</h2>
+  <div class="subtitle">Simbol yang dipakai konsisten di seluruh diagram.</div>
+  <div class="legend">
+    <span><span class="swatch" style="background:#dbeafe;border-color:#60a5fa"></span> Halaman / Screen (Node)</span>
+    <span><span class="swatch" style="background:#fef3c7;border-color:#d97706"></span> Keputusan / Kondisi (Diamond)</span>
+    <span><span class="swatch" style="background:#dcfce7;border-color:#16a34a"></span> Entry / Exit Point</span>
+    <span><span class="swatch" style="background:#fee2e2;border-color:#dc2626"></span> Exception / Error Handling</span>
+    <span>➡️ Panah navigasi maju</span>
+    <span>⬅️ Panah kembali (back/pop)</span>
+    <span>🔁 <code>pushReplacement</code> (ganti halaman, tanpa back stack)</span>
+    <span>🔒 Gate = butuh login</span>
+  </div>
+</section>
+
+<!-- ============== 1. APP SHELL ============== -->
+<section>
+  <h2>1. App Shell & Entry Point (Bottom Navigation)</h2>
+  <div class="subtitle">Entry point aplikasi dan 4 tab utama yang menggunakan <code>IndexedStack</code>. Keranjang (Tas) <b>bukan tab</b>, melainkan tombol header global.</div>
+  <div class="mermaid">
+flowchart TD
+    Start([main.dart<br/>runApp AplikasiME]):::entry --> Boot[StatePengguna.muatSesiTersimpan<br/>sinkronkanKeranjang]:::boot
+    Boot --> Shell[HalamanUtamaNavigasi<br/>BottomNav IndexedStack]:::shell
+
+    Shell --> T0[Tab 0: BERANDA<br/>HalamanKatalog modeJelajah=false]:::page
+    Shell --> T1[Tab 1: JELAJAH<br/>HalamanKatalog modeJelajah=true<br/>+ story highlights]:::page
+    Shell --> T2[Tab 2: PESANAN<br/>HalamanRiwayatPesanan]:::page
+    Shell --> T3[Tab 3: AKUN<br/>HalamanAkun]:::page
+
+    T0 -.->|tap story kategori| T1
+    T1 -.->|tab switch| T0
+
+    CartBtn[Header: Tombol Tas Belanja<br/>NavigasiUniversal.keKeranjang]:::global
+    T0 --> CartBtn
+    T1 --> CartBtn
+    CartBtn --> Cart[[HalamanKeranjang]]:::page
+
+    AvatarBtn[Header: Avatar Profil<br/>NavigasiUniversal.keProfil]:::global
+    T0 --> AvatarBtn
+    T1 --> AvatarBtn
+    AvatarBtn --> T3
+
+    classDef entry fill:#dcfce7,stroke:#16a34a,color:#166534
+    classDef boot fill:#f3f4f6,stroke:#9ca3af
+    classDef shell fill:#e0e7ff,stroke:#6366f1,color:#3730a3
+    classDef page fill:#dbeafe,stroke:#60a5fa,color:#1e3a8a
+    classDef global fill:#f3e8ff,stroke:#a855f7,color:#6b21a8
+  </div>
+  <div class="note">Tab <b>PESANAN</b> dan <b>AKUN</b> juga memiliki header dengan tombol tas & avatar (lihat NavigasiUniversal). Transisi antar tab tidak memakai <code>Navigator.push</code>, melainkan perubahan <code>index</code> pada <code>IndexedStack</code>, sehingga <b>state setiap tab tetap terjaga</b>.</div>
+</section>
+
+<!-- ============== 2. AUTENTIKASI ============== -->
+<section>
+  <h2>2. Modul Autentikasi (Login & Register)</h2>
+  <div class="subtitle">Pola <b>Login Gate</b>: halaman yang membutuhkan login akan mendorong <code>HalamanLogin</code> dan menunggu nilai kembalian <code>true</code>.</div>
+  <div class="mermaid">
+flowchart TD
+    Caller[Halaman pemanggil gate<br/>Akun / Keranjang / RincianProduk]:::page
+    Caller --> CekLogin{isLoggedIn?}:::decision
+    CekLogin -- Ya --> Lanjut[Lanjut ke tujuan asli]:::page
+    CekLogin -- Tidak --> Login[HalamanLogin]:::page
+
+    Login -->|teks "Daftar"| Register[HalamanRegister]:::page
+    Register -->|registrasi sukses / back| Login
+
+    Login -->|submit & token valid| Sukses[Navigator.pop context, true]:::ok
+    Login -->|validasi gagal / API error| ErrLogin[SnackBar error,<br/>tetap di Login]:::err
+
+    Sukses --> Caller2[Halaman pemanggil menerima true<br/>lanjut eksekusi tujuan]:::page
+
+    classDef page fill:#dbeafe,stroke:#60a5fa,color:#1e3a8a
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#92400e
+    classDef ok fill:#dcfce7,stroke:#16a34a,color:#166534
+    classDef err fill:#fee2e2,stroke:#dc2626,color:#991b1b
+  </div>
+</section>
+
+<!-- ============== 3. KATALOG & PRODUK ============== -->
+<section>
+  <h2>3. Katalog & Rincian Produk</h2>
+  <div class="subtitle">Alur jelajah produk, lihat detail, dan tambah ke keranjang (dengan login gate).</div>
+  <div class="mermaid">
+flowchart TD
+    Kat[HalamanKatalog<br/>Beranda / Jelajah]:::page
+    Kat -->|tap kartu produk| Detail[HalamanRincianProduk<br/>produkId]:::page
+
+    Kat -->|Tombol Tas Header| Cart[HalamanKeranjang]:::page
+    Detail -->|back| Kat
+
+    Detail -->|tap "Tambah ke Keranjang"| Cek{isLoggedIn?}:::decision
+    Cek -- Tidak --> LoginG[HalamanLogin]:::page
+    LoginG -->|login sukses (true)| Cek
+    Cek -- Ya --> Add[Tambah item ke keranjang via API]:::action
+
+    Add -->|berhasil| Snack[SnackBar "Berhasil ditambahkan"<br/>+ aksi LIHAT]:::action
+    Snack -->|tap LIHAT| Cart
+    Add -->|gagal / stok habis / API error| ErrAdd[SnackBar error,<br/>tetap di RincianProduk]:::err
+
+    Kat -.->|tap story kategori| Jelajah[HalamanKatalog modeJelajah]:::page
+
+    classDef page fill:#dbeafe,stroke:#60a5fa,color:#1e3a8a
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#92400e
+    classDef action fill:#e0e7ff,stroke:#6366f1,color:#3730a3
+    classDef err fill:#fee2e2,stroke:#dc2626,color:#991b1b
+  </div>
+</section>
+
+<!-- ============== 4. KERANJANG & CHECKOUT ============== -->
+<section>
+  <h2>4. Keranjang & Checkout (3 Langkah)</h2>
+  <div class="subtitle">Rantai checkout memakai <code>pushReplacement</code> (🔁) supaya tombol back tidak kembali ke langkah sebelumnya — user pakai AppBar back untuk mundur.</div>
+  <div class="mermaid">
+flowchart TD
+    Cart[HalamanKeranjang]:::page
+    Cart -->|back| Prev[Halaman sebelumnya]:::page
+
+    Cart -->|tombol Checkout| Cek{isLoggedIn?}:::decision
+    Cek -- Tidak --> LoginG[HalamanLogin]:::page
+    LoginG -->|true| Cek
+    Cek -- Ya --> C1[HalamanCheckoutAlurSatu<br/>Pilih Alamat]:::page
+
+    C1 -->|back| Cart
+    C1 -->|tap area alamat| Buku[HalamanBukuAlamat<br/>pilih alamat]:::page
+    C1 -->|tombol Tambah Alamat| Tambah[HalamanTambahAlamat]:::page
+    Tambah -->|simpan sukses (true)| Buku
+    Buku -->|pilih alamat (pop data)| C1
+
+    C1 -->|Lanjut ke Pembayaran<br/>🔁 pushReplacement| C2[HalamanCheckoutAlurDua<br/>Pilih Kurir & Metode Bayar]:::page
+    C2 -->|back| C1
+    C2 -->|tap metode bayar| MP[HalamanMetodePembayaran]:::page
+    MP -->|pilih metode| C2
+
+    C2 -->|Lanjut 🔁 pushReplacement| C3[HalamanCheckoutAlurTiga<br/>Konfirmasi & Ringkasan]:::page
+    C3 -->|back| C2
+
+    C3 -->|Bayar Sekarang (Midtrans) 🔁| BayarMid[HalamanPembayaran<br/>WebView Midtrans]:::page
+    C3 -->|Bayar QRIS 🔁| BayarQris[HalamanPembayaranQris]:::page
+
+    classDef page fill:#dbeafe,stroke:#60a5fa,color:#1e3a8a
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#92400e
+  </div>
+</section>
+
+<!-- ============== 5. PEMBAYARAN ============== -->
+<section>
+  <h2>5. Alur Pembayaran (Midtrans & QRIS)</h2>
+  <div class="subtitle">Dua jalur pembayaran yang bermuara ke <code>HalamanPembayaranBerhasil</code>.</div>
+  <div class="mermaid">
+flowchart TD
+    Mid[HalamanPembayaran<br/>WebView Midtrans]:::page
+    Mid -->|tombol X / tutup| BackMid[pop → kembali ke<br/>Checkout Alur Tiga]:::page
+
+    Mid -->|onNavigationRequest<br/>URL mengandung callback| Cb{status pembayaran?}:::decision
+    Cb -- settlement / success --> Berhasil[HalamanPembayaranBerhasil<br/>🔁 pushReplacement]:::page
+    Cb -- pending / gagal / timeout| ErrMid[SnackBar info, pop]:::err
+
+    Qris[HalamanPembayaranQris]:::page
+    Qris -->|back| BackQ[pop → Checkout Alur Tiga]:::page
+    Qris -->|polling status pembayaran| Poll{sukses?}:::decision
+    Poll -- Ya --> Berhasil
+    Poll -- Tidak / timeout --> ErrQris[SnackBar "menunggu pembayaran",<br/>tetap di halaman]:::err
+
+    Berhasil -->|LIHAT DETAIL PESANAN| Rincian[HalamanRincianPesanan]:::page
+    Berhasil -->|KEMBALI KE BERANDA / back header| Home[HalamanUtamaNavigasi<br/>popUntil first route]:::shell
+
+    classDef page fill:#dbeafe,stroke:#60a5fa,color:#1e3a8a
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#92400e
+    classDef shell fill:#e0e7ff,stroke:#6366f1,color:#3730a3
+    classDef err fill:#fee2e2,stroke:#dc2626,color:#991b1b
+  </div>
+</section>
+
+<!-- ============== 6. PESANAN ============== -->
+<section>
+  <h2>6. Riwayat & Rincian Pesanan</h2>
+  <div class="subtitle">Aksi pada kartu pesanan bersifat dinamis berdasarkan status pesanan (belum bayar → bayar; sudah bayar → bukti transaksi).</div>
+  <div class="mermaid">
+flowchart TD
+    Riwayat[HalamanRiwayatPesanan]:::page
+    Riwayat -->|tap kartu pesanan| Rincian[HalamanRincianPesanan<br/>pesananId]:::page
+    Rincian -->|back| Riwayat
+
+    Riwayat -->|daftar kosong: Belanja Lagi 🔁| Cart[HalamanKeranjang]:::page
+
+    Riwayat -->|Bayar QRIS (status belum bayar)| Qris[[HalamanPembayaranQris]]:::page
+    Riwayat -->|Bayar Midtrans (status belum bayar)| Mid[[HalamanPembayaran]]:::page
+    Riwayat -->|Bukti Transaksi (status sudah bayar)| Bukti[[HalamanBuktiTransaksi]]:::page
+
+    Rincian -->|Bayar QRIS| Qris
+    Rincian -->|Bayar| Mid
+    Rincian -->|Bukti Transaksi| Bukti
+
+    Bukti -->|back| Rincian
+    Bukti -->|Lihat Detail Pesanan 🔁| Rincian
+
+    Qris -->|Lihat Bukti| Bukti
+
+    classDef page fill:#dbeafe,stroke:#60a5fa,color:#1e3a8a
+  </div>
+</section>
+
+<!-- ============== 7. AKUN & ALAMAT ============== -->
+<section>
+  <h2>7. Akun & Buku Alamat</h2>
+  <div class="subtitle">Halaman Akun berfungsi sebagai hub ke modul pesanan, alamat, dan (khusus admin) kelola produk. Semua item menu memiliki login gate.</div>
+  <div class="mermaid">
+flowchart TD
+    Akun[HalamanAkun]:::page
+    Akun -->|back| Shell[HalamanUtamaNavigasi]:::shell
+
+    Akun -->|Riwayat Pesanan| Cek1{isLoggedIn?}:::decision
+    Cek1 -- Ya --> Riwayat[HalamanRiwayatPesanan]:::page
+    Cek1 -- Tidak --> Login[[HalamanLogin]]:::page
+
+    Akun -->|Buku Alamat| Cek2{isLoggedIn?}:::decision
+    Cek2 -- Ya --> Buku[HalamanBukuAlamat]:::page
+    Cek2 -- Tidak --> Login
+
+    Akun -->|Kelola Produk (admin)| Cek3{isLoggedIn & isAdmin?}:::decision
+    Cek3 -- Ya --> Kelola[HalamanKelolaProduk]:::page
+    Cek3 -- Tidak --> Login
+
+    Akun -->|Logout| Logout[hapus sesi → reload state<br/>kembali ke Beranda]:::action
+
+    Buku -->|back| Akun
+    Buku -->|Tambah Alamat| Tambah[HalamanTambahAlamat]:::page
+    Tambah -->|simpan sukses (true)| Buku
+    Tambah -->|back| Buku
+
+    classDef page fill:#dbeafe,stroke:#60a5fa,color:#1e3a8a
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#92400e
+    classDef shell fill:#e0e7ff,stroke:#6366f1,color:#3730a3
+    classDef action fill:#dcfce7,stroke:#16a34a,color:#166534
+  </div>
+</section>
+
+<!-- ============== 8. ADMIN KELOLA PRODUK ============== -->
+<section>
+  <h2>8. Modul Admin — Kelola Produk</h2>
+  <div class="subtitle">Hanya dapat diakses pengguna admin melalui menu Akun. Operasi CRUD produk melalui API backend.</div>
+  <div class="mermaid">
+flowchart TD
+    Kelola[HalamanKelolaProduk]:::page
+    Kelola -->|back| Akun[HalamanAkun]:::page
+
+    Kelola -->|FAB Tambah / ubah kartu| Form[HalamanFormProduk<br/>produk opsional]:::page
+    Kelola -->|daftar kosong: Tambah Produk| Form
+
+    Form -->|back| Kelola
+    Form -->|Simpan / Simpan Perubahan| Save{API simpan berhasil?}:::decision
+    Save -- Ya --> PopOK[pop context, true → refresh daftar]:::ok
+    Save -- Tidak --> ErrDlg[AlertDialog "Gagal Menyimpan"<br/>tetap di Form]:::err
+    ErrDlg -->|Mengerti| Form
+
+    PopOK --> Kelola
+
+    classDef page fill:#dbeafe,stroke:#60a5fa,color:#1e3a8a
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#92400e
+    classDef ok fill:#dcfce7,stroke:#16a34a,color:#166534
+    classDef err fill:#fee2e2,stroke:#dc2626,color:#991b1b
+  </div>
+</section>
+
+<!-- ============== 9. DIAGRAM INDUK (OVERVIEW) ============== -->
+<section>
+  <h2>9. Diagram Induk — Seluruh Konektivitas Halaman</h2>
+  <div class="subtitle">Peta konektivitas tingkat tinggi seluruh 20 halaman. Untuk detail transisi lihat diagram per-modul di atas.</div>
+  <div class="mermaid">
+flowchart LR
+    Start([Entry: main.dart]):::entry --> Shell[HalamanUtamaNavigasi<br/>BottomNav 4 tab]:::shell
+
+    Shell --> Kat[HalamanKatalog]:::page
+    Shell --> Riwayat[HalamanRiwayatPesanan]:::page
+    Shell --> Akun[HalamanAkun]:::page
+
+    Kat --> Detail[HalamanRincianProduk]:::page
+    Kat --> Cart[HalamanKeranjang]:::page
+    Detail --> Cart
+
+    Cart --> C1[Checkout Alur Satu]:::page
+    C1 --> C2[Checkout Alur Dua]:::page
+    C2 --> C3[Checkout Alur Tiga]:::page
+    C1 --> Buku[HalamanBukuAlamat]:::page
+    C1 --> Tambah[HalamanTambahAlamat]:::page
+    C2 --> MP[HalamanMetodePembayaran]:::page
+
+    C3 --> Mid[HalamanPembayaran]:::page
+    C3 --> Qris[HalamanPembayaranQris]:::page
+    Mid --> Sukses[HalamanPembayaranBerhasil]:::page
+    Qris --> Sukses
+    Sukses --> Rincian[HalamanRincianPesanan]:::page
+    Sukses --> Shell
+
+    Riwayat --> Rincian
+    Riwayat --> Mid
+    Riwayat --> Qris
+    Riwayat --> Bukti[HalamanBuktiTransaksi]:::page
+    Rincian --> Bukti
+    Qris --> Bukti
+    Bukti --> Rincian
+
+    Akun --> Riwayat
+    Akun --> Buku
+    Akun --> Kelola[HalamanKelolaProduk]:::page
+    Kelola --> Form[HalamanFormProduk]:::page
+
+    Login[HalamanLogin]:::page --> Register[HalamanRegister]:::page
+    Login -. gate .-> Cart
+    Login -. gate .-> Detail
+    Login -. gate .-> Akun
+
+    classDef entry fill:#dcfce7,stroke:#16a34a,color:#166534
+    classDef shell fill:#e0e7ff,stroke:#6366f1,color:#3730a3
+    classDef page fill:#dbeafe,stroke:#60a5fa,color:#1e3a8a
+  </div>
+</section>
+
+<!-- ============== 10. AUDIT KONEKTIVITAS ============== -->
+<section>
+  <h2>10. Tabel Audit Konektivitas & Exit Point</h2>
+  <div class="subtitle">Audit semua halaman: entry point, jalur masuk, jalur keluar, dan status konektivitas.</div>
+  <table>
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Halaman</th>
+        <th>Entry Point (dari mana)</th>
+        <th>Exit Point (ke mana)</th>
+        <th>Konektivitas</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td><code>HalamanKatalog</code> (Beranda)</td><td>BottomNav Tab 0</td><td>RincianProduk, Keranjang, Jelajah (story)</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>2</td><td><code>HalamanKatalog</code> (Jelajah)</td><td>BottomNav Tab 1</td><td>RincianProduk, Keranjang, Beranda</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>3</td><td><code>HalamanRiwayatPesanan</code></td><td>BottomNav Tab 2, Akun</td><td>RincianPesanan, Pembayaran, PembayaranQris, BuktiTransaksi, Keranjang</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>4</td><td><code>HalamanAkun</code></td><td>BottomNav Tab 3, Header Avatar</td><td>RiwayatPesanan, BukuAlamat, KelolaProduk, Login (gate), Beranda (logout)</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>5</td><td><code>HalamanLogin</code></td><td>Akun, Keranjang, RincianProduk (gate)</td><td>pop(true) ke pemanggil, Register</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>6</td><td><code>HalamanRegister</code></td><td>Login</td><td>pop ke Login</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>7</td><td><code>HalamanRincianProduk</code></td><td>Katalog</td><td>Keranjang (via snackbar/tombol), Login (gate)</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>8</td><td><code>HalamanKeranjang</code></td><td>Header Tas, Katalog, RincianProduk, RiwayatPesanan</td><td>CheckoutAlurSatu, Login (gate), back</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>9</td><td><code>HalamanCheckoutAlurSatu</code></td><td>Keranjang (pushReplacement)</td><td>BukuAlamat, TambahAlamat, CheckoutAlurDua, back ke Keranjang</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>10</td><td><code>HalamanCheckoutAlurDua</code></td><td>CheckoutAlurSatu (pushReplacement)</td><td>MetodePembayaran, CheckoutAlurTiga, back</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>11</td><td><code>HalamanCheckoutAlurTiga</code></td><td>CheckoutAlurDua (pushReplacement)</td><td>Pembayaran, PembayaranQris, back</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>12</td><td><code>HalamanMetodePembayaran</code></td><td>CheckoutAlurDua</td><td>pop ke CheckoutAlurDua</td><td><span class="tag tag-warn">CATATAN</span></td></tr>
+      <tr><td>13</td><td><code>HalamanPembayaran</code> (Midtrans)</td><td>CheckoutAlurTiga, RiwayatPesanan, RincianPesanan</td><td>PembayaranBerhasil, pop (X)</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>14</td><td><code>HalamanPembayaranQris</code></td><td>CheckoutAlurTiga, RiwayatPesanan, RincianPesanan</td><td>PembayaranBerhasil, BuktiTransaksi, back</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>15</td><td><code>HalamanPembayaranBerhasil</code></td><td>Pembayaran, PembayaranQris</td><td>RincianPesanan, Beranda (popUntil)</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>16</td><td><code>HalamanRincianPesanan</code></td><td>RiwayatPesanan, PembayaranBerhasil, BuktiTransaksi</td><td>Pembayaran, PembayaranQris, BuktiTransaksi, back</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>17</td><td><code>HalamanBuktiTransaksi</code></td><td>RiwayatPesanan, RincianPesanan, PembayaranQris</td><td>RincianPesanan, back</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>18</td><td><code>HalamanBukuAlamat</code></td><td>CheckoutAlurSatu, Akun</td><td>TambahAlamat, pop (dengan data alamat), back</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>19</td><td><code>HalamanTambahAlamat</code></td><td>BukuAlamat, CheckoutAlurSatu</td><td>pop(true) ke BukuAlamat, back</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>20</td><td><code>HalamanKelolaProduk</code></td><td>Akun (admin)</td><td>FormProduk, back</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+      <tr><td>21</td><td><code>HalamanFormProduk</code></td><td>KelolaProduk</td><td>pop(true) ke KelolaProduk, back</td><td><span class="tag tag-ok">TERHUBUNG</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <b>Catatan untuk HalamanMetodePembayaran:</b> tombol <b>"BAYAR SEKARANG"</b> dan <b>"UBAH"</b> memiliki <code>onPressed: () {}</code> (placeholder kosong). Pemilihan metode dilakukan dengan memilih kartu lalu <code>maybePop</code> kembali ke Checkout Alur Dua. Tidak ada jalur yang terputus, tetapi tombol aksi utama belum terhubung ke logika apa pun.
+  </div>
+</section>
+
+<!-- ============== 11. EXCEPTION & ERROR ============== -->
+<section>
+  <h2>11. Ringkasan Exception & Error Handling</h2>
+  <div class="subtitle">Penanganan error per modul untuk memastikan tidak ada alur yang menggantung.</div>
+  <table>
+    <thead>
+      <tr><th>Modul</th><th>Skenario Error</th><th>Penanganan</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Login</td><td>Email/sandi salah, API gagal</td><td>SnackBar error, tetap di HalamanLogin</td></tr>
+      <tr><td>Register</td><td>Validasi gagal / email terdaftar</td><td>SnackBar / error text field, tetap di form</td></tr>
+      <tr><td>Tambah Keranjang</td><td>Stok habis, API error, varian belum dipilih</td><td>SnackBar error, tetap di RincianProduk</td></tr>
+      <tr><td>Checkout</td><td>Alamat belum dipilih / metode belum dipilih</td><td>Validasi tombol "Lanjut" dinonaktifkan / snackbar</td></tr>
+      <tr><td>Pembayaran Midtrans</td><td>URL callback pending/gagal/timeout</td><td>SnackBar info, pop kembali (tidak otomatis sukses)</td></tr>
+      <tr><td>Pembayaran QRIS</td><td>Polling timeout / status pending</td><td>SnackBar "menunggu pembayaran", tetap di halaman</td></tr>
+      <tr><td>Form Produk (Admin)</td><td>API simpan gagal</td><td>AlertDialog "Gagal Menyimpan", tetap di form</td></tr>
+      <tr><td>Network (umum)</td><td>Tidak ada koneksi / server error</td><td>WidgetKosong / SnackBar dengan retry di tiap halaman list</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============== 12. EXIT POINTS ============== -->
+<section>
+  <h2>12. Titik Keluar (Exit Points) Utama</h2>
+  <div class="subtitle">Titik di mana user menyelesaikan sebuah flow dan kembali ke titik aman.</div>
+  <table>
+    <thead>
+      <tr><th>Exit Point</th><th>Dipicu dari</th><th>Tujuan</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>NavigasiUniversal.keBeranda</code></td><td>PembayaranBerhasil, Logo Header</td><td><code>popUntil(route.isFirst)</code> → Beranda (Tab 0)</td></tr>
+      <tr><td>Logout di HalamanAkun</td><td>Tombol Logout</td><td>Hapus sesi, state reload, kembali ke Beranda</td></tr>
+      <tr><td>Tutup WebView (X)</td><td>HalamanPembayaran</td><td><code>pop</code> kembali ke Checkout Alur Tiga</td></tr>
+      <tr><td>AppBar Back (universal)</td><td>Semua detail/flow</td><td><code>NavigasiUniversal.kembali</code> → pop, atau ke Beranda jika tidak bisa pop</td></tr>
+      <tr><td>Exit aplikasi (sistem)</td><td>Tombol back OS di root</td><td>Keluar aplikasi (default Flutter)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="footer">
+  Dokumen audit navigasi — ME Atelier. Dihasilkan dari analisis statis <code>mobile/lib/screens/</code> (20 halaman).
+</div>
+
+</main>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'default', flowchart: { curve: 'basis', useMaxWidth: true }, securityLevel: 'loose' });
+</script>
+</body>
+</html>

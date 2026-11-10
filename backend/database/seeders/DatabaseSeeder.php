@@ -13,7 +13,8 @@ use App\Models\Produk;
 use App\Models\User;
 use App\Models\VarianProduk;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -31,15 +32,40 @@ class DatabaseSeeder extends Seeder
         // 0b. Aset Tampilan (Gambar Banner/Beranda) yang dapat diedit dari Filament
         $this->call(AsetTampilanSeeder::class);
 
+        // Nonaktifkan foreign keys dan bersihkan tabel transaksi & katalog agar seeder bersifat idempoten
+        Schema::disableForeignKeyConstraints();
+        DetailPesanan::query()->delete();
+        Pesanan::query()->delete();
+        Keranjang::query()->delete();
+        VarianProduk::query()->delete();
+        Produk::query()->delete();
+        Kategori::query()->delete();
+        Pelanggan::query()->delete();
+        Kurir::query()->delete();
+        MetodePembayaran::query()->delete();
+        Schema::enableForeignKeyConstraints();
+
         // 1. Pelanggan Tetap untuk Pengujian (PRD Bagian 9)
         $pelanggan = Pelanggan::create([
             'id' => 1,
             'nama' => 'Auril Aditya',
+            'email' => 'auril@toko-me.test',
+            'password' => 'password',
+            'no_telp' => '081234567890',
         ]);
 
-        // 2. Kategori (Minimal 2: Pakaian & Aksesori)
-        $katPakaian = Kategori::create(['nama' => 'Pakaian']);
+        // 2. Kategori: Atasan, Bawahan, Outerwear, Aksesori
+        $katAtasan = Kategori::create(['nama' => 'Atasan']);
+        $katBawahan = Kategori::create(['nama' => 'Bawahan']);
+        $katOuterwear = Kategori::create(['nama' => 'Outerwear']);
         $katAksesori = Kategori::create(['nama' => 'Aksesori']);
+
+        $kategoriMap = [
+            'Atasan' => $katAtasan,
+            'Bawahan' => $katBawahan,
+            'Outerwear' => $katOuterwear,
+            'Aksesori' => $katAksesori,
+        ];
 
         // 3. Kurir & Tarif Wilayah (Minimal 3 tarif berbeda)
         $kurirDalamKota = Kurir::create([
@@ -60,10 +86,15 @@ class DatabaseSeeder extends Seeder
             'tarif' => 35000,
         ]);
 
-        // 4. Metode Pembayaran (Minimal 2: tunai_di_tempat & transfer_manual)
-        $metodeCod = MetodePembayaran::create([
-            'kode' => 'tunai_di_tempat',
-            'nama' => 'Tunai di Tempat (COD)',
+        // 4. Metode Pembayaran (Midtrans Payment Gateway, QRIS, Transfer, COD)
+        $metodeMidtrans = MetodePembayaran::create([
+            'kode' => 'midtrans',
+            'nama' => 'Midtrans Payment Gateway (QRIS, VA Bank, Kartu Kredit, GoPay)',
+        ]);
+
+        $metodeQris = MetodePembayaran::create([
+            'kode' => 'qris',
+            'nama' => 'QRIS (Quick Response Code Indonesian Standard)',
         ]);
 
         $metodeTransfer = MetodePembayaran::create([
@@ -71,188 +102,605 @@ class DatabaseSeeder extends Seeder
             'nama' => 'Transfer Bank Manual (BCA/Mandiri)',
         ]);
 
-        // 5. 12 Produk Dummy (7 Pakaian + 5 Aksesori)
-        // Kasus Khusus PRD:
-        // - Kaos Polos: Varian M Hitam stok 0, L masih ada (Pembuktian aturan bisnis domain pakaian!)
-        // - Produk 1 habis stok total (stok 0)
-        // - Produk 1 tidak tersedia (tersedia = false)
-        // - Produk dengan deskripsi null untuk uji null safety Flutter
-
-        // --- 7 PRODUK PAKAIAN ---
-        // Produk 1: Kaos Polos Oversize (Dengan varian M Hitam = 0, L = 15)
-        $p1 = Produk::create([
-            'kategori_id' => $katPakaian->id,
-            'nama' => 'Kaos Polos Oversize Cotton Combed',
-            'harga' => 89000,
-            'tersedia' => true,
-            'deskripsi' => 'Kaos potongan oversize berbahan 100% katun combed 24s yang sejuk, tebal, dan menyerap keringat dengan baik.',
-            'bahan' => 'Katun Combed 24s',
-            'merek' => 'ME Basics',
-            'gambar' => '1.jpg',
+        $metodeCod = MetodePembayaran::create([
+            'kode' => 'tunai_di_tempat',
+            'nama' => 'Tunai di Tempat (COD)',
         ]);
-        VarianProduk::create(['produk_id' => $p1->id, 'ukuran' => 'S', 'warna' => 'Hitam', 'stok' => 8, 'sku' => 'MEB-1-S-BLK']);
-        // Ini varian kunci pengujian: stok 0 untuk M Hitam!
-        $vP1MHitam = VarianProduk::create(['produk_id' => $p1->id, 'ukuran' => 'M', 'warna' => 'Hitam', 'stok' => 0, 'sku' => 'MEB-1-M-BLK']);
-        $vP1LHitam = VarianProduk::create(['produk_id' => $p1->id, 'ukuran' => 'L', 'warna' => 'Hitam', 'stok' => 15, 'sku' => 'MEB-1-L-BLK']);
-        VarianProduk::create(['produk_id' => $p1->id, 'ukuran' => 'M', 'warna' => 'Putih', 'stok' => 12, 'sku' => 'MEB-1-M-WHT']);
-        VarianProduk::create(['produk_id' => $p1->id, 'ukuran' => 'L', 'warna' => 'Putih', 'stok' => 20, 'sku' => 'MEB-1-L-WHT']);
 
-        // Produk 2: Kemeja Flanel Slim Fit
-        $p2 = Produk::create([
-            'kategori_id' => $katPakaian->id,
-            'nama' => 'Kemeja Flanel Slim Fit Plaid',
-            'harga' => 189000,
-            'tersedia' => true,
-            'deskripsi' => 'Kemeja flanel motif kotak-kotak klasik dengan siluet modern, cocok untuk gaya kasual maupun semi-formal.',
-            'bahan' => 'Wool-blend Flanel',
-            'merek' => 'ME Studio',
-            'gambar' => '2.jpg',
-        ]);
-        VarianProduk::create(['produk_id' => $p2->id, 'ukuran' => 'M', 'warna' => 'Merah Navy', 'stok' => 10, 'sku' => 'MES-2-M-RED']);
-        VarianProduk::create(['produk_id' => $p2->id, 'ukuran' => 'L', 'warna' => 'Merah Navy', 'stok' => 8, 'sku' => 'MES-2-L-RED']);
-        VarianProduk::create(['produk_id' => $p2->id, 'ukuran' => 'XL', 'warna' => 'Hijau Botol', 'stok' => 6, 'sku' => 'MES-2-XL-GRN']);
+        // 5. 36 Produk ME (Kelompok 2): Atasan 15, Bawahan 12, Aksesori 9
+        $daftarProduk = [
+            [
+                'id' => 1,
+                'nama' => 'Kaos Polos Oversize Cotton Combed',
+                'kategori' => 'Atasan',
+                'harga' => 89000,
+                'bahan' => 'Katun Combed 24s',
+                'merek' => 'ME Basics',
+                'deskripsi' => 'Kaos potongan oversize berbahan 100% katun combed 24s yang sejuk, tebal, dan menyerap keringat dengan baik.',
+                'tersedia' => true,
+                'ukuran' => ['S', 'M', 'L'],
+                'warna' => ['Hitam', 'Putih'],
+                'stok_nol' => ['M/Hitam'],
+            ],
+            [
+                'id' => 2,
+                'nama' => 'Kemeja Flanel Slim Fit Plaid',
+                'kategori' => 'Atasan',
+                'harga' => 189000,
+                'bahan' => 'Wool-blend Flanel',
+                'merek' => 'ME Studio',
+                'deskripsi' => 'Kemeja flanel motif kotak-kotak klasik dengan siluet modern, cocok untuk gaya kasual maupun semi-formal.',
+                'tersedia' => true,
+                'ukuran' => ['M', 'L', 'XL'],
+                'warna' => ['Merah Navy', 'Hijau Botol'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 3,
+                'nama' => 'Hoodie Heavyweight Fleece Pullover',
+                'kategori' => 'Atasan',
+                'harga' => 279000,
+                'bahan' => 'Heavyweight Cotton Fleece',
+                'merek' => 'ME Originals',
+                'deskripsi' => 'Hoodie tebal 380 gsm berbahan fleece lembut dengan saku kangguru dan tali serut tahan lama.',
+                'tersedia' => true,
+                'ukuran' => ['M', 'L'],
+                'warna' => ['Abu-abu Misty', 'Hitam Pekat'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 4,
+                'nama' => 'Jaket Denim Trucker Vintage Wash',
+                'kategori' => 'Outerwear',
+                'harga' => 349000,
+                'bahan' => 'Non-stretch 13oz Denim',
+                'merek' => 'ME Denim Co.',
+                'deskripsi' => null, // Uji Flutter null-safety
+                'tersedia' => true,
+                'ukuran' => ['M', 'L'],
+                'warna' => ['Light Blue Wash'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 5,
+                'nama' => 'Celana Chino Reguler Fit Straight',
+                'kategori' => 'Bawahan',
+                'harga' => 219000,
+                'bahan' => 'Twill Cotton Stretch',
+                'merek' => 'ME Basics',
+                'deskripsi' => 'Celana panjang chino potongan straight dengan stretch ringan untuk kenyamanan mobilitas harian.',
+                'tersedia' => true,
+                'ukuran' => ['30', '32'],
+                'warna' => ['Khaki', 'Hitam'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 6,
+                'nama' => 'Rok Plisket Midi Pleated Skirt',
+                'kategori' => 'Bawahan',
+                'harga' => 139000,
+                'bahan' => 'Silk Chiffon Pleat',
+                'merek' => 'ME Studio',
+                'deskripsi' => 'Rok lipit midi anggun dengan pinggang elastis dan bahan jatuh berkilau lembut.',
+                'tersedia' => true,
+                'ukuran' => ['All Size'],
+                'warna' => ['Dusty Pink', 'Mocca'],
+                'stok_nol' => ['All Size/Dusty Pink', 'All Size/Mocca'],
+            ],
+            [
+                'id' => 7,
+                'nama' => 'Dress Casual Button Down Linen',
+                'kategori' => 'Atasan',
+                'harga' => 259000,
+                'bahan' => 'Pure French Linen',
+                'merek' => 'ME Minimalist',
+                'deskripsi' => 'Gaun santai lengan pendek dengan kancing depan penuh dan saku tersembunyi samping.',
+                'tersedia' => false, // Non-aktif test case
+                'ukuran' => ['M', 'L'],
+                'warna' => ['Sage Green'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 8,
+                'nama' => 'Topi Baseball Bordir Minimalis Cap',
+                'kategori' => 'Aksesori',
+                'harga' => 75000,
+                'bahan' => 'Cotton Drill 100%',
+                'merek' => 'ME Accessories',
+                'deskripsi' => 'Topi baseball 6-panel dengan pengait besi belakang yang dapat disesuaikan.',
+                'tersedia' => true,
+                'ukuran' => ['All Size'],
+                'warna' => ['Hitam', 'Krem'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 9,
+                'nama' => 'Tas Selempang Kanvas Crossbody Bag',
+                'kategori' => 'Aksesori',
+                'harga' => 165000,
+                'bahan' => 'Water-repellent Canvas',
+                'merek' => 'ME Accessories',
+                'deskripsi' => 'Tas selempang praktis anti-air berkapasitas lega untuk membawa ponsel, dompet, dan barang esensial.',
+                'tersedia' => true,
+                'ukuran' => ['All Size'],
+                'warna' => ['Hitam', 'Army'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 10,
+                'nama' => 'Ikat Pinggang Kulit Gesper Metal',
+                'kategori' => 'Aksesori',
+                'harga' => 119000,
+                'bahan' => 'Genuine Cowhide Leather',
+                'merek' => 'ME Leatherworks',
+                'deskripsi' => 'Ikat pinggang formal elegan dengan gesper perak brushed dan jahitan rapi tepi.',
+                'tersedia' => true,
+                'ukuran' => ['All Size'],
+                'warna' => ['Cokelat Gelap', 'Hitam'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 11,
+                'nama' => 'Kaus Kaki Crew Ribbed Katun (Isi 3 Pasang)',
+                'kategori' => 'Aksesori',
+                'harga' => 59000,
+                'bahan' => 'Combed Cotton + Spandex',
+                'merek' => 'ME Basics',
+                'deskripsi' => 'Paket hemat kaus kaki crew bertumit ganda dengan karet nyaman tidak mudah melorot.',
+                'tersedia' => true,
+                'ukuran' => ['All Size'],
+                'warna' => ['Monokrom Mix'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 12,
+                'nama' => 'Syal Rajut Musim Dingin Woven Scarf',
+                'kategori' => 'Aksesori',
+                'harga' => 129000,
+                'bahan' => 'Soft Acrylic Wool',
+                'merek' => 'ME Studio',
+                'deskripsi' => 'Syal rajut panjang bermotif waffle knit halus untuk menjaga kehangatan leher.',
+                'tersedia' => true,
+                'ukuran' => ['All Size'],
+                'warna' => ['Abu Terang', 'Burgundy'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 13,
+                'nama' => 'Blouse Satin Lengan Panjang Wanita',
+                'kategori' => 'Atasan',
+                'harga' => 169000,
+                'bahan' => 'Satin',
+                'merek' => 'ME Studio',
+                'deskripsi' => 'Blouse satin feminin berpotongan longgar elegan dengan kilau lembut mewah, cocok untuk tampilan formal maupun pesta.',
+                'tersedia' => true,
+                'ukuran' => ['S', 'M', 'L'],
+                'warna' => ['Putih Gading', 'Hitam', 'Dusty Pink'],
+                'stok_nol' => ['M/Hitam'],
+            ],
+            [
+                'id' => 14,
+                'nama' => 'Kemeja Linen Oversize Wanita',
+                'kategori' => 'Atasan',
+                'harga' => 199000,
+                'bahan' => 'Linen',
+                'merek' => 'ME Minimalist',
+                'deskripsi' => 'Kemeja santai bersiluet loose fit dari bahan linen alami yang adem, bertekstur estetik, dan nyaman seharian.',
+                'tersedia' => true,
+                'ukuran' => ['S', 'M', 'L'],
+                'warna' => ['Krem', 'Hijau Sage'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 15,
+                'nama' => 'Cardigan Rajut Crop Wanita',
+                'kategori' => 'Outerwear',
+                'harga' => 179000,
+                'bahan' => 'Rajut akrilik',
+                'merek' => 'ME Basics',
+                'deskripsi' => 'Cardigan rajut dengan potongan crop trendi berdetail kancing depan, memberi nuansa chic dan hangat.',
+                'tersedia' => true,
+                'ukuran' => ['S', 'M', 'L'],
+                'warna' => ['Cokelat Susu', 'Abu Muda'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 16,
+                'nama' => 'Tank Top Ribbed Wanita',
+                'kategori' => 'Atasan',
+                'harga' => 69000,
+                'bahan' => 'Katun ribbed',
+                'merek' => 'ME Basics',
+                'deskripsi' => 'Tank top katun bertekstur rusuk elastis yang pas memeluk tubuh, esensial untuk dalaman maupun pakaian santai.',
+                'tersedia' => true,
+                'ukuran' => ['S', 'M', 'L'],
+                'warna' => ['Hitam', 'Putih'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 17,
+                'nama' => 'Sweater Turtleneck Rajut Wanita',
+                'kategori' => 'Atasan',
+                'harga' => 219000,
+                'bahan' => 'Rajut wool blend',
+                'merek' => 'ME Studio',
+                'deskripsi' => 'Sweater kerah tinggi hangat bermaterial campuran wool rajut halus yang lembut di kulit dan tidak gatal.',
+                'tersedia' => true,
+                'ukuran' => ['S', 'M', 'L'],
+                'warna' => ['Maroon', 'Hitam'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 18,
+                'nama' => 'Kemeja Oxford Lengan Panjang Pria',
+                'kategori' => 'Atasan',
+                'harga' => 209000,
+                'bahan' => 'Katun oxford',
+                'merek' => 'ME Studio',
+                'deskripsi' => 'Kemeja lengan panjang bahan oxford premium dengan kerah button-down berkarakter rapi dan maskulin.',
+                'tersedia' => true,
+                'ukuran' => ['M', 'L', 'XL'],
+                'warna' => ['Biru Muda', 'Putih'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 19,
+                'nama' => 'Polo Shirt Pique Pria',
+                'kategori' => 'Atasan',
+                'harga' => 129000,
+                'bahan' => 'Katun pique',
+                'merek' => 'ME Basics',
+                'deskripsi' => 'Kaos polo klasik berpori sarang lebah yang sejuk dengan kerah elastis tahan kerut untuk gaya sporty kasual.',
+                'tersedia' => true,
+                'ukuran' => ['M', 'L', 'XL'],
+                'warna' => ['Navy', 'Hitam', 'Putih'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 20,
+                'nama' => 'Kaos Raglan Lengan Panjang Pria',
+                'kategori' => 'Atasan',
+                'harga' => 99000,
+                'bahan' => 'Katun combed',
+                'merek' => 'ME Basics',
+                'deskripsi' => 'Kaos lengan panjang dua warna model sambungan raglan untuk gaya santai bernuansa retro.',
+                'tersedia' => true,
+                'ukuran' => ['M', 'L', 'XL'],
+                'warna' => ['Abu Misty', 'Hitam'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 21,
+                'nama' => 'Kemeja Batik Modern Lengan Pendek Pria',
+                'kategori' => 'Atasan',
+                'harga' => 175000,
+                'bahan' => 'Katun primisima',
+                'merek' => 'ME Originals',
+                'deskripsi' => 'Kemeja batik cetak kontemporer bahan katun primisima halus, pas badan dengan motif bernilai seni tinggi.',
+                'tersedia' => true,
+                'ukuran' => ['M', 'L', 'XL'],
+                'warna' => ['Cokelat Sogan', 'Biru Indigo'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 22,
+                'nama' => 'Jaket Bomber Pria',
+                'kategori' => 'Outerwear',
+                'harga' => 329000,
+                'bahan' => 'Parasut',
+                'merek' => 'ME Originals',
+                'deskripsi' => 'Jaket bomber fungsional berbahan parasut windproof dengan lapisan dalam hangat dan resleting logam kokoh.',
+                'tersedia' => true,
+                'ukuran' => ['M', 'L', 'XL'],
+                'warna' => ['Hitam', 'Hijau Army'],
+                'stok_nol' => ['*'], // stok 0 semua varian (produk tersedia tetapi habis)
+            ],
+            [
+                'id' => 23,
+                'nama' => 'Celana Kulot Linen Wanita',
+                'kategori' => 'Bawahan',
+                'harga' => 169000,
+                'bahan' => 'Linen',
+                'merek' => 'ME Minimalist',
+                'deskripsi' => 'Celana kulot lebar berbahan linen sejuk dengan pinggang berkaret belakang yang nyaman untuk aktivitas santai.',
+                'tersedia' => true,
+                'ukuran' => ['S', 'M', 'L'],
+                'warna' => ['Hitam', 'Krem'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 24,
+                'nama' => 'Rok Mini A-Line Denim Wanita',
+                'kategori' => 'Bawahan',
+                'harga' => 149000,
+                'bahan' => 'Denim',
+                'merek' => 'ME Denim Co.',
+                'deskripsi' => 'Rok mini siluet A-line denim kokoh dengan saku depan fungsional yang memberi tampilan youthful dan kasual.',
+                'tersedia' => true,
+                'ukuran' => ['S', 'M', 'L'],
+                'warna' => ['Biru Wash', 'Hitam'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 25,
+                'nama' => 'Celana Jeans Slim Fit Pria',
+                'kategori' => 'Bawahan',
+                'harga' => 259000,
+                'bahan' => 'Denim stretch',
+                'merek' => 'ME Denim Co.',
+                'deskripsi' => 'Celana jeans pria pola slim fit dengan serat stretch fleksibel yang leluasa mengikuti pergerakan kaki.',
+                'tersedia' => true,
+                'ukuran' => ['29', '30', '31', '32'],
+                'warna' => ['Biru Tua', 'Hitam'],
+                'stok_nol' => ['32/Hitam'],
+            ],
+            [
+                'id' => 26,
+                'nama' => 'Celana Jogger Cargo Pria',
+                'kategori' => 'Bawahan',
+                'harga' => 189000,
+                'bahan' => 'Katun twill',
+                'merek' => 'ME Originals',
+                'deskripsi' => 'Celana jogger berkantong samping cargo dengan ujung kaki berkerut rib yang trendi dan praktis.',
+                'tersedia' => true,
+                'ukuran' => ['M', 'L', 'XL'],
+                'warna' => ['Olive', 'Hitam'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 27,
+                'nama' => 'Kacamata Persegi Frame Acetate',
+                'kategori' => 'Aksesori',
+                'harga' => 149000,
+                'bahan' => 'Acetate',
+                'merek' => 'ME Accessories',
+                'deskripsi' => 'Kacamata bingkai persegi tegas bermaterial acetate ringan yang tahan gores dan nyaman dipakai harian.',
+                'tersedia' => true,
+                'ukuran' => ['All Size'],
+                'warna' => ['Hitam', 'Tortoise', 'Bening'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 28,
+                'nama' => 'Kacamata Bulat Retro Metal',
+                'kategori' => 'Aksesori',
+                'harga' => 129000,
+                'bahan' => 'Stainless steel',
+                'merek' => 'ME Accessories',
+                'deskripsi' => 'Kacamata berbingkai bulat tipis gaya vintage dengan material stainless steel antikarat dan nose pad empuk.',
+                'tersedia' => true,
+                'ukuran' => ['All Size'],
+                'warna' => ['Emas', 'Perak'],
+                'stok_nol' => ['All Size/Perak'],
+            ],
+            [
+                'id' => 29,
+                'nama' => 'Sabuk Anyaman Kanvas',
+                'kategori' => 'Aksesori',
+                'harga' => 79000,
+                'bahan' => 'Kanvas',
+                'merek' => 'ME Accessories',
+                'deskripsi' => 'Ikat pinggang anyam elastis berbahan serat kanvas tangguh dengan gesper pin ganda yang fleksibel.',
+                'tersedia' => true,
+                'ukuran' => ['90 cm', '100 cm', '110 cm'],
+                'warna' => ['Hitam', 'Khaki'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 30,
+                'nama' => 'Topi Bucket Katun',
+                'kategori' => 'Aksesori',
+                'harga' => 85000,
+                'bahan' => 'Katun twill',
+                'merek' => 'ME Accessories',
+                'deskripsi' => 'Topi bucket katun twill dengan jahitan presisi dan ventilasi udara, cocok untuk perlindungan cuaca luar ruangan.',
+                'tersedia' => true,
+                'ukuran' => ['All Size'],
+                'warna' => ['Krem', 'Hitam', 'Olive'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 31,
+                'nama' => 'Rok Midi Satin Wanita',
+                'kategori' => 'Bawahan',
+                'harga' => 189000,
+                'bahan' => 'Satin',
+                'merek' => 'ME Studio',
+                'deskripsi' => 'Rok panjang midi satin bersiluet bias cut yang jatuh anggun mengikuti lekuk gerak tubuh.',
+                'tersedia' => true,
+                'ukuran' => ['S', 'M', 'L'],
+                'warna' => ['Champagne', 'Hitam', 'Hijau Botol'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 32,
+                'nama' => 'Rok Pensil Span Lipit Wanita',
+                'kategori' => 'Bawahan',
+                'harga' => 139000,
+                'bahan' => 'Span scuba',
+                'merek' => 'ME Basics',
+                'deskripsi' => 'Rok kerja pensil span bahan scuba tebal elastis dengan aksen lipit rapi yang menunjang siluet profesional.',
+                'tersedia' => true,
+                'ukuran' => ['S', 'M', 'L'],
+                'warna' => ['Hitam', 'Abu Tua'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 33,
+                'nama' => 'Celana Palazzo Wanita',
+                'kategori' => 'Bawahan',
+                'harga' => 159000,
+                'bahan' => 'Crinkle',
+                'merek' => 'ME Minimalist',
+                'deskripsi' => 'Celana palazzo pipa lebar dari bahan katun crinkle bertekstur unik, flowy dan adem dipakai seharian.',
+                'tersedia' => true,
+                'ukuran' => ['S', 'M', 'L'],
+                'warna' => ['Krem', 'Hitam', 'Terakota'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 34,
+                'nama' => 'Celana Bahan Slack Pria',
+                'kategori' => 'Bawahan',
+                'harga' => 229000,
+                'bahan' => 'Wool blend',
+                'merek' => 'ME Studio',
+                'deskripsi' => 'Celana formal bahan wool blend premium berpotongan tailored rapi dengan lipatan presisi depan.',
+                'tersedia' => true,
+                'ukuran' => ['29', '30', '31', '32'],
+                'warna' => ['Hitam', 'Abu Tua', 'Navy'],
+                'stok_nol' => ['29/Navy'],
+            ],
+            [
+                'id' => 35,
+                'nama' => 'Celana Pendek Chino Pria',
+                'kategori' => 'Bawahan',
+                'harga' => 119000,
+                'bahan' => 'Katun twill',
+                'merek' => 'ME Basics',
+                'deskripsi' => 'Celana pendek chino selutut dari bahan katun twill kokoh untuk gaya akhir pekan santai dan kasual.',
+                'tersedia' => true,
+                'ukuran' => ['29', '30', '31', '32'],
+                'warna' => ['Khaki', 'Navy', 'Olive'],
+                'stok_nol' => [],
+            ],
+            [
+                'id' => 36,
+                'nama' => 'Rok Tenis Pleated Mini Wanita',
+                'kategori' => 'Bawahan',
+                'harga' => 119000,
+                'bahan' => 'Poliester',
+                'merek' => 'ME Originals',
+                'deskripsi' => 'Rok mini lipit tenis bergaya sporty preppy dengan furing celana dalaman yang aman dan nyaman bergerak.',
+                'tersedia' => true,
+                'ukuran' => ['S', 'M', 'L'],
+                'warna' => ['Putih', 'Navy', 'Hitam'],
+                'stok_nol' => [],
+            ],
+        ];
 
-        // Produk 3: Hoodie Heavyweight
-        $p3 = Produk::create([
-            'kategori_id' => $katPakaian->id,
-            'nama' => 'Hoodie Heavyweight Fleece Pullover',
-            'harga' => 279000,
-            'tersedia' => true,
-            'deskripsi' => 'Hoodie tebal 380 gsm berbahan fleece lembut dengan saku kangguru dan tali serut tahan lama.',
-            'bahan' => 'Heavyweight Cotton Fleece',
-            'merek' => 'ME Originals',
-            'gambar' => '3.jpg',
-        ]);
-        VarianProduk::create(['produk_id' => $p3->id, 'ukuran' => 'M', 'warna' => 'Abu-abu Misty', 'stok' => 14, 'sku' => 'MEO-3-M-GRY']);
-        VarianProduk::create(['produk_id' => $p3->id, 'ukuran' => 'L', 'warna' => 'Abu-abu Misty', 'stok' => 10, 'sku' => 'MEO-3-L-GRY']);
-        VarianProduk::create(['produk_id' => $p3->id, 'ukuran' => 'L', 'warna' => 'Hitam Pekat', 'stok' => 12, 'sku' => 'MEO-3-L-BLK']);
+        $merekPrefix = [
+            'ME Basics' => 'MEB',
+            'ME Studio' => 'MES',
+            'ME Originals' => 'MEO',
+            'ME Denim Co.' => 'MED',
+            'ME Minimalist' => 'MEM',
+            'ME Accessories' => 'MEA',
+            'ME Leatherworks' => 'MEL',
+        ];
 
-        // Produk 4: Jaket Denim Vintage (Deskripsi bernilai NULL untuk uji Flutter null-safety!)
-        $p4 = Produk::create([
-            'kategori_id' => $katPakaian->id,
-            'nama' => 'Jaket Denim Trucker Vintage Wash',
-            'harga' => 349000,
-            'tersedia' => true,
-            'deskripsi' => null, // Nullable test case!
-            'bahan' => 'Non-stretch 13oz Denim',
-            'merek' => 'ME Denim Co.',
-            'gambar' => '4.jpg',
-        ]);
-        VarianProduk::create(['produk_id' => $p4->id, 'ukuran' => 'M', 'warna' => 'Light Blue Wash', 'stok' => 7, 'sku' => 'MED-4-M-BLU']);
-        VarianProduk::create(['produk_id' => $p4->id, 'ukuran' => 'L', 'warna' => 'Light Blue Wash', 'stok' => 9, 'sku' => 'MED-4-L-BLU']);
+        $warnaPrefix = [
+            'Hitam' => 'HTM',
+            'Putih' => 'PTH',
+            'Putih Gading' => 'PTH',
+            'Merah Navy' => 'MNV',
+            'Hijau Botol' => 'HBT',
+            'Abu-abu Misty' => 'MST',
+            'Hitam Pekat' => 'HTM',
+            'Light Blue Wash' => 'BLU',
+            'Khaki' => 'KHK',
+            'Dusty Pink' => 'PNK',
+            'Mocca' => 'MCC',
+            'Sage Green' => 'SGE',
+            'Hijau Sage' => 'SGE',
+            'Krem' => 'KRM',
+            'Army' => 'ARM',
+            'Hijau Army' => 'ARM',
+            'Cokelat Gelap' => 'CKG',
+            'Monokrom Mix' => 'MNK',
+            'Abu Terang' => 'ABU',
+            'Burgundy' => 'BGD',
+            'Cokelat Susu' => 'CSU',
+            'Abu Muda' => 'ABU',
+            'Maroon' => 'MRN',
+            'Biru Muda' => 'BLU',
+            'Navy' => 'NVY',
+            'Abu Misty' => 'ABU',
+            'Cokelat Sogan' => 'CSG',
+            'Biru Indigo' => 'IND',
+            'Biru Wash' => 'BLU',
+            'Biru Tua' => 'BTU',
+            'Olive' => 'OLV',
+            'Tortoise' => 'TRT',
+            'Bening' => 'BNG',
+            'Emas' => 'EMS',
+            'Perak' => 'PRK',
+            'Champagne' => 'CMP',
+            'Abu Tua' => 'ATU',
+            'Terakota' => 'TRK',
+        ];
 
-        // Produk 5: Celana Chino Reguler
-        $p5 = Produk::create([
-            'kategori_id' => $katPakaian->id,
-            'nama' => 'Celana Chino Reguler Fit Straight',
-            'harga' => 219000,
-            'tersedia' => true,
-            'deskripsi' => 'Celana panjang chino potongan straight dengan stretch ringan untuk kenyamanan mobilitas harian.',
-            'bahan' => 'Twill Cotton Stretch',
-            'merek' => 'ME Basics',
-            'gambar' => '5.jpg',
-        ]);
-        VarianProduk::create(['produk_id' => $p5->id, 'ukuran' => '30', 'warna' => 'Khaki', 'stok' => 10, 'sku' => 'MEB-5-30-KHK']);
-        VarianProduk::create(['produk_id' => $p5->id, 'ukuran' => '32', 'warna' => 'Khaki', 'stok' => 12, 'sku' => 'MEB-5-32-KHK']);
-        VarianProduk::create(['produk_id' => $p5->id, 'ukuran' => '32', 'warna' => 'Hitam', 'stok' => 8, 'sku' => 'MEB-5-32-BLK']);
+        $ukuranPrefix = function (string $ukuran): string {
+            if (str_starts_with($ukuran, 'All Size')) {
+                return 'AS';
+            }
+            if (str_ends_with($ukuran, ' cm')) {
+                return trim(str_replace(' cm', '', $ukuran));
+            }
 
-        // Produk 6: Rok Plisket Midi (Uji Produk Habis Total: Semua varian stok 0!)
-        $p6 = Produk::create([
-            'kategori_id' => $katPakaian->id,
-            'nama' => 'Rok Plisket Midi Pleated Skirt',
-            'harga' => 139000,
-            'tersedia' => true,
-            'deskripsi' => 'Rok lipit midi anggun dengan pinggang elastis dan bahan jatuh berkilau lembut.',
-            'bahan' => 'Silk Chiffon Pleat',
-            'merek' => 'ME Studio',
-            'gambar' => '6.jpg',
-        ]);
-        VarianProduk::create(['produk_id' => $p6->id, 'ukuran' => 'All Size', 'warna' => 'Dusty Pink', 'stok' => 0, 'sku' => 'MES-6-AS-PNK']);
-        VarianProduk::create(['produk_id' => $p6->id, 'ukuran' => 'All Size', 'warna' => 'Mocca', 'stok' => 0, 'sku' => 'MES-6-AS-MCC']);
+            return $ukuran;
+        };
 
-        // Produk 7: Dress Casual Linen (Uji Produk Non-Aktif: tersedia = false!)
-        $p7 = Produk::create([
-            'kategori_id' => $katPakaian->id,
-            'nama' => 'Dress Casual Button Down Linen',
-            'harga' => 259000,
-            'tersedia' => false, // Non-aktif test case!
-            'deskripsi' => 'Gaun santai lengan pendek dengan kancing depan penuh dan saku tersembunyi samping.',
-            'bahan' => 'Pure French Linen',
-            'merek' => 'ME Minimalist',
-            'gambar' => '7.jpg',
-        ]);
-        VarianProduk::create(['produk_id' => $p7->id, 'ukuran' => 'M', 'warna' => 'Sage Green', 'stok' => 15, 'sku' => 'MEM-7-M-SGE']);
-        VarianProduk::create(['produk_id' => $p7->id, 'ukuran' => 'L', 'warna' => 'Sage Green', 'stok' => 10, 'sku' => 'MEM-7-L-SGE']);
+        $p1 = null;
+        $p2 = null;
+        $p3 = null;
+        $vP1LHitam = null;
 
-        // --- 5 PRODUK AKSESORI ---
-        // Produk 8: Topi Baseball Bordir
-        $p8 = Produk::create([
-            'kategori_id' => $katAksesori->id,
-            'nama' => 'Topi Baseball Bordir Minimalis Cap',
-            'harga' => 75000,
-            'tersedia' => true,
-            'deskripsi' => 'Topi baseball 6-panel dengan pengait besi belakang yang dapat disesuaikan.',
-            'bahan' => 'Cotton Drill 100%',
-            'merek' => 'ME Accessories',
-            'gambar' => '8.jpg',
-        ]);
-        VarianProduk::create(['produk_id' => $p8->id, 'ukuran' => 'All Size', 'warna' => 'Hitam', 'stok' => 25, 'sku' => 'MEA-8-AS-BLK']);
-        VarianProduk::create(['produk_id' => $p8->id, 'ukuran' => 'All Size', 'warna' => 'Krem', 'stok' => 18, 'sku' => 'MEA-8-AS-CRM']);
+        foreach ($daftarProduk as $item) {
+            $kat = $kategoriMap[$item['kategori']];
 
-        // Produk 9: Tas Selempang Kanvas
-        $p9 = Produk::create([
-            'kategori_id' => $katAksesori->id,
-            'nama' => 'Tas Selempang Kanvas Crossbody Bag',
-            'harga' => 165000,
-            'tersedia' => true,
-            'deskripsi' => 'Tas selempang praktis anti-air berkapasitas lega untuk membawa ponsel, dompet, dan barang esensial.',
-            'bahan' => 'Water-repellent Canvas',
-            'merek' => 'ME Accessories',
-            'gambar' => '9.jpg',
-        ]);
-        VarianProduk::create(['produk_id' => $p9->id, 'ukuran' => 'All Size', 'warna' => 'Hitam', 'stok' => 12, 'sku' => 'MEA-9-AS-BLK']);
-        VarianProduk::create(['produk_id' => $p9->id, 'ukuran' => 'All Size', 'warna' => 'Army', 'stok' => 14, 'sku' => 'MEA-9-AS-ARM']);
+            $produk = Produk::forceCreate([
+                'id' => $item['id'],
+                'kategori_id' => $kat->id,
+                'nama' => $item['nama'],
+                'harga' => $item['harga'],
+                'tersedia' => $item['tersedia'],
+                'deskripsi' => $item['deskripsi'],
+                'bahan' => $item['bahan'],
+                'merek' => $item['merek'],
+                'gambar' => $item['id'] . '.jpg',
+            ]);
 
-        // Produk 10: Ikat Pinggang Kulit
-        $p10 = Produk::create([
-            'kategori_id' => $katAksesori->id,
-            'nama' => 'Ikat Pinggang Kulit Gesper Metal',
-            'harga' => 119000,
-            'tersedia' => true,
-            'deskripsi' => 'Ikat pinggang formal elegan dengan gesper perak brushed dan jahitan rapi tepi.',
-            'bahan' => 'Genuine Cowhide Leather',
-            'merek' => 'ME Leatherworks',
-            'gambar' => '10.jpg',
-        ]);
-        VarianProduk::create(['produk_id' => $p10->id, 'ukuran' => 'All Size', 'warna' => 'Cokelat Gelap', 'stok' => 20, 'sku' => 'MEL-10-AS-BRN']);
-        VarianProduk::create(['produk_id' => $p10->id, 'ukuran' => 'All Size', 'warna' => 'Hitam', 'stok' => 22, 'sku' => 'MEL-10-AS-BLK']);
+            if ($item['id'] === 1) {
+                $p1 = $produk;
+            } elseif ($item['id'] === 2) {
+                $p2 = $produk;
+            } elseif ($item['id'] === 3) {
+                $p3 = $produk;
+            }
 
-        // Produk 11: Kaus Kaki Katun 3-Pack
-        $p11 = Produk::create([
-            'kategori_id' => $katAksesori->id,
-            'nama' => 'Kaus Kaki Crew Ribbed Katun (Isi 3 Pasang)',
-            'harga' => 59000,
-            'tersedia' => true,
-            'deskripsi' => 'Paket hemat kaus kaki crew bertumit ganda dengan karet nyaman tidak mudah melorot.',
-            'bahan' => 'Combed Cotton + Spandex',
-            'merek' => 'ME Basics',
-            'gambar' => '11.jpg',
-        ]);
-        VarianProduk::create(['produk_id' => $p11->id, 'ukuran' => 'All Size', 'warna' => 'Monokrom Mix', 'stok' => 30, 'sku' => 'MEB-11-AS-MNK']);
+            $prefixMerek = $merekPrefix[$item['merek']] ?? 'ME';
 
-        // Produk 12: Syal Rajut Hangat
-        $p12 = Produk::create([
-            'kategori_id' => $katAksesori->id,
-            'nama' => 'Syal Rajut Musim Dingin Woven Scarf',
-            'harga' => 129000,
-            'tersedia' => true,
-            'deskripsi' => 'Syal rajut panjang bermotif waffle knit halus untuk menjaga kehangatan leher.',
-            'bahan' => 'Soft Acrylic Wool',
-            'merek' => 'ME Studio',
-            'gambar' => '12.jpg',
-        ]);
-        VarianProduk::create(['produk_id' => $p12->id, 'ukuran' => 'All Size', 'warna' => 'Abu Terang', 'stok' => 15, 'sku' => 'MES-12-AS-LGR']);
-        VarianProduk::create(['produk_id' => $p12->id, 'ukuran' => 'All Size', 'warna' => 'Burgundy', 'stok' => 11, 'sku' => 'MES-12-AS-BGD']);
+            foreach ($item['ukuran'] as $uk) {
+                foreach ($item['warna'] as $wr) {
+                    $kunciVarian = "{$uk}/{$wr}";
+                    $apakahStokNol = in_array('*', $item['stok_nol'], true) || in_array($kunciVarian, $item['stok_nol'], true);
+
+                    if ($apakahStokNol) {
+                        $stok = 0;
+                    } else {
+                        // Stok normal antara 5 sampai 25 per varian
+                        $stok = 8 + (($item['id'] * 7 + strlen($uk) * 3 + strlen($wr) * 5) % 15);
+                    }
+
+                    $uCode = $ukuranPrefix($uk);
+                    $wCode = $warnaPrefix[$wr] ?? strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $wr), 0, 3));
+                    $sku = "{$prefixMerek}-{$item['id']}-{$uCode}-{$wCode}";
+
+                    $varian = VarianProduk::create([
+                        'produk_id' => $produk->id,
+                        'ukuran' => $uk,
+                        'warna' => $wr,
+                        'stok' => $stok,
+                        'sku' => $sku,
+                    ]);
+
+                    if ($item['id'] === 1 && $uk === 'L' && $wr === 'Hitam') {
+                        $vP1LHitam = $varian;
+                    }
+                }
+            }
+        }
 
         // 6. Data Contoh Keranjang Awal untuk Pelanggan 1
         Keranjang::create([
@@ -340,5 +788,10 @@ class DatabaseSeeder extends Seeder
             'jumlah' => 2,
             'subtotal' => 178000,
         ]);
+
+        // Sinkronisasi data katalog & foto dari snapshot tim jika ada
+        if (file_exists(database_path('data/katalog.json'))) {
+            Artisan::call('katalog:import');
+        }
     }
 }

@@ -7,19 +7,25 @@ use App\Filament\Resources\Pesanans\Pages\EditPesanan;
 use App\Filament\Resources\Pesanans\Pages\ListPesanans;
 use App\Models\Pesanan;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class PesananResource extends Resource
 {
@@ -38,7 +44,7 @@ class PesananResource extends Resource
     protected static ?string $recordTitleAttribute = 'nomor_pesanan';
 
     /**
-     * Status pesanan yang dipakai backend (lihat PesananController::transisiSah).
+     * Status pesanan yang dipakai backend (lihat Pesanan::TRANSISI_SAH).
      */
     public const STATUS = [
         'menunggu_pembayaran' => 'Menunggu Pembayaran',
@@ -95,6 +101,43 @@ class PesananResource extends Resource
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
+                Section::make('Barang yang Dipesan')
+                    ->description('Daftar varian produk yang dipesan pelanggan beserta kuantitas dan harga satuan saat checkout.')
+                    ->schema([
+                        Repeater::make('detail')
+                            ->label('Daftar Item')
+                            ->relationship('detail')
+                            ->schema([
+                                TextInput::make('nama_produk')
+                                    ->label('Produk')
+                                    ->readOnly(),
+                                TextInput::make('ukuran')
+                                    ->label('Ukuran')
+                                    ->readOnly(),
+                                TextInput::make('warna')
+                                    ->label('Warna')
+                                    ->readOnly(),
+                                TextInput::make('jumlah')
+                                    ->label('Qty')
+                                    ->numeric()
+                                    ->readOnly(),
+                                TextInput::make('harga_satuan')
+                                    ->label('Harga Satuan')
+                                    ->prefix('Rp')
+                                    ->numeric()
+                                    ->readOnly(),
+                                TextInput::make('subtotal')
+                                    ->label('Subtotal')
+                                    ->prefix('Rp')
+                                    ->numeric()
+                                    ->readOnly(),
+                            ])
+                            ->columns(6)
+                            ->addable(false)
+                            ->deletable(false)
+                            ->reorderable(false)
+                            ->columnSpanFull(),
+                    ]),
                 Section::make('Rincian Biaya')
                     ->schema([
                         TextInput::make('subtotal')
@@ -164,13 +207,139 @@ class PesananResource extends Resource
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
+            ->filters([
+                SelectFilter::make('status')
+                    ->label('Filter Status')
+                    ->options(self::STATUS),
+            ])
             ->recordActions([
+                Action::make('konfirmasi')
+                    ->label('Konfirmasi Pembayaran')
+                    ->icon(Heroicon::OutlinedCheckBadge)
+                    ->color('success')
+                    ->visible(fn (Pesanan $record): bool => $record->status === 'menunggu_konfirmasi')
+                    ->requiresConfirmation()
+                    ->modalHeading('Konfirmasi Pembayaran')
+                    ->modalDescription(fn (Pesanan $record) => "Tandai pembayaran pesanan #{$record->nomor_pesanan} sebagai Dibayar?")
+                    ->modalSubmitActionLabel('Konfirmasi Dibayar')
+                    ->action(function (Pesanan $record): void {
+                        if (!$record->bolehPindahKe('dibayar')) {
+                            Notification::make()
+                                ->title('Transisi tidak diizinkan')
+                                ->body("Status pesanan #{$record->nomor_pesanan} tidak dapat berpindah ke Dibayar.")
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        $record->status = 'dibayar';
+                        $record->save();
+
+                        Notification::make()
+                            ->title('Pembayaran Dikonfirmasi')
+                            ->body("Pesanan #{$record->nomor_pesanan} kini berstatus Dibayar.")
+                            ->success()
+                            ->send();
+                    }),
+                Action::make('kemas')
+                    ->label('Kemas Barang')
+                    ->icon(Heroicon::OutlinedArchiveBox)
+                    ->color('warning')
+                    ->visible(fn (Pesanan $record): bool => $record->status === 'dibayar')
+                    ->requiresConfirmation()
+                    ->modalHeading('Kemas Pesanan')
+                    ->modalDescription(fn (Pesanan $record) => "Proses pesanan #{$record->nomor_pesanan} ke tahap pengemasan atelier?")
+                    ->modalSubmitActionLabel('Kemas Sekarang')
+                    ->action(function (Pesanan $record): void {
+                        if (!$record->bolehPindahKe('diproses')) {
+                            Notification::make()
+                                ->title('Transisi tidak diizinkan')
+                                ->body("Status pesanan #{$record->nomor_pesanan} tidak dapat berpindah ke Diproses.")
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        $record->status = 'diproses';
+                        $record->save();
+
+                        Notification::make()
+                            ->title('Pesanan Siap Dikemas')
+                            ->body("Pesanan #{$record->nomor_pesanan} berhasil dipindahkan ke status Diproses.")
+                            ->success()
+                            ->send();
+                    }),
+                Action::make('kirim')
+                    ->label('Kirim ke Kurir')
+                    ->icon(Heroicon::OutlinedTruck)
+                    ->color('primary')
+                    ->visible(fn (Pesanan $record): bool => $record->status === 'diproses')
+                    ->requiresConfirmation()
+                    ->modalHeading('Serahkan ke Kurir')
+                    ->modalDescription(fn (Pesanan $record) => "Kirimkan paket #{$record->nomor_pesanan} ke kurir pengiriman?")
+                    ->modalSubmitActionLabel('Kirim Paket')
+                    ->action(function (Pesanan $record): void {
+                        if (!$record->bolehPindahKe('dikirim')) {
+                            Notification::make()
+                                ->title('Transisi tidak diizinkan')
+                                ->body("Status pesanan #{$record->nomor_pesanan} tidak dapat berpindah ke Dikirim.")
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        $record->status = 'dikirim';
+                        $record->save();
+
+                        Notification::make()
+                            ->title('Pesanan Telah Dikirim')
+                            ->body("Pesanan #{$record->nomor_pesanan} kini berstatus Dikirim (barang sedang proses pengiriman).")
+                            ->success()
+                            ->send();
+                    }),
+                Action::make('batalkan')
+                    ->label('Batalkan Pesanan')
+                    ->icon(Heroicon::OutlinedXCircle)
+                    ->color('danger')
+                    ->visible(fn (Pesanan $record): bool => !in_array($record->status, ['dibatalkan', 'selesai']))
+                    ->requiresConfirmation()
+                    ->modalHeading('Batalkan Pesanan')
+                    ->modalDescription(fn (Pesanan $record) => "Apakah Anda yakin ingin membatalkan pesanan #{$record->nomor_pesanan}? Seluruh stok varian barang akan otomatis dikembalikan ke katalog.")
+                    ->modalSubmitActionLabel('Batalkan & Kembalikan Stok')
+                    ->action(function (Pesanan $record): void {
+                        DB::transaction(function () use ($record) {
+                            $record->kembalikanStok();
+                            $record->status = 'dibatalkan';
+                            $record->save();
+                        });
+
+                        Notification::make()
+                            ->title('Pesanan Dibatalkan')
+                            ->body("Pesanan #{$record->nomor_pesanan} berhasil dibatalkan dan stok produk telah dikembalikan ke katalog.")
+                            ->success()
+                            ->send();
+                    }),
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->before(function (Pesanan $record): void {
+                        if (!in_array($record->status, ['dibatalkan', 'selesai'])) {
+                            $record->kembalikanStok();
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->before(function (Collection $records): void {
+                            foreach ($records as $record) {
+                                if (!in_array($record->status, ['dibatalkan', 'selesai'])) {
+                                    $record->kembalikanStok();
+                                }
+                            }
+                        }),
                 ]),
             ]);
     }

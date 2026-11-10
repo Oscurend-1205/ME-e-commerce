@@ -1,17 +1,17 @@
-# fashion_store
+# Fashion Store Mobile App
 
-A new Flutter project.
+Aplikasi *mobile e-commerce fashion* yang dibangun menggunakan framework **Flutter**.
 
-## Getting Started
+## Prasyarat
+Sebelum menjalankan aplikasi ini di laptop Anda, pastikan Anda sudah menginstal:
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (versi terbaru)
+- Android Studio / VS Code dengan ekstensi Flutter & Dart
+- Emulator Android yang aktif atau perangkat fisik (HP) yang terhubung via USB Debugging.
 
-This project is a starting point for a Flutter application.
+## Cara Menjalankan Aplikasi (Getting Started)
 
-A few resources to get you started if this is your first Flutter project:
+Ikuti langkah-langkah di bawah ini untuk menjalankan proyek di lingkungan lokal:
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. **Clone repositori ini** (jika belum):
+   ```bash
+   git clone [https://github.com/Oscurend-1205/ME-e-commerce.git](https://github.com/Oscurend-1205/ME-e-commerce.git)

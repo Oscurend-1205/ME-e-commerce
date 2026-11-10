@@ -20,6 +20,11 @@ class Konstan {
       final host = _normalisasiHost(customHost!);
       return host.endsWith('/api') ? host : '$host/api';
     }
+    const envApi = String.fromEnvironment('API_URL');
+    if (envApi.isNotEmpty) {
+      final host = envApi.trim().replaceAll(RegExp(r'/+$'), '');
+      return host.endsWith('/api') ? host : '$host/api';
+    }
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return 'http://10.0.2.2:8000/api';
     }
@@ -27,12 +32,21 @@ class Konstan {
   }
 
   /// URL dasar penyimpanan aset gambar di backend Laravel:
-  /// Menggunakan /api/gambar agar mendukung header CORS untuk Flutter Web (Chrome) & HP fisik
+  /// - Web: /api/gambar (butuh header CORS untuk Chrome)
+  /// - Mobile/Desktop: /storage/produk (file statis via symlink public/storage,
+  ///   dilayani langsung web server tanpa boot framework Laravel — jauh lebih cepat)
   static String get storageUrl {
     final base = baseUrl.replaceAll(RegExp(r'/+$'), '');
-    return base.endsWith('/api') ? '$base/gambar' : '$base/api/gambar';
+    if (kIsWeb) {
+      return base.endsWith('/api') ? '$base/gambar' : '$base/api/gambar';
+    }
+    final host = base.replaceAll(RegExp(r'/api$'), '');
+    return '$host/storage/produk';
   }
 
+  static const Duration batasWaktu = Duration(seconds: 20);
+
+  /// ID pelanggan statis untuk mode tamu / identitas fallback (PRD UTS).
+  /// Bearer token tetap diprioritaskan backend bila pengguna sudah login.
   static const int pelangganId = 1;
-  static const Duration batasWaktu = Duration(seconds: 10);
 }

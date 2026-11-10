@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../models/produk.dart';
+import '../services/state_pengguna.dart';
 import '../theme.dart';
 
 /// Mengelola URL Foto Produk & Banner yang disimpan di Backend Laravel Storage
@@ -14,7 +15,7 @@ class FotoDummy {
   // Editorial Inset & Highlight
   static String get manifesto => '${Konstan.storageUrl}/manifesto.jpg';
   static String get siluetBaru => '${Konstan.storageUrl}/siluet-baru.jpg';
-  static String get avatar => '${Konstan.storageUrl}/avatar.jpg';
+  static String get avatar => StatePengguna.fotoProfilNotifier.value;
   static String get upsell1 => '${Konstan.storageUrl}/upsell-1.jpg';
   static String get upsell2 => '${Konstan.storageUrl}/upsell-2.jpg';
 
@@ -79,6 +80,8 @@ class FotoDummy {
     BoxFit fit = BoxFit.cover,
     double? width,
     double? height,
+    int? cacheWidth,
+    int? cacheHeight,
     Widget? fallbackWidget,
   }) {
     return Image.network(
@@ -86,6 +89,8 @@ class FotoDummy {
       width: width,
       height: height,
       fit: fit,
+      cacheWidth: cacheWidth,
+      cacheHeight: cacheHeight,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
         return Container(

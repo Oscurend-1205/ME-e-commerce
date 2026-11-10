@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import '../enums.dart';
 import '../models/produk.dart';
 import '../services/layanan_api.dart';
+import '../services/state_pengguna.dart';
 import '../theme.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/format_rupiah.dart';
+import '../widgets/komponen_header.dart';
+import '../widgets/notifikasi_geser.dart';
 import '../widgets/pemilih_varian.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_keranjang.dart';
+import 'halaman_login.dart';
 
 class HalamanRincianProduk extends StatefulWidget {
   final int produkId;
@@ -28,11 +32,20 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
   Varian? _varianTerpilih;
   int _jumlah = 1;
   bool _sedangMenambahkan = false;
+  int _indeksFotoAktif = 0;
+  late final PageController _pageControllerFoto;
 
   @override
   void initState() {
     super.initState();
+    _pageControllerFoto = PageController();
     _muatRincianProduk();
+  }
+
+  @override
+  void dispose() {
+    _pageControllerFoto.dispose();
+    super.dispose();
   }
 
   Future<void> _muatRincianProduk() async {
@@ -40,6 +53,7 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
       _keadaan = KeadaanMuat.memuat;
       _varianTerpilih = null;
       _jumlah = 1;
+      _indeksFotoAktif = 0;
     });
 
     final respon = await LayananApi.ambilRincianProduk(widget.produkId);
@@ -74,6 +88,12 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
   }
 
   Future<void> _tambahKeKeranjang() async {
+    // Gate autentikasi: guest harus login dulu sebelum belanja
+    if (!StatePengguna.isLoggedInNotifier.value) {
+      await _tampilkanDialogHarusLogin();
+      return;
+    }
+
     if (_produk == null || _varianTerpilih == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -115,39 +135,83 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
     });
 
     if (respon.berhasil) {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-content: Text(
-  '${_produk!.nama} (${_varianTerpilih!.ukuran}, ${_varianTerpilih!.warna}) masuk ke keranjang.',
-),
-duration: const Duration(milliseconds: 1500),
-
-          action: SnackBarAction(
-            label: 'LIHAT',
-            textColor: TemaAplikasi.surfaceWhite,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HalamanKeranjang(),
-                ),
-              );
-            },
-          ),
-          backgroundColor: TemaAplikasi.primary,
-          behavior: SnackBarBehavior.floating,
-        ),
+      StatePengguna.sinkronkanKeranjang();
+      StatePengguna.triggerRefreshKatalog();
+      await _muatRincianProduk();
+      if (!mounted) return;
+      NotifikasiGeser.tampilkan(
+        context,
+        pesan:
+            '${_produk!.nama} (${_varianTerpilih!.ukuran}, ${_varianTerpilih!.warna}) masuk ke keranjang.',
+        durasi: const Duration(milliseconds: 2200),
+        labelAksi: 'LIHAT',
+        onAksi: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HalamanKeranjang(),
+            ),
+          ).then((_) {
+            if (mounted) _muatRincianProduk();
+          });
+        },
       );
     } else {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(respon.message),
-          duration: const Duration(milliseconds: 1500),
-          backgroundColor: TemaAplikasi.errorColor,
-          behavior: SnackBarBehavior.floating,
+      NotifikasiGeser.tampilkan(
+        context,
+        pesan: respon.message,
+        warnaLatar: TemaAplikasi.errorColor,
+        durasi: const Duration(milliseconds: 2200),
+      );
+    }
+  }
+
+  Future<void> _tampilkanDialogHarusLogin() async {
+    final lanjut = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: TemaAplikasi.surfaceWhite,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        title: const Text(
+          'Masuk Diperlukan',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: TemaAplikasi.primary,
+          ),
         ),
+        content: const Text(
+          'Silakan masuk atau daftar akun terlebih dahulu untuk menambahkan produk ke keranjang.',
+          style: TextStyle(fontSize: 13, color: TemaAplikasi.secondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            style: TextButton.styleFrom(
+              foregroundColor: TemaAplikasi.secondary,
+            ),
+            child: const Text('NANTI'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: TemaAplikasi.primary,
+              foregroundColor: TemaAplikasi.onPrimary,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            child: const Text('MASUK'),
+          ),
+        ],
+      ),
+    );
+
+    if (lanjut == true && mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const HalamanLogin()),
       );
     }
   }
@@ -186,6 +250,10 @@ duration: const Duration(milliseconds: 1500),
         foregroundColor: TemaAplikasi.primary,
         elevation: 0,
         scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => NavigasiUniversal.kembali(context),
+        ),
         title: Text(
           _produk?.nama.toUpperCase() ?? 'RINCIAN PRODUK',
           style: const TextStyle(
@@ -195,18 +263,8 @@ duration: const Duration(milliseconds: 1500),
           ),
           overflow: TextOverflow.ellipsis,
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_bag_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HalamanKeranjang(),
-                ),
-              );
-            },
-          ),
+        actions: const [
+          TombolTasHeader(),
         ],
       ),
       body: _bangunKonten(),
@@ -235,12 +293,14 @@ duration: const Duration(milliseconds: 1500),
         );
       case KeadaanMuat.berhasil:
         final produk = _produk!;
+        final daftarFoto = produk.daftarFotoUrl;
+
         return SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Hero Image 3:4 Aspect Ratio (Editorial ZARA style dengan Foto Dummy)
+              // Hero Image Gallery 3:4 Aspect Ratio (Editorial ZARA style, mendukung 1-5 foto)
               AspectRatio(
                 aspectRatio: 3 / 4,
                 child: Container(
@@ -254,34 +314,107 @@ duration: const Duration(milliseconds: 1500),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      FotoDummy.bangunGambar(
-                        url: FotoDummy.untukProduk(produk),
-                        fit: BoxFit.cover,
-                        fallbackWidget: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                produk.kategori.toLowerCase() == 'aksesori'
-                                    ? Icons.watch_outlined
-                                    : Icons.checkroom_outlined,
-                                size: 80,
-                                color: TemaAplikasi.mutedGray,
+                      // PageView Slider Foto Produk
+                      PageView.builder(
+                        controller: _pageControllerFoto,
+                        itemCount: daftarFoto.length,
+                        onPageChanged: (idx) {
+                          setState(() => _indeksFotoAktif = idx);
+                        },
+                        itemBuilder: (context, index) {
+                          final urlFoto = daftarFoto[index];
+                          return FotoDummy.bangunGambar(
+                            url: urlFoto,
+                            fit: BoxFit.cover,
+                            fallbackWidget: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    produk.kategori.toLowerCase() == 'aksesori'
+                                        ? Icons.watch_outlined
+                                        : Icons.checkroom_outlined,
+                                    size: 80,
+                                    color: TemaAplikasi.mutedGray,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    produk.merek.toUpperCase(),
+                                    style: const TextStyle(
+                                      color: TemaAplikasi.secondary,
+                                      letterSpacing: 3.0,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 12),
-                              Text(
-                                produk.merek.toUpperCase(),
-                                style: const TextStyle(
-                                  color: TemaAplikasi.secondary,
-                                  letterSpacing: 3.0,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
+                            ),
+                          );
+                        },
+                      ),
+
+                      // Tombol Navigasi Kiri / Kanan jika lebih dari 1 foto
+                      if (daftarFoto.length > 1) ...[
+                        if (_indeksFotoAktif > 0)
+                          Positioned(
+                            left: 8,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: InkWell(
+                                onTap: () {
+                                  _pageControllerFoto.previousPage(
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.35),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.chevron_left,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
+                        if (_indeksFotoAktif < daftarFoto.length - 1)
+                          Positioned(
+                            right: 8,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: InkWell(
+                                onTap: () {
+                                  _pageControllerFoto.nextPage(
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.35),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.chevron_right,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+
+                      // Tag Kategori Produk di Sudut Kiri Atas
                       Positioned(
                         top: 14,
                         left: 14,
@@ -305,6 +438,34 @@ duration: const Duration(milliseconds: 1500),
                           ),
                         ),
                       ),
+
+                      // Indikator Posisi Foto (cth: 1 / 5) di Sudut Kanan Atas
+                      if (daftarFoto.length > 1)
+                        Positioned(
+                          top: 14,
+                          right: 14,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.65),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            child: Text(
+                              '${_indeksFotoAktif + 1} / ${daftarFoto.length}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // Watermark Brand ME
                       Positioned(
                         bottom: 14,
                         right: 14,
@@ -315,7 +476,7 @@ duration: const Duration(milliseconds: 1500),
                           ),
                           color: Colors.black.withValues(alpha: 0.5),
                           child: const Text(
-                            'ME STUDIO / 2026',
+                            'ME ATELIER / 2026',
                             style: TextStyle(
                               fontSize: 10,
                               letterSpacing: 2.0,
@@ -329,6 +490,65 @@ duration: const Duration(milliseconds: 1500),
                   ),
                 ),
               ),
+
+              // Baris Thumbnail & Dots Selector jika ada lebih dari 1 foto (maks 5 foto)
+              if (daftarFoto.length > 1) ...[
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(daftarFoto.length, (idx) {
+                    final isDipilih = idx == _indeksFotoAktif;
+                    return GestureDetector(
+                      onTap: () {
+                        _pageControllerFoto.animateToPage(
+                          idx,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: 52,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: TemaAplikasi.surfaceContainer,
+                          borderRadius: BorderRadius.circular(2),
+                          border: Border.all(
+                            color: isDipilih
+                                ? TemaAplikasi.primary
+                                : TemaAplikasi.borderGray,
+                            width: isDipilih ? 2 : 1,
+                          ),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: FotoDummy.bangunGambar(
+                          url: daftarFoto[idx],
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(daftarFoto.length, (idx) {
+                    final isDipilih = idx == _indeksFotoAktif;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: isDipilih ? 18 : 6,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: isDipilih
+                            ? TemaAplikasi.primary
+                            : TemaAplikasi.borderGray,
+                        borderRadius: BorderRadius.circular(1.5),
+                      ),
+                    );
+                  }),
+                ),
+              ],
               const SizedBox(height: 24),
 
               // Merek & Kategori Baris Halus
