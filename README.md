@@ -183,7 +183,7 @@ Dokumentasi detail endpoint dan koleksi Postman: [api-docs (1).md](api-docs%20(1
   - membuat catalog produk
   - memperbaiki bug
   - merapikan laporan
-  - 
+  - analisis dan performa
     
   
     
