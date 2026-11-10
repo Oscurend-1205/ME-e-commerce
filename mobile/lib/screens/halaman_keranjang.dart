@@ -391,7 +391,7 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
         return WidgetKosong(
           ikon: Icons.shopping_bag_outlined,
           pesan: 'Tas belanja Anda masih kosong.',
-          saranAksi: 'Lihat Koleksi Terbaru ME',
+          saranAksi: 'Lihat Koleksi ME',
           onAksi: () => Navigator.pop(context),
         );
       case KeadaanMuat.galat:

@@ -44,10 +44,22 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
   @override
   void initState() {
     super.initState();
+    StatePengguna.isLoggedInNotifier.addListener(_onAuthStatusBerubah);
+    StatePengguna.tokenNotifier.addListener(_onAuthStatusBerubah);
+    if (StatePengguna.isLoggedInNotifier.value) {
+      _muatPesanan();
+    } else {
+      _keadaan = KeadaanMuat.kosong;
+    }
+  }
+
+  void _onAuthStatusBerubah() {
+    if (!mounted) return;
     if (StatePengguna.isLoggedInNotifier.value) {
       _muatPesanan();
     } else {
       setState(() {
+        _daftarSemuaPesanan = [];
         _keadaan = KeadaanMuat.kosong;
       });
     }
@@ -55,6 +67,8 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
 
   @override
   void dispose() {
+    StatePengguna.isLoggedInNotifier.removeListener(_onAuthStatusBerubah);
+    StatePengguna.tokenNotifier.removeListener(_onAuthStatusBerubah);
     _cariController.dispose();
     super.dispose();
   }
@@ -300,19 +314,33 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: TemaAplikasi.surfaceBright,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _bangunAppBar(),
-            if (_modeCari) _bangunKolomPencarian(),
-            _bangunHeaderArsip(),
-            _bangunTabBarMinimalis(),
-            Expanded(child: _bangunKonten()),
-          ],
-        ),
-      ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: StatePengguna.isLoggedInNotifier,
+      builder: (context, isLoggedIn, _) {
+        // Jika sudah login tetapi pesanan belum pernah dimuat, muat otomatis
+        if (isLoggedIn && _daftarSemuaPesanan.isEmpty && _keadaan != KeadaanMuat.memuat) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && StatePengguna.isLoggedInNotifier.value && _keadaan != KeadaanMuat.memuat) {
+              _muatPesanan();
+            }
+          });
+        }
+
+        return Scaffold(
+          backgroundColor: TemaAplikasi.surfaceBright,
+          body: SafeArea(
+            child: Column(
+              children: [
+                _bangunAppBar(),
+                if (_modeCari) _bangunKolomPencarian(),
+                _bangunHeaderArsip(),
+                _bangunTabBarMinimalis(),
+                Expanded(child: _bangunKonten()),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -362,6 +390,14 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
           ),
           Row(
             children: [
+              IconButton(
+                onPressed: _keadaan == KeadaanMuat.memuat ? null : _muatPesanan,
+                icon: const Icon(Icons.refresh, size: 20, color: TemaAplikasi.primary),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                tooltip: 'Segarkan Pesanan',
+              ),
+              const SizedBox(width: 14),
               IconButton(
                 onPressed: () {
                   setState(() {
@@ -1063,57 +1099,65 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
         break;
     }
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: const BoxDecoration(
-                color: TemaAplikasi.surfaceContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(ikon, size: 28, color: TemaAplikasi.secondary),
+    return RefreshIndicator(
+      onRefresh: _muatPesanan,
+      color: TemaAplikasi.primary,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(32, 60, 32, 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    color: TemaAplikasi.surfaceContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(ikon, size: 28, color: TemaAplikasi.secondary),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  judul,
+                  style: const TextStyle(
+                    fontFamily: 'PlayfairDisplay',
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: TemaAplikasi.primary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  deskripsi,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 12, color: TemaAplikasi.secondary, height: 1.4),
+                ),
+                const SizedBox(height: 20),
+                OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      _tabAktif = 'proses';
+                      _modeCari = false;
+                      _kataKunci = '';
+                      _cariController.clear();
+                    });
+                    _muatPesanan();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: TemaAplikasi.primary,
+                    side: const BorderSide(color: TemaAplikasi.primary),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                  ),
+                  child: const Text('LIHAT SEMUA PESANAN', style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w700)),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              judul,
-              style: const TextStyle(
-                fontFamily: 'PlayfairDisplay',
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: TemaAplikasi.primary,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              deskripsi,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: TemaAplikasi.secondary, height: 1.4),
-            ),
-            const SizedBox(height: 20),
-            OutlinedButton(
-              onPressed: () {
-                setState(() {
-                  _tabAktif = 'proses';
-                  _modeCari = false;
-                  _kataKunci = '';
-                  _cariController.clear();
-                });
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: TemaAplikasi.primary,
-                side: const BorderSide(color: TemaAplikasi.primary),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
-              ),
-              child: const Text('LIHAT SEMUA PESANAN', style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w700)),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -34,13 +34,30 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
   @override
   void initState() {
     super.initState();
+    StatePengguna.isLoggedInNotifier.addListener(_onAuthBerubah);
+    if (StatePengguna.isLoggedInNotifier.value) {
+      _muatRincianPesanan();
+    } else {
+      _keadaan = KeadaanMuat.kosong;
+    }
+  }
+
+  void _onAuthBerubah() {
+    if (!mounted) return;
     if (StatePengguna.isLoggedInNotifier.value) {
       _muatRincianPesanan();
     } else {
       setState(() {
+        _pesanan = null;
         _keadaan = KeadaanMuat.kosong;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    StatePengguna.isLoggedInNotifier.removeListener(_onAuthBerubah);
+    super.dispose();
   }
 
   Future<void> _muatRincianPesanan() async {
@@ -168,23 +185,36 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: TemaAplikasi.surfaceWhite,
-      appBar: AppBar(
-        backgroundColor: TemaAplikasi.surfaceWhite,
-        foregroundColor: TemaAplikasi.primary,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: const Text(
-          'RINCIAN PESANAN',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 2.0,
+    return ValueListenableBuilder<bool>(
+      valueListenable: StatePengguna.isLoggedInNotifier,
+      builder: (context, isLoggedIn, _) {
+        if (isLoggedIn && _pesanan == null && _keadaan != KeadaanMuat.memuat) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && StatePengguna.isLoggedInNotifier.value && _keadaan != KeadaanMuat.memuat) {
+              _muatRincianPesanan();
+            }
+          });
+        }
+
+        return Scaffold(
+          backgroundColor: TemaAplikasi.surfaceWhite,
+          appBar: AppBar(
+            backgroundColor: TemaAplikasi.surfaceWhite,
+            foregroundColor: TemaAplikasi.primary,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            title: const Text(
+              'RINCIAN PESANAN',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 2.0,
+              ),
+            ),
           ),
-        ),
-      ),
-      body: _bangunKonten(),
+          body: _bangunKonten(),
+        );
+      },
     );
   }
 

@@ -9,64 +9,74 @@ class HalamanBuktiTransaksi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!StatePengguna.isLoggedInNotifier.value) {
-      return Scaffold(
-        backgroundColor: TemaAplikasi.surfaceBright,
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: TemaAplikasi.surfaceWhite,
-          foregroundColor: TemaAplikasi.primary,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          title: const Text(
-            'BUKTI TRANSAKSI',
-            style: TextStyle(
-              fontSize: 14,
-              letterSpacing: 1.8,
-              fontWeight: FontWeight.w700,
-              color: TemaAplikasi.primary,
-            ),
-          ),
-          leading: IconButton(
-            onPressed: () => Navigator.maybePop(context),
-            tooltip: 'Kembali',
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.lock_outline_rounded, size: 48, color: TemaAplikasi.primary),
-                const SizedBox(height: 16),
-                const Text(
-                  'Silakan masuk untuk melihat bukti transaksi.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: TemaAplikasi.primary,
-                  ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: StatePengguna.isLoggedInNotifier,
+      builder: (context, isLoggedIn, _) {
+        if (!isLoggedIn) {
+          return Scaffold(
+            backgroundColor: TemaAplikasi.surfaceBright,
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              backgroundColor: TemaAplikasi.surfaceWhite,
+              foregroundColor: TemaAplikasi.primary,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              title: const Text(
+                'BUKTI TRANSAKSI',
+                style: TextStyle(
+                  fontSize: 14,
+                  letterSpacing: 1.8,
+                  fontWeight: FontWeight.w700,
+                  color: TemaAplikasi.primary,
                 ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const HalamanLogin()),
+              ),
+              leading: IconButton(
+                onPressed: () => Navigator.maybePop(context),
+                tooltip: 'Kembali',
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
+            ),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.lock_outline_rounded, size: 48, color: TemaAplikasi.primary),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Silakan masuk untuk melihat bukti transaksi.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: TemaAplikasi.primary,
+                      ),
                     ),
-                    child: const Text('MASUK SEKARANG'),
-                  ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const HalamanLogin()),
+                        ),
+                        child: const Text('MASUK SEKARANG'),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-      );
-    }
+          );
+        }
+
+        return _bangunKonten(context);
+      },
+    );
+  }
+
+  Widget _bangunKonten(BuildContext context) {
     final daftarBukti = [
       _BuktiTransaksiItem(
         judul: 'Invoice Pembelian',
