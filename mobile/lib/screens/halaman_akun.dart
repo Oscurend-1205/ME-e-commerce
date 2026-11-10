@@ -82,11 +82,6 @@ class _HalamanAkunState extends State<HalamanAkun> {
             color: TemaAplikasi.primary,
           ),
         ),
-        leading: IconButton(
-          onPressed: () => NavigasiUniversal.kembali(context),
-          tooltip: 'Kembali',
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
         actions: const [
           TombolTasHeader(),
         ],

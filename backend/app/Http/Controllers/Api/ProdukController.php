@@ -22,7 +22,7 @@ class ProdukController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Produk::with(['kategori', 'varian']);
+        $query = Produk::with(['kategori', 'varian', 'fotos']);
 
         // Filter kategori (?kategori=)
         if ($request->filled('kategori')) {
@@ -52,7 +52,7 @@ class ProdukController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $produk = Produk::with(['kategori', 'varian'])->find($id);
+        $produk = Produk::with(['kategori', 'varian', 'fotos'])->find($id);
 
         if (! $produk) {
             return $this->gagal('Produk tidak ditemukan.', 404);

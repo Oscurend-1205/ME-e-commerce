@@ -147,9 +147,12 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
         highlightColor: Colors.transparent,
         child: SizedBox(
           height: 64,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
               // Ikon atau Micro Avatar (Sesuai State 2A & 2B di cek-navbar.html)
               if (pakaiAvatar && isAktif)
                 Container(
@@ -218,6 +221,7 @@ class _HalamanUtamaNavigasiState extends State<HalamanUtamaNavigasi> {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),

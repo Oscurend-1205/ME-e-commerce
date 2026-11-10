@@ -73,10 +73,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
 
       setState(() {
         _dataKeranjang = data;
-        _daftarRekomendasi = rekomendasi;
-        _keadaan = data.items.isEmpty
-            ? KeadaanMuat.kosong
-            : KeadaanMuat.berhasil;
+        _daftarRekomendasi = rekomendasi.isNotEmpty ? rekomendasi : _daftarRekomendasi;
+        _keadaan = KeadaanMuat.berhasil;
       });
     } else {
       setState(() {
@@ -316,9 +314,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
         ],
       ),
       bottomNavigationBar:
-          _keadaan == KeadaanMuat.berhasil &&
-              _dataKeranjang != null &&
-              _dataKeranjang!.items.isNotEmpty
+          (_keadaan == KeadaanMuat.berhasil || _keadaan == KeadaanMuat.kosong) &&
+              _dataKeranjang != null
           ? _bangunStickyBottomBar()
           : null,
     );
@@ -388,21 +385,15 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
     switch (_keadaan) {
       case KeadaanMuat.memuat:
         return const WidgetMemuat();
-      case KeadaanMuat.kosong:
-        return WidgetKosong(
-          ikon: Icons.shopping_bag_outlined,
-          pesan: 'Tas belanja Anda masih kosong.',
-          saranAksi: 'Lihat Koleksi ME',
-          onAksi: () => Navigator.pop(context),
-        );
       case KeadaanMuat.galat:
         return WidgetGalat(
           jenisGalat: _jenisGalat,
           pesan: _pesanGalat,
           onCobaLagi: _muatKeranjang,
         );
+      case KeadaanMuat.kosong:
       case KeadaanMuat.berhasil:
-        final items = _dataKeranjang!.items;
+        final items = _dataKeranjang?.items ?? [];
         return SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.only(bottom: 24),
@@ -440,35 +431,36 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                         ),
                       ],
                     ),
-                    InkWell(
-                      onTap: _kosongkanKeranjang,
-                      borderRadius: BorderRadius.circular(2),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 4,
-                        ),
-                        child: Row(
-                          children: const [
-                            Icon(
-                              Icons.delete_sweep_outlined,
-                              size: 16,
-                              color: TemaAplikasi.secondary,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'KOSONGKAN',
-                              style: TextStyle(
-                                fontSize: 10,
-                                letterSpacing: 1.0,
-                                fontWeight: FontWeight.w600,
+                    if (items.isNotEmpty)
+                      InkWell(
+                        onTap: _kosongkanKeranjang,
+                        borderRadius: BorderRadius.circular(2),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 4,
+                          ),
+                          child: Row(
+                            children: const [
+                              Icon(
+                                Icons.delete_sweep_outlined,
+                                size: 16,
                                 color: TemaAplikasi.secondary,
                               ),
-                            ),
-                          ],
+                              SizedBox(width: 4),
+                              Text(
+                                'KOSONGKAN',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  letterSpacing: 1.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: TemaAplikasi.secondary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -476,55 +468,58 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
               // Ongkir ditentukan server setelah kurir dipilih saat checkout.
               _bangunNotifikasiBebasOngkir(),
 
-              // Checkout memproses seluruh item di keranjang.
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'SEMUA ITEM (${items.length})',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1.0,
-                        color: TemaAplikasi.primary,
-                      ),
-                    ),
-                    Row(
-                      children: const [
-                        Icon(
-                          Icons.schedule,
-                          size: 15,
-                          color: TemaAplikasi.secondary,
+              if (items.isNotEmpty) ...[
+                // Checkout memproses seluruh item di keranjang.
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'SEMUA ITEM (${items.length})',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.0,
+                          color: TemaAplikasi.primary,
                         ),
-                        SizedBox(width: 4),
-                        Text(
-                          'Kirim Hari Ini',
-                          style: TextStyle(
-                            fontSize: 11,
+                      ),
+                      Row(
+                        children: const [
+                          Icon(
+                            Icons.schedule,
+                            size: 15,
                             color: TemaAplikasi.secondary,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          SizedBox(width: 4),
+                          Text(
+                            'Kirim Hari Ini',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: TemaAplikasi.secondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
 
-              // Daftar Item Keranjang (cek-keranjangBelanja.html)
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                // Daftar Item Keranjang (cek-keranjangBelanja.html)
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  itemCount: items.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) => _bangunKartuItem(items[index]),
                 ),
-                itemCount: items.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 12),
-                itemBuilder: (context, index) => _bangunKartuItem(items[index]),
-              ),
+              ] else
+                _bangunKeranjangKosong(),
 
               // Cross-sell Carousel: Sempurnakan Tampilan (cek-keranjangBelanja.html)
               _bangunCrossSellCarousel(),
@@ -876,6 +871,49 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 3b. Keadaan Kosong Item Keranjang
+  Widget _bangunKeranjangKosong() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+      decoration: BoxDecoration(
+        color: TemaAplikasi.surfaceWhite,
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(color: TemaAplikasi.borderGray),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: const BoxDecoration(
+              color: TemaAplikasi.surfaceLight,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.shopping_bag_outlined,
+              size: 24,
+              color: TemaAplikasi.secondary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'kosong, belum ada produk di keranjang',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: TemaAplikasi.secondary,
+              letterSpacing: 0.3,
+            ),
           ),
         ],
       ),
@@ -1353,6 +1391,8 @@ class _HalamanKeranjangState extends State<HalamanKeranjang> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: TemaAplikasi.primary,
                   foregroundColor: TemaAplikasi.onPrimary,
+                  disabledBackgroundColor: TemaAplikasi.borderGray,
+                  disabledForegroundColor: TemaAplikasi.mutedGray,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(2),
                   ),

@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../constants.dart';
 import '../enums.dart';
+import '../models/hero_banner.dart';
 import '../models/produk.dart';
 import '../services/layanan_api.dart';
 import '../services/state_pengguna.dart';
@@ -12,7 +16,6 @@ import '../widgets/komponen_header.dart';
 import '../widgets/modal_pilih_varian.dart';
 import '../widgets/notifikasi_geser.dart';
 import '../widgets/widget_keadaan.dart';
-import '../constants.dart';
 import 'halaman_keranjang.dart';
 import 'halaman_rincian_produk.dart';
 
@@ -45,6 +48,12 @@ class _HalamanKatalogState extends State<HalamanKatalog>
   final TextEditingController _emailVipController = TextEditingController();
   final Set<int> _wishlistIds = {};
   bool _tampilkanPencarian = false;
+
+  // Hero Banner Slider
+  List<HeroBannerModel> _daftarHeroBanner = [];
+  int _heroBannerIndeks = 0;
+  Timer? _heroBannerTimer;
+  final PageController _heroBannerPageController = PageController();
 
   // Controller Animasi Scroll & Marquee Landing Page
   final ScrollController _scrollController = ScrollController();
@@ -116,8 +125,15 @@ class _HalamanKatalogState extends State<HalamanKatalog>
   void initState() {
     super.initState();
     if (widget.modeJelajah) {
-      _storyTerpilih = widget.storyAwal ?? 'Atasan & Kemeja';
-      _kategoriTerpilih = 'Atasan';
+      if (widget.storyAwal == 'Semua') {
+        // Dipanggil dari tombol "Jelajahi Semua Produk": tampilkan grid
+        // semua produk tanpa filter editorial.
+        _storyTerpilih = 'Semua';
+        _kategoriTerpilih = null;
+      } else {
+        _storyTerpilih = widget.storyAwal ?? 'Atasan & Kemeja';
+        _kategoriTerpilih = 'Atasan';
+      }
       _tampilkanPencarian = false;
     } else {
       _storyTerpilih = 'Baru Tiba';
@@ -136,7 +152,15 @@ class _HalamanKatalogState extends State<HalamanKatalog>
     if (widget.modeJelajah &&
         widget.storyAwal != null &&
         widget.storyAwal != _storyTerpilih) {
-      _pilihStoryBerdasarkanLabel(widget.storyAwal!);
+      if (widget.storyAwal == 'Semua') {
+        setState(() {
+          _storyTerpilih = 'Semua';
+          _kategoriTerpilih = null;
+        });
+        _muatProduk();
+      } else {
+        _pilihStoryBerdasarkanLabel(widget.storyAwal!);
+      }
     }
   }
 
@@ -155,6 +179,8 @@ class _HalamanKatalogState extends State<HalamanKatalog>
 
   @override
   void dispose() {
+    _heroBannerTimer?.cancel();
+    _heroBannerPageController.dispose();
     StatePengguna.versiKatalogNotifier.removeListener(_muatData);
     _scrollController.removeListener(_tanganiScroll);
     _scrollController.dispose();
@@ -165,7 +191,71 @@ class _HalamanKatalogState extends State<HalamanKatalog>
   }
 
   Future<void> _muatData() async {
-    await Future.wait([_muatProduk(), _muatJumlahKeranjang()]);
+    await Future.wait([
+      _muatProduk(),
+      _muatJumlahKeranjang(),
+      _muatHeroBanner(),
+    ]);
+  }
+
+  Future<void> _muatHeroBanner() async {
+    final respon = await LayananApi.ambilHeroBanner();
+    if (!mounted) return;
+
+    if (respon.berhasil && respon.data is List) {
+      final list = (respon.data as List)
+          .map((item) => HeroBannerModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+      if (list.isNotEmpty) {
+        setState(() {
+          _daftarHeroBanner = list;
+          if (_heroBannerIndeks >= list.length) {
+            _heroBannerIndeks = 0;
+          }
+        });
+        if (_heroBannerPageController.hasClients) {
+          _heroBannerPageController.jumpToPage(_heroBannerIndeks);
+        }
+        _aturTimerHeroBanner();
+        return;
+      }
+    }
+
+    if (_daftarHeroBanner.isEmpty) {
+      setState(() {
+        _daftarHeroBanner = const [
+          HeroBannerModel(
+            id: 1,
+            judul: 'ME MINIMALISM',
+            subjudul:
+                'Eksplorasi siluet bersih, material linen premium, dan palet monokrom abadi.',
+            tag: 'BARU TIBA // DROP 01',
+            koleksi: 'ATELIER ÉDITION 2026',
+            gambar: 'hero-banner.jpg',
+            gambarUrl: '',
+            urutan: 1,
+          ),
+        ];
+      });
+    }
+    _aturTimerHeroBanner();
+  }
+
+  void _aturTimerHeroBanner() {
+    _heroBannerTimer?.cancel();
+    if (_daftarHeroBanner.length <= 1) return;
+    _heroBannerTimer = Timer.periodic(const Duration(milliseconds: 4500), (
+      timer,
+    ) {
+      if (!mounted || !_heroBannerPageController.hasClients) return;
+      final indeksBerikutnya =
+          (_heroBannerIndeks + 1) % _daftarHeroBanner.length;
+      _heroBannerPageController.animateToPage(
+        indeksBerikutnya,
+        duration: const Duration(milliseconds: 650),
+        curve: Curves.easeInOut,
+      );
+    });
   }
 
   Future<void> _muatProduk() async {
@@ -525,7 +615,7 @@ class _HalamanKatalogState extends State<HalamanKatalog>
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () {
-                widget.onPindahTab?.call(1, 'Wanita');
+                widget.onPindahTab?.call(1, 'Semua');
               },
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: TemaAplikasi.primary, width: 1),
@@ -723,47 +813,80 @@ class _HalamanKatalogState extends State<HalamanKatalog>
       );
     }
 
-    // Header Beranda PERSIS & SAMA untuk semua halaman/kategori (Tanpa Tombol Back)
+    // Header ala Tokopedia: search bar + ikon notifikasi & keranjang
     return AppBar(
       backgroundColor: TemaAplikasi.surfaceWhite,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      title: Row(
-        children: [
-          const LogoBrandHeader(),
-          const Spacer(),
-          Text(
-            widget.modeJelajah ? 'JELAJAH' : 'BERANDA',
-            style: const TextStyle(
-              fontSize: 11,
-              letterSpacing: 2.5,
-              fontWeight: FontWeight.w600,
-              color: TemaAplikasi.primary,
+      automaticallyImplyLeading: false,
+      titleSpacing: 12,
+      title: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: TemaAplikasi.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: TemaAplikasi.borderGray, width: 0.8),
+        ),
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _tampilkanPencarian = true;
+            });
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.search,
+                  size: 18,
+                  color: TemaAplikasi.secondary,
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Cari produk atelier...',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: TemaAplikasi.mutedGray,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: TemaAplikasi.primary,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Text(
+                    'Cari',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: TemaAplikasi.onPrimary,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const Spacer(),
-        ],
+        ),
       ),
-      actions: [..._bangunHeaderActions(), const AvatarHeaderUser()],
+      actions: [
+        _TombolNotifikasiHeader(),
+        const TombolTasHeader(),
+        const AvatarHeaderUser(),
+      ],
       bottom: (!widget.modeJelajah)
           ? _HeaderScrollProgress(controller: _scrollController)
           : null,
     );
-  }
-
-  List<Widget> _bangunHeaderActions() {
-    return [
-      IconButton(
-        icon: const Icon(Icons.search_outlined, size: 22),
-        tooltip: 'Pencarian',
-        onPressed: () {
-          setState(() {
-            _tampilkanPencarian = true;
-          });
-        },
-      ),
-      const TombolTasHeader(),
-    ];
   }
 
   // 1. Story / Category Highlight Pills (Horizontal Scroll)
@@ -869,6 +992,27 @@ class _HalamanKatalogState extends State<HalamanKatalog>
         : 0.0;
     final textOpacity = (1.0 - (posisiScroll / 300.0)).clamp(0.0, 1.0);
 
+    final jumlahBanner = _daftarHeroBanner.isNotEmpty
+        ? _daftarHeroBanner.length
+        : 1;
+    final indeksAman = _heroBannerIndeks.clamp(0, jumlahBanner - 1);
+    final bannerAktif = _daftarHeroBanner.isNotEmpty
+        ? _daftarHeroBanner[indeksAman]
+        : null;
+
+    final tagText = bannerAktif?.tag.isNotEmpty == true
+        ? bannerAktif!.tag
+        : 'BARU TIBA // DROP 01';
+    final koleksiText = bannerAktif?.koleksi.isNotEmpty == true
+        ? bannerAktif!.koleksi
+        : 'ATELIER ÉDITION 2026';
+    final judulText = bannerAktif?.judul.isNotEmpty == true
+        ? bannerAktif!.judul
+        : 'ME MINIMALISM';
+    final subjudulText = bannerAktif?.subjudul.isNotEmpty == true
+        ? bannerAktif!.subjudul
+        : 'Eksplorasi siluet bersih, material linen premium, dan palet monokrom abadi.';
+
     return Container(
       width: double.infinity,
       height: 440,
@@ -878,15 +1022,37 @@ class _HalamanKatalogState extends State<HalamanKatalog>
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Foto Editorial ME MINIMALISM dengan Efek Parallax Scroll
+          // Foto Editorial ME MINIMALISM dengan Efek Parallax Scroll & Auto-Slide Horizontal
           Transform.translate(
             offset: Offset(0, -parallaxOffset * 0.4),
             child: Transform.scale(
               scale: 1.08 + overscrollScale,
-              child: FotoDummy.bangunGambar(
-                url: FotoDummy.heroBanner,
-                fit: BoxFit.cover,
-                cacheWidth: 1080,
+              child: PageView.builder(
+                controller: _heroBannerPageController,
+                itemCount: jumlahBanner,
+                onPageChanged: (index) {
+                  if (_heroBannerIndeks == index) return;
+                  setState(() {
+                    _heroBannerIndeks = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  final banner = _daftarHeroBanner.isNotEmpty
+                      ? _daftarHeroBanner[index]
+                      : null;
+                  final url = banner != null && banner.gambarUrl.isNotEmpty
+                      ? banner.gambarUrl
+                      : FotoDummy.heroBanner;
+
+                  return KeyedSubtree(
+                    key: ValueKey<String>(url),
+                    child: FotoDummy.bangunGambar(
+                      url: url,
+                      fit: BoxFit.cover,
+                      cacheWidth: 1080,
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -927,9 +1093,9 @@ class _HalamanKatalogState extends State<HalamanKatalog>
                           color: Colors.white.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(2),
                         ),
-                        child: const Text(
-                          'BARU TIBA // DROP 01',
-                          style: TextStyle(
+                        child: Text(
+                          tagText,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 9,
                             letterSpacing: 2.0,
@@ -938,9 +1104,9 @@ class _HalamanKatalogState extends State<HalamanKatalog>
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        'ATELIER ÉDITION 2026',
-                        style: TextStyle(
+                      Text(
+                        koleksiText,
+                        style: const TextStyle(
                           color: Color(0xFFE5E2E1),
                           fontSize: 10,
                           letterSpacing: 2.2,
@@ -950,9 +1116,9 @@ class _HalamanKatalogState extends State<HalamanKatalog>
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'ME MINIMALISM',
-                    style: TextStyle(
+                  Text(
+                    judulText,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 28,
                       fontWeight: FontWeight.w400,
@@ -960,15 +1126,37 @@ class _HalamanKatalogState extends State<HalamanKatalog>
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Eksplorasi siluet bersih, material linen premium, dan palet monokrom abadi.',
-                    style: TextStyle(
+                  Text(
+                    subjudulText,
+                    style: const TextStyle(
                       color: Color(0xFFE5E2E1),
                       fontSize: 12,
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+
+                  // Indikator Titik/Garis Animasi Slide (Jika lebih dari 1 foto)
+                  if (jumlahBanner > 1)
+                    Row(
+                      children: List.generate(jumlahBanner, (i) {
+                        final aktif = i == indeksAman;
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOutCubic,
+                          margin: const EdgeInsets.only(right: 6),
+                          width: aktif ? 24 : 6,
+                          height: 3,
+                          decoration: BoxDecoration(
+                            color: aktif
+                                ? Colors.white
+                                : Colors.white.withValues(alpha: 0.35),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        );
+                      }),
+                    ),
+                  const SizedBox(height: 6),
                 ],
               ),
             ),
@@ -1996,147 +2184,6 @@ class _HalamanKatalogState extends State<HalamanKatalog>
           ),
         ),
 
-        // 3. Campaign Spotlight Lookbook Card (cek-katalogWanita.html)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: AspectRatio(
-            aspectRatio: 4 / 5,
-            child: Container(
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: TemaAplikasi.surfaceContainer,
-                borderRadius: BorderRadius.circular(2),
-              ),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  FotoDummy.bangunGambar(
-                    url: FotoDummy.heroWanita,
-                    fit: BoxFit.cover,
-                    cacheWidth: 1080,
-                  ),
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Color(0x33000000),
-                          Color(0xEE000000),
-                        ],
-                        stops: [0.35, 0.65, 1.0],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3.5,
-                              ),
-                              color: Colors.black.withValues(alpha: 0.75),
-                              child: const Text(
-                                '• KAMPANYE UTAMA',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 8.5,
-                                  letterSpacing: 2.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            const Text(
-                              '02 / 04 SERIES',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 9.5,
-                                letterSpacing: 2.0,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'L’Élégance Silencieuse',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w400,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'Eksplorasi drape arsitektural & palet monokrom abadi.',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            InkWell(
-                              onTap: () {
-                                setState(() {
-                                  _subKategoriWanita = 'OUTERWEAR & COAT';
-                                });
-                                ScaffoldMessenger.of(
-                                  context,
-                                ).hideCurrentSnackBar();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Menampilkan Seri 02: L’Élégance Silencieuse',
-                                    ),
-                                    duration: Duration(milliseconds: 1500),
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
-                              },
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Text(
-                                    'JELAJAHI SERI 02',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                      letterSpacing: 2.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  SizedBox(width: 6),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    size: 14,
-                                    color: Colors.white,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-
         // 4. Horizontal Category Filter Chips (cek-katalogWanita.html)
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -2414,147 +2461,6 @@ class _HalamanKatalogState extends State<HalamanKatalog>
             ],
           ),
         ),
-
-        // 3. Campaign Spotlight Lookbook Card (cek-katalogPria.html)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: AspectRatio(
-            aspectRatio: 4 / 5,
-            child: Container(
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: TemaAplikasi.surfaceContainer,
-                borderRadius: BorderRadius.circular(2),
-              ),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  FotoDummy.bangunGambar(
-                    url: FotoDummy.heroPria,
-                    fit: BoxFit.cover,
-                    cacheWidth: 1080,
-                  ),
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Color(0x33000000),
-                          Color(0xEE000000),
-                        ],
-                        stops: [0.35, 0.65, 1.0],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3.5,
-                              ),
-                              color: Colors.black.withValues(alpha: 0.75),
-                              child: const Text(
-                                '• KAMPANYE UTAMA',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 8.5,
-                                  letterSpacing: 2.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            const Text(
-                              '01 / 04 SERIES',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 9.5,
-                                letterSpacing: 2.0,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'L’Homme Contemporain',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w400,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'Eksplorasi potongan jas dekonstruksi & palet monokrom abadi.',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            InkWell(
-                              onTap: () {
-                                setState(() {
-                                  _subKategoriPria = 'SUITING & BLAZER';
-                                });
-                                ScaffoldMessenger.of(
-                                  context,
-                                ).hideCurrentSnackBar();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Menampilkan Seri 01: L’Homme Contemporain',
-                                    ),
-                                    duration: Duration(milliseconds: 1500),
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
-                              },
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Text(
-                                    'JELAJAHI SERI 01',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                      letterSpacing: 2.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  SizedBox(width: 6),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    size: 14,
-                                    color: Colors.white,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
 
         // 4. Horizontal Category Filter Chips (cek-katalogPria.html)
         SingleChildScrollView(
@@ -3071,47 +2977,37 @@ class _MarqueeRunningText extends StatefulWidget {
   State<_MarqueeRunningText> createState() => _MarqueeRunningTextState();
 }
 
-class _MarqueeRunningTextState extends State<_MarqueeRunningText> {
-  late final ScrollController _controller;
-  bool _berjalan = true;
+class _MarqueeRunningTextState extends State<_MarqueeRunningText>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animController;
+  late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    _controller = ScrollController();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _jalankanAnimasi();
-    });
-  }
-
-  void _jalankanAnimasi() async {
-    while (mounted && _berjalan) {
-      if (_controller.hasClients && _controller.position.hasContentDimensions) {
-        final maxScroll = _controller.position.maxScrollExtent;
-        if (maxScroll.isFinite && maxScroll > 0) {
-          try {
-            await _controller.animateTo(
-              maxScroll,
-              duration: const Duration(seconds: 22),
-              curve: Curves.linear,
-            );
-            if (_controller.hasClients && mounted && _berjalan) {
-              _controller.jumpTo(0);
+    _scrollController = ScrollController();
+    _animController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 250))
+          ..addListener(() {
+            if (!mounted) return;
+            if (_scrollController.hasClients &&
+                _scrollController.position.hasContentDimensions) {
+              final max = _scrollController.position.maxScrollExtent;
+              if (max.isFinite && max > 0) {
+                final target = _animController.value * max;
+                if (target.isFinite) {
+                  _scrollController.jumpTo(target);
+                }
+              }
             }
-          } catch (_) {}
-        } else {
-          await Future.delayed(const Duration(milliseconds: 500));
-        }
-      } else {
-        await Future.delayed(const Duration(milliseconds: 500));
-      }
-    }
+          });
+    _animController.repeat();
   }
 
   @override
   void dispose() {
-    _berjalan = false;
-    _controller.dispose();
+    _animController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -3122,9 +3018,9 @@ class _MarqueeRunningTextState extends State<_MarqueeRunningText> {
       color: TemaAplikasi.primary,
       alignment: Alignment.center,
       child: ListView.builder(
-        controller: _controller,
+        controller: _scrollController,
         scrollDirection: Axis.horizontal,
-        physics: const NeverScrollableScrollPhysics(),
+        physics: const ClampingScrollPhysics(),
         itemCount: 15,
         itemBuilder: (context, index) {
           return Center(
@@ -3195,6 +3091,56 @@ class _HeaderScrollProgressState extends State<_HeaderScrollProgress> {
       backgroundColor: Colors.transparent,
       valueColor: const AlwaysStoppedAnimation<Color>(TemaAplikasi.primary),
       minHeight: 2,
+    );
+  }
+}
+
+/// Tombol lonceng notifikasi dengan titik indikator badge kecil.
+/// Menggantikan ikon chat pada header ala Tokopedia.
+class _TombolNotifikasiHeader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Belum ada notifikasi baru.'),
+            duration: Duration(milliseconds: 1500),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      },
+      borderRadius: BorderRadius.circular(24),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            const Icon(
+              Icons.notifications_none_outlined,
+              size: 24,
+              color: TemaAplikasi.primary,
+            ),
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: TemaAplikasi.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: TemaAplikasi.surfaceWhite,
+                    width: 1.2,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

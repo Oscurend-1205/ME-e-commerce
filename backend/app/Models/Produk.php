@@ -37,6 +37,11 @@ class Produk extends Model
         return $this->hasMany(VarianProduk::class, 'produk_id');
     }
 
+    public function fotos()
+    {
+        return $this->hasMany(FotoProduk::class, 'produk_id')->orderBy('urutan', 'asc');
+    }
+
     public function getStokAttribute()
     {
         return (int) $this->varian()->sum('stok');
@@ -58,18 +63,39 @@ class Produk extends Model
      */
     public function formatRingkas(): array
     {
+        $daftarFoto = [];
+        $koleksiFoto = $this->relationLoaded('fotos') ? $this->fotos : $this->fotos()->get();
+        if ($koleksiFoto->isNotEmpty()) {
+            $daftarFoto = $koleksiFoto->map(function ($f) {
+                return [
+                    'id' => $f->id,
+                    'url' => $f->url,
+                    'urutan' => (int) $f->urutan,
+                ];
+            })->values()->all();
+        } elseif ($this->gambar_url) {
+            $daftarFoto = [
+                [
+                    'id' => 0,
+                    'url' => $this->gambar_url,
+                    'urutan' => 1,
+                ],
+            ];
+        }
+
         return [
             'id' => $this->id,
             'nama' => $this->nama,
             'harga' => (int) $this->harga,
             'kategori' => $this->kategori ? $this->kategori->nama : '',
-            'stok' => (int) $this->varian->sum('stok'),
+            'stok' => (int) ($this->varian ? $this->varian->sum('stok') : 0),
             'tersedia' => (bool) $this->tersedia,
             'deskripsi' => $this->deskripsi,
             'bahan' => $this->bahan,
             'merek' => $this->merek,
             'gambar' => $this->gambar,
             'gambar_url' => $this->gambar_url,
+            'fotos' => $daftarFoto,
             'varian' => $this->varian ? $this->varian->map(function ($v) {
                 return [
                     'id' => $v->id,

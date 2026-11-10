@@ -11,8 +11,6 @@ import '../widgets/format_rupiah.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_login.dart';
-import 'halaman_pembayaran.dart';
-import 'halaman_pembayaran_qris.dart';
 
 class HalamanRincianPesanan extends StatefulWidget {
   final int pesananId;
@@ -637,121 +635,76 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
     final status = pesanan.status.toLowerCase();
 
     if (status == 'menunggu_pembayaran') {
-      return Column(
-        children: [
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                if (pesanan.snapToken != null &&
-                    pesanan.snapToken!.isNotEmpty) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HalamanPembayaran(
-                        pesananId: pesanan.id,
-                        snapToken: pesanan.snapToken!,
-                        redirectUrl: pesanan.redirectUrl,
-                        qrUrl: pesanan.qrUrl,
-                        qrString: pesanan.qrString,
-                        nomorPesanan: pesanan.nomorPesanan,
-                        total: pesanan.total,
-                      ),
-                    ),
-                  ).then((_) => _muatRincianPesanan());
-                } else if (pesanan.metodePembayaran?.toLowerCase().contains(
-                      'qris',
-                    ) ==
-                    true) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HalamanPembayaranQris(
-                        pesananId: pesanan.id,
-                        nomorPesanan: pesanan.nomorPesanan,
-                        total: pesanan.total,
-                        qrUrl: pesanan.qrUrl,
-                        qrString: pesanan.qrString,
-                      ),
-                    ),
-                  ).then((_) => _muatRincianPesanan());
-                } else {
-                  _ubahStatus('menunggu_konfirmasi');
-                }
-              },
-              icon: const Icon(Icons.payment, size: 16),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: TemaAplikasi.primary,
-                foregroundColor: TemaAplikasi.onPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                elevation: 0,
-              ),
-              label: const Text(
-                'BAYAR SEKARANG (MIDTRANS)',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 2.0,
-                ),
-              ),
+      return SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: OutlinedButton(
+          onPressed: () => _ubahStatus(
+            'dibatalkan',
+            dialogPesan:
+                'Apakah Anda yakin ingin membatalkan pesanan ini? Stok varian akan otomatis dikembalikan.',
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: TemaAplikasi.errorColor,
+            side: const BorderSide(color: TemaAplikasi.errorColor),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: OutlinedButton(
-              onPressed: () => _ubahStatus(
-                'dibatalkan',
-                dialogPesan:
-                    'Apakah Anda yakin ingin membatalkan pesanan ini? Stok varian akan otomatis dikembalikan.',
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: TemaAplikasi.errorColor,
-                side: const BorderSide(color: TemaAplikasi.errorColor),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              child: const Text(
-                'BATALKAN PESANAN',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 2.0,
-                ),
-              ),
+          child: const Text(
+            'BATALKAN PESANAN',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 2.0,
             ),
           ),
-        ],
+        ),
       );
     }
 
     if (status == 'menunggu_konfirmasi') {
-      return SizedBox(
+      return Container(
         width: double.infinity,
-        height: 48,
-        child: ElevatedButton(
-          onPressed: () => _ubahStatus('dibayar'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: TemaAplikasi.primary,
-            foregroundColor: TemaAplikasi.onPrimary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(2),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: TemaAplikasi.surfaceLight,
+          border: Border.all(color: TemaAplikasi.borderGray),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.schedule,
+              size: 22,
+              color: TemaAplikasi.primary,
             ),
-            elevation: 0,
-          ),
-          child: const Text(
-            'KONFIRMASI PEMBAYARAN (ADMIN)',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.5,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'MENUNGGU KONFIRMASI PEMBAYARAN',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                      color: TemaAplikasi.primary,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Pembayaran Anda sedang dalam proses verifikasi sistem/admin Filament.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: TemaAplikasi.secondary,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       );
     }

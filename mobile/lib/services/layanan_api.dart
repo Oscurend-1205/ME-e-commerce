@@ -122,8 +122,22 @@ class LayananApi {
   }
 
   // =====================================================================
-  //  PRODUK
+  //  PRODUK & BANNER
   // =====================================================================
+
+  /// GET /api/hero-banners — Ambil daftar hero banner beranda
+  static Future<ApiResponse> ambilHeroBanner() async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/hero-banners');
+      final respons = await _client
+          .get(uri, headers: _headers())
+          .timeout(Konstan.batasWaktu);
+
+      return _prosesRespons(respons);
+    } catch (e) {
+      return _tanganiGalat(e);
+    }
+  }
 
   /// GET /api/produk — Ambil daftar produk (opsional: filter kategori, cari)
   static Future<ApiResponse> ambilProduk({

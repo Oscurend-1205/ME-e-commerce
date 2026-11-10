@@ -137,10 +137,11 @@ class ProdukResource extends Resource
                             ->reorderable(false)
                             ->columnSpanFull(),
                     ]),
-                Section::make('Gambar Produk')
+                Section::make('Gambar Utama Produk')
+                    ->description('Foto utama produk yang akan dijadikan cover pada katalog.')
                     ->schema([
                         FileUpload::make('gambar')
-                            ->label('Gambar Produk')
+                            ->label('Gambar Cover (Katalog)')
                             ->image()
                             ->disk('public')
                             ->directory('produk')
@@ -160,6 +161,51 @@ class ProdukResource extends Resource
 
                                 return $uploaded;
                             })
+                            ->columnSpanFull(),
+                    ]),
+                Section::make('Galeri Foto Produk')
+                    ->description('Tambahkan 1 hingga 5 foto produk untuk ditampilkan dalam slider galeri di halaman detail produk aplikasi mobile.')
+                    ->schema([
+                        Repeater::make('fotos')
+                            ->label('Daftar Foto Detail (Maks. 5 Foto)')
+                            ->relationship('fotos')
+                            ->maxItems(5)
+                            ->reorderableWithButtons()
+                            ->orderColumn('urutan')
+                            ->defaultItems(0)
+                            ->addActionLabel('Tambah Foto Produk')
+                            ->schema([
+                                FileUpload::make('nama_file')
+                                    ->label('Berkas Foto')
+                                    ->image()
+                                    ->disk('public')
+                                    ->directory('produk')
+                                    ->visibility('public')
+                                    ->imagePreviewHeight('140')
+                                    ->required()
+                                    ->afterStateHydrated(function (FileUpload $component, ?string $state): void {
+                                        $component->state(filled($state) ? 'produk/'.basename($state) : null);
+                                    })
+                                    ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? basename($state) : null)
+                                    ->getUploadedFileUsing(function (BaseFileUpload $component, string $file, string|array|null $storedFileNames): ?array {
+                                        $uploaded = $component->getUploadedFile($file, $storedFileNames);
+
+                                        if ($uploaded !== null) {
+                                            $uploaded['url'] = url('/api/gambar/'.basename($file));
+                                        }
+
+                                        return $uploaded;
+                                    })
+                                    ->columnSpan(3),
+                                TextInput::make('urutan')
+                                    ->label('Urutan')
+                                    ->numeric()
+                                    ->default(1)
+                                    ->minValue(1)
+                                    ->maxValue(5)
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(4)
                             ->columnSpanFull(),
                     ]),
             ]);

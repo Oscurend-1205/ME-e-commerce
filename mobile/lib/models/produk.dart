@@ -12,6 +12,7 @@ class Produk {
   final String merek;
   final String? gambar;
   final String? gambarUrl;
+  final List<FotoProdukItem>? fotos;
   final List<Varian>? varian;
 
   Produk({
@@ -26,6 +27,7 @@ class Produk {
     required this.merek,
     this.gambar,
     this.gambarUrl,
+    this.fotos,
     this.varian,
   });
 
@@ -44,6 +46,18 @@ class Produk {
     return '${Konstan.storageUrl}/$id.jpg';
   }
 
+  /// Daftar URL seluruh foto produk untuk galeri/slider (maks 5 foto)
+  List<String> get daftarFotoUrl {
+    if (fotos != null && fotos!.isNotEmpty) {
+      final list = fotos!
+          .map((f) => f.url.trim())
+          .where((u) => u.isNotEmpty)
+          .toList();
+      if (list.isNotEmpty) return list;
+    }
+    return [fotoUrl];
+  }
+
   factory Produk.fromJson(Map<String, dynamic> json) {
     return Produk(
       id: json['id'] ?? 0,
@@ -57,6 +71,11 @@ class Produk {
       merek: json['merek'] ?? '',
       gambar: json['gambar'],
       gambarUrl: json['gambar_url'],
+      fotos: json['fotos'] != null
+          ? (json['fotos'] as List)
+              .map((f) => FotoProdukItem.fromJson(f as Map<String, dynamic>))
+              .toList()
+          : null,
       varian: json['varian'] != null
           ? (json['varian'] as List)
               .map((v) => Varian.fromJson(v))
@@ -78,7 +97,40 @@ class Produk {
       'merek': merek,
       'gambar': gambar,
       'gambar_url': gambarUrl,
+      'fotos': fotos?.map((f) => f.toJson()).toList(),
       'varian': varian?.map((v) => v.toJson()).toList(),
+    };
+  }
+}
+
+class FotoProdukItem {
+  final int id;
+  final String url;
+  final int urutan;
+
+  FotoProdukItem({
+    required this.id,
+    required this.url,
+    required this.urutan,
+  });
+
+  factory FotoProdukItem.fromJson(Map<String, dynamic> json) {
+    return FotoProdukItem(
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      url: json['url']?.toString() ?? '',
+      urutan: json['urutan'] is int
+          ? json['urutan'] as int
+          : int.tryParse(json['urutan']?.toString() ?? '1') ?? 1,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'url': url,
+      'urutan': urutan,
     };
   }
 }

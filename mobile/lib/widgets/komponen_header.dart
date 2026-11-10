@@ -182,7 +182,7 @@ class TombolTasHeader extends StatelessWidget {
   }
 }
 
-/// Widget Logo Brand ME STUDIO Universal di Header dengan Navigasi ke Beranda
+/// Widget Logo Brand ME Universal di Header dengan Navigasi ke Beranda
 class LogoBrandHeader extends StatelessWidget {
   final VoidCallback? onTap;
 
@@ -197,29 +197,14 @@ class LogoBrandHeader extends StatelessWidget {
       onTap: onTap ?? () => NavigasiUniversal.keBeranda(context),
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Text(
-            'ME',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              letterSpacing: 1.5,
-              fontSize: 22,
-              color: TemaAplikasi.primary,
-            ),
-          ),
-          SizedBox(width: 8),
-          Text(
-            'STUDIO',
-            style: TextStyle(
-              fontSize: 9,
-              letterSpacing: 2.5,
-              fontWeight: FontWeight.w600,
-              color: TemaAplikasi.secondary,
-            ),
-          ),
-        ],
+      child: const Text(
+        'ME',
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          letterSpacing: 1.5,
+          fontSize: 22,
+          color: TemaAplikasi.primary,
+        ),
       ),
     );
   }

@@ -32,11 +32,20 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
   Varian? _varianTerpilih;
   int _jumlah = 1;
   bool _sedangMenambahkan = false;
+  int _indeksFotoAktif = 0;
+  late final PageController _pageControllerFoto;
 
   @override
   void initState() {
     super.initState();
+    _pageControllerFoto = PageController();
     _muatRincianProduk();
+  }
+
+  @override
+  void dispose() {
+    _pageControllerFoto.dispose();
+    super.dispose();
   }
 
   Future<void> _muatRincianProduk() async {
@@ -44,6 +53,7 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
       _keadaan = KeadaanMuat.memuat;
       _varianTerpilih = null;
       _jumlah = 1;
+      _indeksFotoAktif = 0;
     });
 
     final respon = await LayananApi.ambilRincianProduk(widget.produkId);
@@ -283,12 +293,14 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
         );
       case KeadaanMuat.berhasil:
         final produk = _produk!;
+        final daftarFoto = produk.daftarFotoUrl;
+
         return SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Hero Image 3:4 Aspect Ratio (Editorial ZARA style dengan Foto Dummy)
+              // Hero Image Gallery 3:4 Aspect Ratio (Editorial ZARA style, mendukung 1-5 foto)
               AspectRatio(
                 aspectRatio: 3 / 4,
                 child: Container(
@@ -302,34 +314,107 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      FotoDummy.bangunGambar(
-                        url: FotoDummy.untukProduk(produk),
-                        fit: BoxFit.cover,
-                        fallbackWidget: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                produk.kategori.toLowerCase() == 'aksesori'
-                                    ? Icons.watch_outlined
-                                    : Icons.checkroom_outlined,
-                                size: 80,
-                                color: TemaAplikasi.mutedGray,
+                      // PageView Slider Foto Produk
+                      PageView.builder(
+                        controller: _pageControllerFoto,
+                        itemCount: daftarFoto.length,
+                        onPageChanged: (idx) {
+                          setState(() => _indeksFotoAktif = idx);
+                        },
+                        itemBuilder: (context, index) {
+                          final urlFoto = daftarFoto[index];
+                          return FotoDummy.bangunGambar(
+                            url: urlFoto,
+                            fit: BoxFit.cover,
+                            fallbackWidget: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    produk.kategori.toLowerCase() == 'aksesori'
+                                        ? Icons.watch_outlined
+                                        : Icons.checkroom_outlined,
+                                    size: 80,
+                                    color: TemaAplikasi.mutedGray,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    produk.merek.toUpperCase(),
+                                    style: const TextStyle(
+                                      color: TemaAplikasi.secondary,
+                                      letterSpacing: 3.0,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 12),
-                              Text(
-                                produk.merek.toUpperCase(),
-                                style: const TextStyle(
-                                  color: TemaAplikasi.secondary,
-                                  letterSpacing: 3.0,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
+                            ),
+                          );
+                        },
+                      ),
+
+                      // Tombol Navigasi Kiri / Kanan jika lebih dari 1 foto
+                      if (daftarFoto.length > 1) ...[
+                        if (_indeksFotoAktif > 0)
+                          Positioned(
+                            left: 8,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: InkWell(
+                                onTap: () {
+                                  _pageControllerFoto.previousPage(
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.35),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.chevron_left,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
+                        if (_indeksFotoAktif < daftarFoto.length - 1)
+                          Positioned(
+                            right: 8,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: InkWell(
+                                onTap: () {
+                                  _pageControllerFoto.nextPage(
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.35),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.chevron_right,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+
+                      // Tag Kategori Produk di Sudut Kiri Atas
                       Positioned(
                         top: 14,
                         left: 14,
@@ -353,6 +438,34 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                           ),
                         ),
                       ),
+
+                      // Indikator Posisi Foto (cth: 1 / 5) di Sudut Kanan Atas
+                      if (daftarFoto.length > 1)
+                        Positioned(
+                          top: 14,
+                          right: 14,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.65),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            child: Text(
+                              '${_indeksFotoAktif + 1} / ${daftarFoto.length}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // Watermark Brand ME
                       Positioned(
                         bottom: 14,
                         right: 14,
@@ -363,7 +476,7 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                           ),
                           color: Colors.black.withValues(alpha: 0.5),
                           child: const Text(
-                            'ME STUDIO / 2026',
+                            'ME ATELIER / 2026',
                             style: TextStyle(
                               fontSize: 10,
                               letterSpacing: 2.0,
@@ -377,6 +490,65 @@ class _HalamanRincianProdukState extends State<HalamanRincianProduk> {
                   ),
                 ),
               ),
+
+              // Baris Thumbnail & Dots Selector jika ada lebih dari 1 foto (maks 5 foto)
+              if (daftarFoto.length > 1) ...[
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(daftarFoto.length, (idx) {
+                    final isDipilih = idx == _indeksFotoAktif;
+                    return GestureDetector(
+                      onTap: () {
+                        _pageControllerFoto.animateToPage(
+                          idx,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: 52,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: TemaAplikasi.surfaceContainer,
+                          borderRadius: BorderRadius.circular(2),
+                          border: Border.all(
+                            color: isDipilih
+                                ? TemaAplikasi.primary
+                                : TemaAplikasi.borderGray,
+                            width: isDipilih ? 2 : 1,
+                          ),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: FotoDummy.bangunGambar(
+                          url: daftarFoto[idx],
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(daftarFoto.length, (idx) {
+                    final isDipilih = idx == _indeksFotoAktif;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: isDipilih ? 18 : 6,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: isDipilih
+                            ? TemaAplikasi.primary
+                            : TemaAplikasi.borderGray,
+                        borderRadius: BorderRadius.circular(1.5),
+                      ),
+                    );
+                  }),
+                ),
+              ],
               const SizedBox(height: 24),
 
               // Merek & Kategori Baris Halus

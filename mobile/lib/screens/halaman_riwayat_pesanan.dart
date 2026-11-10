@@ -33,6 +33,10 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
   String _pesanGalat = '';
   List<Pesanan> _daftarSemuaPesanan = [];
 
+  // Penanda agar pemuatan otomatis hanya dijalankan sekali,
+  // sehingga daftar kosong tetap menampilkan empty state (bukan memuat terus).
+  bool _sudahMemuatPertama = false;
+
   // Tab: 'proses' (Dalam Proses), 'selesai' (Selesai), 'dibatalkan' (Dibatalkan)
   String _tabAktif = 'proses';
 
@@ -83,6 +87,7 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
 
     setState(() {
       _keadaan = KeadaanMuat.memuat;
+      _sudahMemuatPertama = true;
     });
 
     final respon = await LayananApi.ambilRiwayatPesanan();
@@ -365,13 +370,16 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
     return ValueListenableBuilder<bool>(
       valueListenable: StatePengguna.isLoggedInNotifier,
       builder: (context, isLoggedIn, _) {
-        // Jika sudah login tetapi pesanan belum pernah dimuat, muat otomatis
+        // Jika sudah login tetapi pesanan belum pernah dimuat, muat otomatis.
+        // Penanda _sudahMemuatPertama mencegah pemuatan berulang saat daftar
+        // memang kosong (tanpa pesanan), agar empty state tetap tampil.
         if (isLoggedIn &&
-            _daftarSemuaPesanan.isEmpty &&
+            !_sudahMemuatPertama &&
             _keadaan != KeadaanMuat.memuat) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted &&
                 StatePengguna.isLoggedInNotifier.value &&
+                !_sudahMemuatPertama &&
                 _keadaan != KeadaanMuat.memuat) {
               _muatPesanan();
             }
@@ -410,42 +418,32 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              if (Navigator.canPop(context))
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    size: 20,
-                    color: TemaAplikasi.primary,
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  tooltip: 'Kembali',
-                ),
-              if (Navigator.canPop(context)) const SizedBox(width: 12),
-              const Text(
-                'ME',
-                style: TextStyle(
-                  fontFamily: 'PlayfairDisplay',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 2.0,
-                  color: TemaAplikasi.primary,
-                ),
-              ),
-            ],
-          ),
           const Text(
-            'PESANAN SAYA',
+            'ME',
             style: TextStyle(
-              fontSize: 12,
+              fontFamily: 'PlayfairDisplay',
+              fontSize: 18,
               fontWeight: FontWeight.w700,
               letterSpacing: 2.0,
               color: TemaAplikasi.primary,
             ),
           ),
+          const SizedBox(width: 8),
+          const Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                'PESANAN SAYA',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2.0,
+                  color: TemaAplikasi.primary,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
           Row(
             children: [
               IconButton(

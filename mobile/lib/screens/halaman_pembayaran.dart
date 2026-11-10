@@ -66,14 +66,19 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
 
   bool get _isMobile {
     if (kIsWeb) return false;
+    try {
+      if (WebViewPlatform.instance == null) return false;
+    } catch (_) {
+      return false;
+    }
     return defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS;
   }
 
   void _cekDukunganDanInisialisasi() {
-    // webview_flutter HANYA didukung di platform mobile asli (Android dan iOS).
-    // Di Windows / Desktop / Web, hindari sepenuhnya inisialisasi WebViewController
-    // agar tidak memicu assertion error dari platform_webview_controller.dart.
+    // webview_flutter HANYA didukung di platform mobile asli (Android dan iOS)
+    // dengan WebViewPlatform yang sudah terdaftar. Di Windows / Desktop / Web,
+    // hindari sepenuhnya inisialisasi WebViewController agar tidak memicu assertion error.
     if (!_isMobile) {
       _isWebViewSupported = false;
       _sedangMemuat = false;
@@ -107,6 +112,14 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
 
   void _initWebView() {
     try {
+      if (WebViewPlatform.instance == null) {
+        setState(() {
+          _isWebViewSupported = false;
+          _sedangMemuat = false;
+        });
+        return;
+      }
+
       _controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(Colors.white)

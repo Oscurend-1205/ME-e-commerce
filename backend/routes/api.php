@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CheckoutController;
+use App\Http\Controllers\Api\HeroBannerController;
 use App\Http\Controllers\Api\KeranjangController;
 use App\Http\Controllers\Api\KurirController;
 use App\Http\Controllers\Api\MetodePembayaranController;
@@ -30,6 +31,8 @@ Route::middleware('auth.pelanggan')->group(function () {
 });
 
 // 1. Endpoint Produk (CRUD, filter, pencarian) — dapat diakses guest
+Route::get('/hero-banners', [HeroBannerController::class, 'index']);
+Route::get('/banners', [HeroBannerController::class, 'index']);
 Route::get('/produk', [ProdukController::class, 'index']);
 Route::get('/produk/{id}', [ProdukController::class, 'show']);
 Route::post('/produk', [ProdukController::class, 'store']);
