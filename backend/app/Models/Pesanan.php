@@ -18,7 +18,7 @@ class Pesanan extends Model
      * status pertama. Perpindahan di luar tabel ini ditolak server dengan 409.
      */
     public const TRANSISI_SAH = [
-        'menunggu_pembayaran' => ['dibayar', 'menunggu_konfirmasi', 'dibatalkan'],
+        'menunggu_pembayaran' => ['menunggu_konfirmasi', 'dibayar', 'dibatalkan'],
         'menunggu_konfirmasi' => ['dibayar', 'dibatalkan'],
         'dibayar' => ['diproses'],
         'diproses' => ['dikirim'],

@@ -697,8 +697,8 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
       return WidgetKosong(
         ikon: Icons.lock_outline_rounded,
         pesan:
-            'Silakan masuk untuk melihat daftar pesanan dan melacak kiriman Anda.',
-        saranAksi: 'MASUK SEKARANG',
+            'Silakan masuk untuk melihat riwayat pesanan dan status pengiriman Anda.',
+        saranAksi: 'MASUK',
         onAksi: () async {
           final res = await Navigator.push<bool>(
             context,

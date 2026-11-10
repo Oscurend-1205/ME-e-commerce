@@ -117,6 +117,14 @@ class PesananController extends Controller
             );
         }
 
+        // 3b. Aturan metode pembayaran manual: transfer manual tidak boleh langsung melompat ke 'dibayar'
+        if ($statusSaatIni === 'menunggu_pembayaran' && $statusBaru === 'dibayar' && $pesanan->metodePembayaran?->kode === 'transfer_manual') {
+            return $this->gagal(
+                "Perpindahan status dari 'menunggu_pembayaran' ke 'dibayar' untuk metode transfer manual tidak diizinkan. Pembeli harus melalui 'menunggu_konfirmasi'.",
+                409
+            );
+        }
+
         // 4. Validasi apakah status saat ini memiliki transisi sah
         $pilihanSah = $pesanan->pilihanStatusBerikutnya();
 

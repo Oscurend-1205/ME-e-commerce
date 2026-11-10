@@ -68,8 +68,12 @@ class PaymentController extends Controller
         // Hanya transisi yang sah (lihat Pesanan::TRANSISI_SAH) yang boleh diterapkan;
         // callback duplikat/terlambat yang akan memundurkan status diabaikan.
         $statusBaru = $this->tentukanStatusSah($transactionStatus, $fraudStatus);
+        $bisaPindah = $statusBaru && (
+            $pesanan->bolehPindahKe($statusBaru) ||
+            ($pesanan->status === 'menunggu_pembayaran' && $statusBaru === 'dibayar')
+        );
 
-        if ($statusBaru && $pesanan->bolehPindahKe($statusBaru)) {
+        if ($bisaPindah) {
             $statusLama = $pesanan->status;
             $pesanan->update(['status' => $statusBaru]);
 
@@ -145,7 +149,11 @@ class PaymentController extends Controller
 
                     if ($trxStatus) {
                         $statusBaru = $this->tentukanStatusSah($trxStatus, $fraudStatus);
-                        if ($statusBaru && $statusBaru !== $pesanan->status && $pesanan->bolehPindahKe($statusBaru)) {
+                        $bisaPindah = $statusBaru && $statusBaru !== $pesanan->status && (
+                            $pesanan->bolehPindahKe($statusBaru) ||
+                            ($pesanan->status === 'menunggu_pembayaran' && $statusBaru === 'dibayar')
+                        );
+                        if ($bisaPindah) {
                             $pesanan->update(['status' => $statusBaru]);
                         }
                     }
