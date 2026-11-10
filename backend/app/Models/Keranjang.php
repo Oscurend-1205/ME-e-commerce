@@ -37,6 +37,43 @@ class Keranjang extends Model
         return $this->belongsTo(VarianProduk::class, 'varian_id');
     }
 
+    /**
+     * Kurangi isi keranjang sesuai detail pesanan yang SUDAH DIBAYAR.
+     *
+     * Item keranjang sengaja TIDAK dihapus saat checkout — baru berkurang
+     * di sini saat pembayaran dikonfirmasi, sehingga barang tidak hilang
+     * dari keranjang selama proses checkout masih berjalan. Jika pengguna
+     * menambah/megubah jumlah setelah checkout, hanya porsi yang dipesan
+     * yang berkurang.
+     */
+    public static function kurangiUntukPesanan(Pesanan $pesanan): void
+    {
+        $pesanan->loadMissing('detail');
+
+        foreach ($pesanan->detail as $detail) {
+            if (!$detail->varian_id) {
+                continue;
+            }
+
+            $item = static::where('pelanggan_id', $pesanan->pelanggan_id)
+                ->where('varian_id', $detail->varian_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$item) {
+                continue;
+            }
+
+            $sisa = $item->jumlah - (int) $detail->jumlah;
+            if ($sisa <= 0) {
+                $item->delete();
+            } else {
+                $item->jumlah = $sisa;
+                $item->save();
+            }
+        }
+    }
+
     public function formatItem(): array
     {
         $hargaSatuan = $this->produk ? (int) $this->produk->harga : 0;

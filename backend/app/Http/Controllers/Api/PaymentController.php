@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Keranjang;
 use App\Models\Pesanan;
 use App\Services\MidtransService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
@@ -70,7 +72,14 @@ class PaymentController extends Controller
 
         if ($statusBaru) {
             $statusLama = $pesanan->status;
-            $pesanan->update(['status' => $statusBaru]);
+            DB::transaction(function () use ($pesanan, $statusBaru, $statusLama) {
+                $pesanan->update(['status' => $statusBaru]);
+                // Pembayaran dikonfirmasi: porsi terpesan baru berkurang dari keranjang.
+                // Hanya saat transisi KE 'dibayar' — callback duplikat tidak mengurangi dua kali.
+                if ($statusBaru === 'dibayar' && $statusLama !== 'dibayar') {
+                    Keranjang::kurangiUntukPesanan($pesanan);
+                }
+            });
 
             Log::info('Status pesanan diperbarui', [
                 'order_id' => $orderId,
@@ -135,7 +144,12 @@ class PaymentController extends Controller
                     if ($trxStatus) {
                         $statusBaru = $this->tentukanStatusSah($trxStatus, $fraudStatus);
                         if ($statusBaru && $statusBaru !== $pesanan->status) {
-                            $pesanan->update(['status' => $statusBaru]);
+                            DB::transaction(function () use ($pesanan, $statusBaru) {
+                                $pesanan->update(['status' => $statusBaru]);
+                                if ($statusBaru === 'dibayar') {
+                                    Keranjang::kurangiUntukPesanan($pesanan);
+                                }
+                            });
                         }
                     }
                 }

@@ -73,6 +73,19 @@ class CheckoutController extends Controller
             return $this->balasUlangIdempoten($pesananEksis);
         }
 
+        // 2b. Isi keranjang tidak lagi dikosongkan saat checkout (baru berkurang
+        // saat pembayaran dikonfirmasi), jadi pelanggan hanya boleh punya SATU
+        // pesanan aktif untuk mencegah pesanan ganda dari keranjang yang sama.
+        $adaPesananAktif = Pesanan::where('pelanggan_id', $pelangganId)
+            ->whereIn('status', ['menunggu_pembayaran', 'menunggu_konfirmasi'])
+            ->exists();
+        if ($adaPesananAktif) {
+            return $this->gagal(
+                'Anda masih memiliki pesanan yang belum selesai. Selesaikan pembayaran atau batalkan pesanan tersebut terlebih dahulu.',
+                409
+            );
+        }
+
         // 3. Validasi payload formulir
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
@@ -97,7 +110,9 @@ class CheckoutController extends Controller
         $metode = MetodePembayaran::findOrFail($request->input('metode_pembayaran_id'));
 
         try {
-            // 4. Satu DB Transaction: baca keranjang, kunci stok, simpan pesanan, kurangi stok, kosongkan keranjang
+            // 4. Satu DB Transaction: baca keranjang, kunci stok, simpan pesanan, kurangi stok.
+            //    Keranjang SENGAJA tidak dikosongkan di sini — item baru berkurang dari
+            //    keranjang saat pesanan berstatus 'dibayar' (lihat Keranjang::kurangiUntukPesanan).
             $pesananBaru = DB::transaction(function () use ($request, $pelangganId, $kunciIdempoten, $kurir, $metode) {
                 // Keranjang dibaca DI DALAM transaksi dan dikunci, supaya dua checkout bersamaan
                 // dari pelanggan yang sama tidak membuat dua pesanan dari isi keranjang yang sama.
@@ -193,8 +208,8 @@ class CheckoutController extends Controller
                     $varian->decrement('stok', $detail['jumlah']);
                 }
 
-                // 8. Kosongkan keranjang pelanggan
-                Keranjang::where('pelanggan_id', $pelangganId)->delete();
+                // 8. Keranjang TIDAK dikosongkan: item tetap ada sampai pembayaran
+                //    dikonfirmasi 'dibayar', baru kemudian porsi terpesan berkurang.
 
                 return $pesanan;
             });

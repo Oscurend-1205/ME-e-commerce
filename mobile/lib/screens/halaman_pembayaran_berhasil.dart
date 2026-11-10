@@ -33,6 +33,9 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
   void initState() {
     super.initState();
     _muatPesanan();
+    // Segarkan badge keranjang: porsi terpesan baru berkurang dari keranjang
+    // setelah pesanan berstatus 'dibayar'.
+    StatePengguna.sinkronkanKeranjang();
   }
 
   Future<void> _muatPesanan() async {

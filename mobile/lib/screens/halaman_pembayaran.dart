@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform, Process;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -63,26 +64,31 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
     _mulaiPengecekanBerkala();
   }
 
-  void _cekDukunganDanInisialisasi() {
-    // webview_flutter hanya didukung secara bawaan di Android dan iOS
-    // Pada Windows Desktop / Web / Linux, WebViewPlatform.instance bernilai null
-    bool didukung = false;
-    try {
-      didukung = WebViewPlatform.instance != null;
-    } catch (_) {
-      didukung = false;
-    }
+  bool get _isMobile {
+    if (kIsWeb) return false;
+    return defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS;
+  }
 
-    if (didukung) {
-      _isWebViewSupported = true;
-      _initWebView();
-    } else {
+  void _cekDukunganDanInisialisasi() {
+    // webview_flutter HANYA didukung di platform mobile asli (Android dan iOS).
+    // Di Windows / Desktop / Web, hindari sepenuhnya inisialisasi WebViewController
+    // agar tidak memicu assertion error dari platform_webview_controller.dart.
+    if (!_isMobile) {
       _isWebViewSupported = false;
       _sedangMemuat = false;
-      // Di platform desktop, otomatis buka URL pembayaran di browser default
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _bukaDiBrowserDefault(tampilkanPesan: false);
       });
+      return;
+    }
+
+    try {
+      _isWebViewSupported = true;
+      _initWebView();
+    } catch (_) {
+      _isWebViewSupported = false;
+      _sedangMemuat = false;
     }
   }
 
@@ -402,7 +408,9 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
           ),
         ],
       ),
-      body: _isWebViewSupported ? _bangunTampilanWebView() : _bangunTampilanDesktopFallback(),
+      body: (_isMobile && _isWebViewSupported && _controller != null)
+          ? _bangunTampilanWebView()
+          : _bangunTampilanDesktopFallback(),
       bottomNavigationBar: _bangunBilahBawah(),
     );
   }

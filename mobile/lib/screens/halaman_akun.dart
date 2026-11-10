@@ -7,7 +7,6 @@ import '../widgets/foto_dummy.dart';
 import '../widgets/komponen_header.dart';
 import 'halaman_buku_alamat.dart';
 import 'halaman_bukti_transaksi.dart';
-import 'halaman_kelola_produk.dart';
 import 'halaman_login.dart';
 import 'halaman_metode_pembayaran.dart';
 import 'halaman_riwayat_pesanan.dart';
@@ -20,9 +19,6 @@ class HalamanAkun extends StatefulWidget {
 }
 
 class _HalamanAkunState extends State<HalamanAkun> {
-  bool _notifikasiAktif = true;
-  bool _biometrikAktif = true;
-
   Future<void> _logout() async {
     final respon = await LayananApi.logout();
     StatePengguna.setLoggedOut();
@@ -99,7 +95,6 @@ class _HalamanAkunState extends State<HalamanAkun> {
         child: Column(
           children: [
             _bangunRingkasanProfil(),
-            _bangunStatAkun(),
             _bangunKeanggotaan(),
             _bangunGrupPengaturan('Pesanan & Transaksi', [
               _bangunItemDaftar(
@@ -158,41 +153,6 @@ class _HalamanAkunState extends State<HalamanAkun> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => const HalamanMetodePembayaran(),
-                    ),
-                  );
-                },
-              ),
-              _bangunToggleItem(
-                icon: Icons.notifications_none_rounded,
-                label: 'Notifikasi Eksklusif ME',
-                value: _notifikasiAktif,
-                onChanged: (val) {
-                  setState(() {
-                    _notifikasiAktif = val;
-                  });
-                },
-              ),
-              _bangunToggleItem(
-                icon: Icons.fingerprint_rounded,
-                label: 'Keamanan Biometrik & FaceID',
-                value: _biometrikAktif,
-                onChanged: (val) {
-                  setState(() {
-                    _biometrikAktif = val;
-                  });
-                },
-              ),
-            ]),
-            _bangunGrupPengaturan('Admin Toko', [
-              _bangunItemDaftar(
-                icon: Icons.inventory_2_outlined,
-                label: 'Kelola Produk',
-                trailingText: 'CRUD Katalog',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const HalamanKelolaProduk(),
                     ),
                   );
                 },
@@ -932,61 +892,6 @@ class _HalamanAkunState extends State<HalamanAkun> {
     );
   }
 
-  Widget _bangunStatAkun() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      color: TemaAplikasi.surfaceWhite,
-      child: GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 4,
-        childAspectRatio: 1.1,
-        crossAxisSpacing: 0,
-        mainAxisSpacing: 0,
-        children: [
-          _bangunStatItem('3', 'Menunggu Bayar'),
-          _bangunStatItem('1', 'Sedang Dikirim'),
-          _bangunStatItem('12', 'Riwayat Pesanan'),
-          _bangunStatItem('8', 'Wishlist'),
-        ],
-      ),
-    );
-  }
-
-  Widget _bangunStatItem(String jumlah, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(right: BorderSide(color: TemaAplikasi.borderGray)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            jumlah,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              color: TemaAplikasi.primary,
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 9,
-              letterSpacing: 0.8,
-              color: TemaAplikasi.secondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _bangunKeanggotaan() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
@@ -1210,39 +1115,6 @@ class _HalamanAkunState extends State<HalamanAkun> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _bangunToggleItem({
-    required IconData icon,
-    required String label,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          Icon(icon, size: 22, color: TemaAplikasi.secondary),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                color: TemaAplikasi.primary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeTrackColor: TemaAplikasi.primary,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-        ],
       ),
     );
   }

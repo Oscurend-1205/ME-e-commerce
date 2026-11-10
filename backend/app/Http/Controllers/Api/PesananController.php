@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Keranjang;
 use App\Models\Pesanan;
 use App\Models\VarianProduk;
 use App\Traits\ApiResponse;
@@ -111,6 +112,12 @@ class PesananController extends Controller
                         VarianProduk::where('id', $item->varian_id)->increment('stok', $item->jumlah);
                     }
                 }
+            }
+
+            // Jika pesanan baru berstatus 'dibayar' (mis. verifikasi manual
+            // transfer), porsi terpesan berkurang dari keranjang di sini juga.
+            if ($statusBaru === 'dibayar') {
+                Keranjang::kurangiUntukPesanan($pesanan);
             }
 
             $pesanan->status = $statusBaru;
