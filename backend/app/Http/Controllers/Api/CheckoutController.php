@@ -228,53 +228,55 @@ class CheckoutController extends Controller
             }
 
             try {
-                if ($metode->kode === 'qris') {
-                    $qrisData = $this->midtrans->generateQrisTransaction([
-                        'order_id' => $pesananBaru->nomor_pesanan,
-                        'gross_amount' => (int) $pesananBaru->total,
-                        'customer_name' => $pesananBaru->nama_penerima,
-                        'customer_email' => 'customer@example.com',
-                        'customer_phone' => '',
-                        'item_details' => $itemDetails,
-                    ]);
-
-                    $pesananBaru->update(['snap_token' => $qrisData['transaction_id'] ?? $pesananBaru->nomor_pesanan]);
-
+                if ($metode->kode === 'tunai_di_tempat') {
                     $dataPesanan = $pesananBaru->formatLengkap();
-                    $dataPesanan['snap_token'] = $qrisData['transaction_id'] ?? null;
-                    $dataPesanan['qr_url'] = $qrisData['qr_url'] ?? null;
-                    $dataPesanan['qr_string'] = $qrisData['qr_string'] ?? null;
-                    $dataPesanan['expired_at'] = $qrisData['expired_at'] ?? null;
-                    $dataPesanan['client_key'] = $this->midtrans->getClientKey();
-
                     return $this->sukses(
                         $dataPesanan,
-                        'Pesanan berhasil dibuat. Silakan scan QRIS untuk menyelesaikan pembayaran.',
-                        201
-                    );
-                } else {
-                    $snapToken = $this->midtrans->generateSnapToken([
-                        'order_id' => $pesananBaru->nomor_pesanan,
-                        'gross_amount' => (int) $pesananBaru->total,
-                        'customer_name' => $pesananBaru->nama_penerima,
-                        'customer_email' => 'customer@example.com',
-                        'customer_phone' => '',
-                        'item_details' => $itemDetails,
-                    ]);
-
-                    // Simpan snap token ke database
-                    $pesananBaru->update(['snap_token' => $snapToken]);
-
-                    $dataPesanan = $pesananBaru->formatLengkap();
-                    $dataPesanan['snap_token'] = $snapToken;
-                    $dataPesanan['client_key'] = $this->midtrans->getClientKey();
-
-                    return $this->sukses(
-                        $dataPesanan,
-                        'Pesanan berhasil dibuat. Silakan selesaikan pembayaran.',
+                        'Pesanan berhasil dibuat dengan metode Tunai di Tempat (COD).',
                         201
                     );
                 }
+
+                // Semua pembayaran online di-handle langsung oleh Midtrans Snap
+                $snapParams = [
+                    'order_id' => $pesananBaru->nomor_pesanan,
+                    'gross_amount' => (int) $pesananBaru->total,
+                    'customer_name' => $pesananBaru->nama_penerima,
+                    'customer_email' => 'customer@example.com',
+                    'customer_phone' => '',
+                    'item_details' => $itemDetails,
+                ];
+
+                $snapData = $this->midtrans->generateSnapTransaction($snapParams);
+                $snapToken = $snapData['token'] ?? null;
+                $redirectUrl = $snapData['redirect_url'] ?? null;
+
+                // Simpan snap token ke database
+                if ($snapToken) {
+                    $pesananBaru->update(['snap_token' => $snapToken]);
+                }
+
+                $dataPesanan = $pesananBaru->formatLengkap();
+                $dataPesanan['snap_token'] = $snapToken;
+                $dataPesanan['redirect_url'] = $redirectUrl;
+                $dataPesanan['client_key'] = $this->midtrans->getClientKey();
+
+                // Jika metode QRIS, sertakan juga QRIS Core API untuk opsi scan standee langsung
+                if ($metode->kode === 'qris') {
+                    try {
+                        $qrisData = $this->midtrans->generateQrisTransaction($snapParams);
+                        $dataPesanan['qr_url'] = $qrisData['qr_url'] ?? null;
+                        $dataPesanan['qr_string'] = $qrisData['qr_string'] ?? null;
+                    } catch (\Throwable $eQris) {
+                        \Illuminate\Support\Facades\Log::info('QRIS Core API notice: ' . $eQris->getMessage());
+                    }
+                }
+
+                return $this->sukses(
+                    $dataPesanan,
+                    'Pesanan berhasil dibuat. Silakan selesaikan pembayaran via Midtrans.',
+                    201
+                );
             } catch (\Exception $e) {
                 report($e);
                 $dataPesanan = $pesananBaru->formatLengkap();

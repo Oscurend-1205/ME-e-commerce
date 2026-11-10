@@ -11,6 +11,8 @@ import '../widgets/format_rupiah.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/widget_keadaan.dart';
 import 'halaman_login.dart';
+import 'halaman_pembayaran.dart';
+import 'halaman_pembayaran_qris.dart';
 
 class HalamanRincianPesanan extends StatefulWidget {
   final int pesananId;
@@ -573,8 +575,39 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
           SizedBox(
             width: double.infinity,
             height: 48,
-            child: ElevatedButton(
-              onPressed: () => _ubahStatus('menunggu_konfirmasi'),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                if (pesanan.snapToken != null && pesanan.snapToken!.isNotEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => HalamanPembayaran(
+                        pesananId: pesanan.id,
+                        snapToken: pesanan.snapToken!,
+                        redirectUrl: pesanan.redirectUrl,
+                        nomorPesanan: pesanan.nomorPesanan,
+                        total: pesanan.total,
+                      ),
+                    ),
+                  ).then((_) => _muatRincianPesanan());
+                } else if (pesanan.metodePembayaran?.toLowerCase().contains('qris') == true) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => HalamanPembayaranQris(
+                        pesananId: pesanan.id,
+                        nomorPesanan: pesanan.nomorPesanan,
+                        total: pesanan.total,
+                        qrUrl: pesanan.qrUrl,
+                        qrString: pesanan.qrString,
+                      ),
+                    ),
+                  ).then((_) => _muatRincianPesanan());
+                } else {
+                  _ubahStatus('menunggu_konfirmasi');
+                }
+              },
+              icon: const Icon(Icons.payment, size: 16),
               style: ElevatedButton.styleFrom(
                 backgroundColor: TemaAplikasi.primary,
                 foregroundColor: TemaAplikasi.onPrimary,
@@ -583,8 +616,8 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
-                'BAYAR SEKARANG (SIMULASI)',
+              label: const Text(
+                'BAYAR SEKARANG (MIDTRANS)',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,

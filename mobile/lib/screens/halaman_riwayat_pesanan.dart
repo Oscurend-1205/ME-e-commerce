@@ -159,7 +159,21 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
     final metode = (pesanan.metodePembayaran ?? '').toLowerCase();
     final isQris = metode.contains('qris');
 
-    if (isQris) {
+    // Jika memiliki snapToken Midtrans, selalu buka pembayaran resmi Midtrans Snap
+    if (pesanan.snapToken != null && pesanan.snapToken!.isNotEmpty) {
+      Navigator.push(
+        context,
+        ruteGeser(
+          HalamanPembayaran(
+            pesananId: pesanan.id,
+            snapToken: pesanan.snapToken!,
+            redirectUrl: pesanan.redirectUrl,
+            nomorPesanan: pesanan.nomorPesanan,
+            total: pesanan.total,
+          ),
+        ),
+      ).then((_) => _muatPesanan());
+    } else if (isQris) {
       Navigator.push(
         context,
         ruteGeser(
@@ -169,17 +183,6 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
             total: pesanan.total,
             qrUrl: pesanan.qrUrl,
             qrString: pesanan.qrString,
-          ),
-        ),
-      ).then((_) => _muatPesanan());
-    } else if (pesanan.snapToken != null && pesanan.snapToken!.isNotEmpty) {
-      Navigator.push(
-        context,
-        ruteGeser(
-          HalamanPembayaran(
-            pesananId: pesanan.id,
-            snapToken: pesanan.snapToken!,
-            nomorPesanan: pesanan.nomorPesanan,
           ),
         ),
       ).then((_) => _muatPesanan());

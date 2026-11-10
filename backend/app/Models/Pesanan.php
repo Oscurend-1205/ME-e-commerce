@@ -68,6 +68,14 @@ class Pesanan extends Model
             'nama_kurir' => $this->kurir ? "{$this->kurir->nama} - {$this->kurir->wilayah}" : null,
             'metode_pembayaran' => $this->metodePembayaran ? $this->metodePembayaran->nama : null,
             'snap_token' => $this->snap_token,
+            'redirect_url' => !empty($this->snap_token)
+                ? (config('services.midtrans.is_production', false)
+                    ? "https://app.midtrans.com/snap/v4/redirection/{$this->snap_token}"
+                    : "https://app.sandbox.midtrans.com/snap/v4/redirection/{$this->snap_token}")
+                : null,
+            'qr_url' => (isset($this->metodePembayaran) && str_contains(strtolower($this->metodePembayaran->kode ?? ''), 'qris') && !empty($this->snap_token))
+                ? "https://api.sandbox.midtrans.com/v2/qris/{$this->snap_token}/qr-code"
+                : null,
             'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
             'detail' => $this->detail->map(function ($d) {
                 return [

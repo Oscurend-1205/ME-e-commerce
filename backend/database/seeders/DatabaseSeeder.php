@@ -86,10 +86,15 @@ class DatabaseSeeder extends Seeder
             'tarif' => 35000,
         ]);
 
-        // 4. Metode Pembayaran (Minimal 2: tunai_di_tempat & transfer_manual)
-        $metodeCod = MetodePembayaran::create([
-            'kode' => 'tunai_di_tempat',
-            'nama' => 'Tunai di Tempat (COD)',
+        // 4. Metode Pembayaran (Midtrans Payment Gateway, QRIS, Transfer, COD)
+        $metodeMidtrans = MetodePembayaran::create([
+            'kode' => 'midtrans',
+            'nama' => 'Midtrans Payment Gateway (QRIS, VA Bank, Kartu Kredit, GoPay)',
+        ]);
+
+        $metodeQris = MetodePembayaran::create([
+            'kode' => 'qris',
+            'nama' => 'QRIS (Quick Response Code Indonesian Standard)',
         ]);
 
         $metodeTransfer = MetodePembayaran::create([
@@ -97,9 +102,9 @@ class DatabaseSeeder extends Seeder
             'nama' => 'Transfer Bank Manual (BCA/Mandiri)',
         ]);
 
-        $metodeQris = MetodePembayaran::create([
-            'kode' => 'qris',
-            'nama' => 'QRIS (Quick Response Code Indonesian Standard)',
+        $metodeCod = MetodePembayaran::create([
+            'kode' => 'tunai_di_tempat',
+            'nama' => 'Tunai di Tempat (COD)',
         ]);
 
         // 5. 36 Produk ME (Kelompok 2): Atasan 15, Bawahan 12, Aksesori 9

@@ -24,6 +24,11 @@ class LayananApi {
     if (token != null && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';
     }
+    // Fallback identitas statis (mode tamu / uji petik UTS).
+    // Backend mengutamakan Bearer token bila keduanya dikirim.
+    headers['X-Pelanggan-Id'] =
+        (StatePengguna.pelangganIdNotifier.value ?? Konstan.pelangganId)
+            .toString();
     if (tambahan != null) {
       headers.addAll(tambahan);
     }

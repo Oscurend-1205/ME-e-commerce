@@ -11,6 +11,7 @@ class Pesanan {
   final String? namaKurir;
   final String? metodePembayaran;
   final String? snapToken;
+  final String? redirectUrl;
   final String? qrUrl;
   final String? qrString;
   final String? createdAt;
@@ -29,6 +30,7 @@ class Pesanan {
     this.namaKurir,
     this.metodePembayaran,
     this.snapToken,
+    this.redirectUrl,
     this.qrUrl,
     this.qrString,
     this.createdAt,
@@ -36,6 +38,14 @@ class Pesanan {
   });
 
   factory Pesanan.fromJson(Map<String, dynamic> json) {
+    final token = json['snap_token'] as String?;
+    final rawRedirect = json['redirect_url'] as String?;
+    final computedRedirect = (rawRedirect != null && rawRedirect.isNotEmpty)
+        ? rawRedirect
+        : (token != null && token.isNotEmpty
+            ? 'https://app.sandbox.midtrans.com/snap/v4/redirection/$token'
+            : null);
+
     return Pesanan(
       id: json['id'] ?? 0,
       nomorPesanan: json['nomor_pesanan'] ?? '',
@@ -48,7 +58,8 @@ class Pesanan {
       catatan: json['catatan'],
       namaKurir: json['nama_kurir'],
       metodePembayaran: json['metode_pembayaran'],
-      snapToken: json['snap_token'],
+      snapToken: token,
+      redirectUrl: computedRedirect,
       qrUrl: json['qr_url'],
       qrString: json['qr_string'],
       createdAt: json['created_at'],

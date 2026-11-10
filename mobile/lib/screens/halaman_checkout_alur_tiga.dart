@@ -110,13 +110,38 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
           ? pesananMap['id'] as int
           : int.tryParse(pesananMap['id'].toString()) ?? 0;
 
-      // Cek apakah metode pembayaran adalah QRIS
+      // Ambil detail Midtrans
       final kodeMetode = _metodeTerpilihFinal?.kode ?? '';
+      final redirectUrl = pesananMap['redirect_url'] as String?;
       final snapToken = pesananMap['snap_token'] as String?;
       final nomorPesanan = pesananMap['nomor_pesanan'] as String? ?? '';
+      final total = pesananMap['total'] is int
+          ? pesananMap['total'] as int
+          : int.tryParse(pesananMap['total'].toString()) ?? 0;
 
-      if (kodeMetode == 'qris') {
-        // Navigasi ke halaman QRIS
+      // Semua pembayaran online diarahkan langsung ke Midtrans Snap Payment Gateway
+      if (snapToken != null && snapToken.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pesanan berhasil dibuat. Membuka Midtrans Payment Gateway...'),
+            backgroundColor: TemaAplikasi.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HalamanPembayaran(
+              pesananId: pesananId,
+              snapToken: snapToken,
+              redirectUrl: redirectUrl,
+              nomorPesanan: nomorPesanan,
+              total: total,
+            ),
+          ),
+        );
+      } else if (kodeMetode == 'qris' && (pesananMap['qr_url'] != null || pesananMap['qr_string'] != null)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Pesanan berhasil dibuat. Silakan scan QRIS untuk pembayaran.'),
@@ -125,41 +150,21 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
           ),
         );
 
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => HalamanPembayaranQris(
               pesananId: pesananId,
               nomorPesanan: nomorPesanan,
-              total: pesananMap['total'] ?? 0,
+              total: total,
               qrUrl: pesananMap['qr_url'] as String?,
               qrString: pesananMap['qr_string'] as String?,
               expiredAt: pesananMap['expired_at'] as String?,
             ),
           ),
         );
-      } else if (snapToken != null && snapToken.isNotEmpty) {
-        // Navigasi ke halaman pembayaran Midtrans
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Pesanan berhasil dibuat. Silakan selesaikan pembayaran.'),
-            backgroundColor: TemaAplikasi.primary,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HalamanPembayaran(
-              pesananId: pesananId,
-              snapToken: snapToken,
-              nomorPesanan: nomorPesanan,
-            ),
-          ),
-        );
       } else {
-        // Fallback: jika tidak ada snap_token, tampilkan opsi manual
+        // Fallback: jika tidak ada snap_token (mis. COD), tampilkan opsi manual / sukses
         _tampilkanOpsiPembayaranManual(pesananId, pesananMap);
       }
     } else {
@@ -696,9 +701,13 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      metode.kode.contains('transfer')
-                          ? 'BCA, Mandiri, BNI, Permata, BRI (Verifikasi Instan)'
-                          : 'Tersedia cicilan 0% hingga 12 bulan',
+                      metode.kode == 'midtrans'
+                          ? 'QRIS, Virtual Account (BCA, Mandiri, BNI, BRI), Kartu Kredit & E-Wallet'
+                          : metode.kode.contains('qris')
+                              ? 'Scan via GoPay, ShopeePay, BCA, Mandiri, OVO, m-Banking (Midtrans)'
+                              : metode.kode.contains('transfer')
+                                  ? 'BCA, Mandiri, BNI, Permata, BRI (Verifikasi Otomatis via Midtrans)'
+                                  : 'Bayar tunai kepada kurir saat pesanan tiba di alamat Anda',
                       style: const TextStyle(
                         fontSize: 12,
                         color: TemaAplikasi.secondary,

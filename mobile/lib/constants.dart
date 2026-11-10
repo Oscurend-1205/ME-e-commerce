@@ -37,4 +37,8 @@ class Konstan {
   }
 
   static const Duration batasWaktu = Duration(seconds: 10);
+
+  /// ID pelanggan statis untuk mode tamu / identitas fallback (PRD UTS).
+  /// Bearer token tetap diprioritaskan backend bila pengguna sudah login.
+  static const int pelangganId = 1;
 }

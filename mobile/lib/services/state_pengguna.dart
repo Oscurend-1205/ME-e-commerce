@@ -42,10 +42,15 @@ class StatePengguna {
     isLoggedInNotifier.value = true;
 
     final respon = await LayananApi.ambilProfil();
-    if (!respon.berhasil || respon.data == null) {
-      // Token kedaluwarsa / tidak valid: kembali ke mode tamu
+    // Hanya keluarkan sesi bila server secara eksplisit menolak token (401).
+    // Gangguan jaringan/timeout tidak boleh menghapus sesi tersimpan.
+    if (respon.code == '401') {
       await _hapusSesiTersimpan();
       setLoggedOut();
+      return;
+    }
+    if (!respon.berhasil || respon.data == null) {
+      // Server belum bisa dihubungi: pertahankan sesi, coba lagi nanti.
       return;
     }
 
@@ -171,9 +176,10 @@ class StatePengguna {
     jumlahKeranjangNotifier.value = jumlah >= 0 ? jumlah : 0;
   }
 
-  /// Sinkronkan jumlah item keranjang dari API server (hanya jika sudah login).
+  /// Sinkronkan jumlah item keranjang dari API server.
+  /// Berfungsi untuk pengguna login (Bearer token) maupun tamu
+  /// (fallback X-Pelanggan-Id statis di backend).
   static Future<void> sinkronkanKeranjang() async {
-    if (!isLoggedInNotifier.value) return;
     final respon = await LayananApi.ambilKeranjang();
     if (respon.berhasil && respon.data != null) {
       final items = (respon.data as Map<String, dynamic>)['items'] as List?;

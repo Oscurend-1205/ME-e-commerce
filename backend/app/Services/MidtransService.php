@@ -17,16 +17,16 @@ class MidtransService
     }
 
     /**
-     * Generate Snap token untuk pembayaran
+     * Generate Snap token & redirect URL untuk pembayaran Midtrans
      *
      * @param array $params - parameter transaksi
-     * @return string - snap token
+     * @return array - ['token' => ..., 'redirect_url' => ...]
      */
-    public function generateSnapToken(array $params): string
+    public function generateSnapTransaction(array $params): array
     {
         $transactionDetails = [
             'order_id' => $params['order_id'],
-            'gross_amount' => $params['gross_amount'],
+            'gross_amount' => (int) $params['gross_amount'],
         ];
 
         $customerDetails = [
@@ -50,7 +50,36 @@ class MidtransService
             ],
         ];
 
-        return Snap::getSnapToken($transaction);
+        if (!empty($params['enabled_payments'])) {
+            $transaction['enabled_payments'] = $params['enabled_payments'];
+        }
+
+        $res = Snap::createTransaction($transaction);
+        $token = is_object($res) ? ($res->token ?? null) : ($res['token'] ?? null);
+        $redirectUrl = is_object($res) ? ($res->redirect_url ?? null) : ($res['redirect_url'] ?? null);
+
+        if (!$redirectUrl && $token) {
+            $redirectUrl = Config::$isProduction
+                ? "https://app.midtrans.com/snap/v4/redirection/{$token}"
+                : "https://app.sandbox.midtrans.com/snap/v4/redirection/{token}";
+        }
+
+        return [
+            'token' => $token,
+            'redirect_url' => $redirectUrl,
+        ];
+    }
+
+    /**
+     * Generate Snap token untuk pembayaran
+     *
+     * @param array $params - parameter transaksi
+     * @return string - snap token
+     */
+    public function generateSnapToken(array $params): string
+    {
+        $result = $this->generateSnapTransaction($params);
+        return $result['token'] ?? '';
     }
 
     /**
