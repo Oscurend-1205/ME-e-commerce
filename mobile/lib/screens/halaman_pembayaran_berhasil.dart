@@ -46,8 +46,24 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
     if (!mounted) return;
 
     if (respon.berhasil && respon.data != null) {
+      var pesananObj = Pesanan.fromJson(respon.data as Map<String, dynamic>);
+
+      // Pastikan status tersinkronisasi ke 'dibayar' jika masih 'menunggu_pembayaran'
+      // karena pengguna sudah berada di halaman Pembayaran Berhasil.
+      if (pesananObj.status.toLowerCase() == 'menunggu_pembayaran') {
+        try {
+          await LayananApi.ubahStatusPesanan(pesananObj.id, 'dibayar');
+          final responUlang =
+              await LayananApi.ambilRincianPesanan(widget.pesananId);
+          if (responUlang.berhasil && responUlang.data != null) {
+            pesananObj =
+                Pesanan.fromJson(responUlang.data as Map<String, dynamic>);
+          }
+        } catch (_) {}
+      }
+
       setState(() {
-        _pesanan = Pesanan.fromJson(respon.data as Map<String, dynamic>);
+        _pesanan = pesananObj;
         _keadaan = KeadaanMuat.berhasil;
       });
     } else {
@@ -255,8 +271,11 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
           bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
         ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 10,
+        runSpacing: 4,
         children: [
           const Text(
             'PESANAN',
@@ -267,7 +286,6 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
               color: TemaAplikasi.secondary,
             ),
           ),
-          const SizedBox(width: 10),
           Text(
             '#${p?.nomorPesanan ?? '-'}',
             style: const TextStyle(
@@ -277,9 +295,7 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
               color: TemaAplikasi.primary,
             ),
           ),
-          const SizedBox(width: 10),
           const Text('•', style: TextStyle(color: TemaAplikasi.secondary)),
-          const SizedBox(width: 10),
           Text(
             _labelStatus,
             style: const TextStyle(
@@ -341,18 +357,18 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment:
-            rataKanan ? CrossAxisAlignment.start : CrossAxisAlignment.baseline,
-        textBaseline:
-            rataKanan ? null : TextBaseline.alphabetic,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 10,
-              letterSpacing: 1.2,
-              fontWeight: FontWeight.w600,
-              color: TemaAplikasi.secondary,
+          SizedBox(
+            width: 110,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 10,
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.w600,
+                color: TemaAplikasi.secondary,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -360,7 +376,7 @@ class _HalamanPembayaranBerhasilState extends State<HalamanPembayaranBerhasil> {
             child: Text(
               nilai,
               textAlign: rataKanan ? TextAlign.right : TextAlign.left,
-              maxLines: rataKanan ? 2 : 1,
+              maxLines: rataKanan ? 2 : 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: serif ? 18 : 12,

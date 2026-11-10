@@ -251,16 +251,21 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
     setState(() => _sedangMemeriksa = true);
 
     try {
-      await LayananApi.ubahStatusPesanan(widget.pesananId, 'dibayar');
+      final respon =
+          await LayananApi.ubahStatusPesanan(widget.pesananId, 'dibayar');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Simulasi berhasil! Status pesanan otomatis diubah menjadi DIBAYAR.'),
-            backgroundColor: TemaAplikasi.successColor,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        _handlePaymentComplete();
+        if (respon.berhasil) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Simulasi berhasil! Status pesanan otomatis diubah menjadi DIBAYAR.',
+              ),
+              backgroundColor: TemaAplikasi.successColor,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        await _handlePaymentComplete();
       }
     } catch (e) {
       if (mounted) {
@@ -276,8 +281,11 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
     }
   }
 
-  void _handlePaymentComplete() {
+  Future<void> _handlePaymentComplete() async {
     _pengecekanOtomatisTimer?.cancel();
+    try {
+      await LayananApi.ubahStatusPesanan(widget.pesananId, 'dibayar');
+    } catch (_) {}
     if (!mounted) return;
 
     Navigator.pushReplacement(

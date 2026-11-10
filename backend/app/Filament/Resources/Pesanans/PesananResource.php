@@ -7,6 +7,7 @@ use App\Filament\Resources\Pesanans\Pages\EditPesanan;
 use App\Filament\Resources\Pesanans\Pages\ListPesanans;
 use App\Models\Pesanan;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -14,11 +15,13 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class PesananResource extends Resource
@@ -164,7 +167,50 @@ class PesananResource extends Resource
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
+            ->filters([
+                SelectFilter::make('status')
+                    ->label('Filter Status')
+                    ->options(self::STATUS),
+            ])
             ->recordActions([
+                Action::make('kemas')
+                    ->label('Kemas Barang')
+                    ->icon(Heroicon::OutlinedArchiveBox)
+                    ->color('warning')
+                    ->visible(fn (Pesanan $record): bool => in_array($record->status, ['dibayar', 'menunggu_konfirmasi']))
+                    ->requiresConfirmation()
+                    ->modalHeading('Kemas Pesanan')
+                    ->modalDescription(fn (Pesanan $record) => "Proses pesanan #{$record->nomor_pesanan} ke tahap pengemasan atelier?")
+                    ->modalSubmitActionLabel('Kemas Sekarang')
+                    ->action(function (Pesanan $record): void {
+                        $record->status = 'diproses';
+                        $record->save();
+
+                        Notification::make()
+                            ->title('Pesanan Siap Dikemas')
+                            ->body("Pesanan #{$record->nomor_pesanan} berhasil dipindahkan ke status Diproses.")
+                            ->success()
+                            ->send();
+                    }),
+                Action::make('kirim')
+                    ->label('Kirim ke Kurir')
+                    ->icon(Heroicon::OutlinedTruck)
+                    ->color('primary')
+                    ->visible(fn (Pesanan $record): bool => $record->status === 'diproses')
+                    ->requiresConfirmation()
+                    ->modalHeading('Serahkan ke Kurir')
+                    ->modalDescription(fn (Pesanan $record) => "Kirimkan paket #{$record->nomor_pesanan} ke kurir pengiriman?")
+                    ->modalSubmitActionLabel('Kirim Paket')
+                    ->action(function (Pesanan $record): void {
+                        $record->status = 'dikirim';
+                        $record->save();
+
+                        Notification::make()
+                            ->title('Pesanan Telah Dikirim')
+                            ->body("Pesanan #{$record->nomor_pesanan} kini berstatus Dikirim (barang sedang proses pengiriman).")
+                            ->success()
+                            ->send();
+                    }),
                 EditAction::make(),
                 DeleteAction::make(),
             ])

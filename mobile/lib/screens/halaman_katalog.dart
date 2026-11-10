@@ -32,7 +32,8 @@ class HalamanKatalog extends StatefulWidget {
   State<HalamanKatalog> createState() => _HalamanKatalogState();
 }
 
-class _HalamanKatalogState extends State<HalamanKatalog> {
+class _HalamanKatalogState extends State<HalamanKatalog>
+    with SingleTickerProviderStateMixin {
   KeadaanMuat _keadaan = KeadaanMuat.memuat;
   JenisGalat _jenisGalat = JenisGalat.tidakDiketahui;
   String _pesanGalat = '';
@@ -643,7 +644,7 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
         child: WidgetKosong(
           ikon: Icons.inventory_2_outlined,
           pesan: 'Belum ada produk untuk koleksi ini.',
-          saranAksi: 'Lihat Koleksi Wanita',
+          saranAksi: 'Lihat Koleksi Terbaru',
           onAksi: () => _pilihStoryBerdasarkanLabel('Wanita'),
         ),
       );
@@ -965,78 +966,6 @@ class _HalamanKatalogState extends State<HalamanKatalog> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      // Tombol Wanita Sesuai cek-beranda.html
-                      Expanded(
-                        child: SizedBox(
-                          height: 44,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (widget.onPindahTab != null) {
-                                widget.onPindahTab!(1, 'Wanita');
-                              } else {
-                                _pilihStoryBerdasarkanLabel('Wanita');
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: TemaAplikasi.primary,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                            child: const Text(
-                              'KOLEKSI WANITA',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      // Tombol Pria Sesuai cek-beranda.html
-                      Expanded(
-                        child: SizedBox(
-                          height: 44,
-                          child: OutlinedButton(
-                            onPressed: () {
-                              if (widget.onPindahTab != null) {
-                                widget.onPindahTab!(1, 'Pria');
-                              } else {
-                                _pilihStoryBerdasarkanLabel('Pria');
-                              }
-                            },
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.black.withValues(
-                                alpha: 0.4,
-                              ),
-                              foregroundColor: Colors.white,
-                              side: BorderSide(
-                                color: Colors.white.withValues(alpha: 0.4),
-                                width: 1,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                            child: const Text(
-                              'KOLEKSI PRIA',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
@@ -3147,27 +3076,31 @@ class _MarqueeRunningTextState extends State<_MarqueeRunningText> {
   void initState() {
     super.initState();
     _controller = ScrollController();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _jalankanAnimasi());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _jalankanAnimasi();
+    });
   }
 
   void _jalankanAnimasi() async {
     while (mounted && _berjalan) {
-      if (_controller.hasClients) {
+      if (_controller.hasClients && _controller.position.hasContentDimensions) {
         final maxScroll = _controller.position.maxScrollExtent;
-        if (maxScroll > 0) {
-          await _controller.animateTo(
-            maxScroll,
-            duration: const Duration(seconds: 22),
-            curve: Curves.linear,
-          );
-          if (_controller.hasClients && mounted && _berjalan) {
-            _controller.jumpTo(0);
-          }
+        if (maxScroll.isFinite && maxScroll > 0) {
+          try {
+            await _controller.animateTo(
+              maxScroll,
+              duration: const Duration(seconds: 22),
+              curve: Curves.linear,
+            );
+            if (_controller.hasClients && mounted && _berjalan) {
+              _controller.jumpTo(0);
+            }
+          } catch (_) {}
         } else {
           await Future.delayed(const Duration(milliseconds: 500));
         }
       } else {
-        await Future.delayed(const Duration(milliseconds: 300));
+        await Future.delayed(const Duration(milliseconds: 500));
       }
     }
   }
@@ -3189,11 +3122,19 @@ class _MarqueeRunningTextState extends State<_MarqueeRunningText> {
         controller: _controller,
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
+        itemCount: 15,
         itemBuilder: (context, index) {
           return Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(widget.text, style: widget.style),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(widget.text, style: widget.style),
+                  const SizedBox(width: 20),
+                  const Icon(Icons.circle, size: 4, color: Colors.white54),
+                ],
+              ),
             ),
           );
         },

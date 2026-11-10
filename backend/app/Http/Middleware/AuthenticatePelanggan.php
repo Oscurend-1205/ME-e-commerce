@@ -31,9 +31,9 @@ class AuthenticatePelanggan
                 ], 401);
             }
         } else {
-            // Mode identitas statis (PRD UTS): header X-Pelanggan-Id tetap diterima
-            // sebagai pelanggan tetap ketika tidak ada token Bearer.
-            $idStatis = $request->header('X-Pelanggan-Id');
+            // Mode identitas statis (PRD UTS): header X-Pelanggan-Id atau query pelanggan_id tetap diterima
+            // sebagai pelanggan ketika tidak ada token Bearer.
+            $idStatis = $request->header('X-Pelanggan-Id') ?: $request->query('pelanggan_id');
             if ($idStatis && is_numeric($idStatis)) {
                 $pelanggan = Pelanggan::find((int) $idStatis);
             }

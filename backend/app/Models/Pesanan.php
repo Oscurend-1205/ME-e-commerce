@@ -65,7 +65,22 @@ class Pesanan extends Model
             'nama_penerima' => $this->nama_penerima,
             'alamat' => $this->alamat,
             'catatan' => $this->catatan,
+            'pelanggan' => $this->pelanggan ? [
+                'id' => $this->pelanggan->id,
+                'nama' => $this->pelanggan->nama,
+                'email' => $this->pelanggan->email,
+                'nomor_telepon' => $this->pelanggan->nomor_telepon,
+            ] : null,
             'nama_kurir' => $this->kurir ? "{$this->kurir->nama} - {$this->kurir->wilayah}" : null,
+            'kurir' => $this->kurir ? [
+                'id' => $this->kurir->id,
+                'nama' => $this->kurir->nama,
+                'wilayah' => $this->kurir->wilayah,
+                'tarif' => (int) $this->kurir->tarif,
+                'estimasi' => str_contains(strtolower($this->kurir->wilayah ?? ''), 'jabodetabek')
+                    ? 'Tiba Besok, 18:00 WIB'
+                    : '2-4 Hari Kerja',
+            ] : null,
             'metode_pembayaran' => $this->metodePembayaran ? $this->metodePembayaran->nama : null,
             'snap_token' => $this->snap_token,
             'redirect_url' => !empty($this->snap_token)

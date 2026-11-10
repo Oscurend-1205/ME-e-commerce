@@ -73,19 +73,6 @@ class CheckoutController extends Controller
             return $this->balasUlangIdempoten($pesananEksis);
         }
 
-        // 2b. Isi keranjang tidak lagi dikosongkan saat checkout (baru berkurang
-        // saat pembayaran dikonfirmasi), jadi pelanggan hanya boleh punya SATU
-        // pesanan aktif untuk mencegah pesanan ganda dari keranjang yang sama.
-        $adaPesananAktif = Pesanan::where('pelanggan_id', $pelangganId)
-            ->whereIn('status', ['menunggu_pembayaran', 'menunggu_konfirmasi'])
-            ->exists();
-        if ($adaPesananAktif) {
-            return $this->gagal(
-                'Anda masih memiliki pesanan yang belum selesai. Selesaikan pembayaran atau batalkan pesanan tersebut terlebih dahulu.',
-                409
-            );
-        }
-
         // 3. Validasi payload formulir
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
@@ -208,8 +195,8 @@ class CheckoutController extends Controller
                     $varian->decrement('stok', $detail['jumlah']);
                 }
 
-                // 8. Keranjang TIDAK dikosongkan: item tetap ada sampai pembayaran
-                //    dikonfirmasi 'dibayar', baru kemudian porsi terpesan berkurang.
+                // 8. Kosongkan keranjang pelanggan setelah pesanan berhasil dibuat
+                Keranjang::where('pelanggan_id', $pelangganId)->delete();
 
                 return $pesanan;
             });

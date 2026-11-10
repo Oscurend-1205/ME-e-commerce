@@ -97,6 +97,9 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
         _daftarSemuaPesanan = daftar;
         _keadaan = KeadaanMuat.berhasil;
       });
+
+      // Cek status pembayaran untuk pesanan yang masih menunggu pembayaran
+      _cekStatusPembayaranBerkala(daftar);
     } else {
       setState(() {
         _keadaan = KeadaanMuat.galat;
@@ -106,23 +109,48 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
     }
   }
 
+  Future<void> _cekStatusPembayaranBerkala(List<Pesanan> daftar) async {
+    for (final pesanan in daftar) {
+      if (pesanan.status.toLowerCase() == 'menunggu_pembayaran' &&
+          pesanan.snapToken != null &&
+          pesanan.snapToken!.isNotEmpty) {
+        try {
+          final respon = await LayananApi.cekStatusPembayaran(
+            pesanan.nomorPesanan,
+          );
+          if (respon.berhasil && respon.data != null) {
+            final data = respon.data as Map<String, dynamic>;
+            final statusPesanan = data['status_pesanan'] as String? ?? '';
+            // Jika status berubah, reload seluruh daftar pesanan
+            if (statusPesanan != 'menunggu_pembayaran' && mounted) {
+              _muatPesanan();
+              break;
+            }
+          }
+        } catch (_) {
+          // Abaikan error silent check
+        }
+      }
+    }
+  }
+
   // Filter Kategori Tab
   List<Pesanan> get _pesananProses => _daftarSemuaPesanan.where((p) {
-        final s = p.status.toLowerCase();
-        return s == 'menunggu_pembayaran' ||
-            s == 'menunggu_konfirmasi' ||
-            s == 'dibayar' ||
-            s == 'diproses' ||
-            s == 'dikirim';
-      }).toList();
+    final s = p.status.toLowerCase();
+    return s == 'menunggu_pembayaran' ||
+        s == 'menunggu_konfirmasi' ||
+        s == 'dibayar' ||
+        s == 'diproses' ||
+        s == 'dikirim';
+  }).toList();
 
   List<Pesanan> get _pesananSelesai => _daftarSemuaPesanan.where((p) {
-        return p.status.toLowerCase() == 'selesai';
-      }).toList();
+    return p.status.toLowerCase() == 'selesai';
+  }).toList();
 
   List<Pesanan> get _pesananDibatalkan => _daftarSemuaPesanan.where((p) {
-        return p.status.toLowerCase() == 'dibatalkan';
-      }).toList();
+    return p.status.toLowerCase() == 'dibatalkan';
+  }).toList();
 
   List<Pesanan> get _pesananTampil {
     List<Pesanan> hasil;
@@ -144,7 +172,9 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
       hasil = hasil.where((p) {
         final matchNomor = p.nomorPesanan.toLowerCase().contains(q);
         final matchKurir = (p.namaKurir ?? '').toLowerCase().contains(q);
-        final matchItem = p.detail?.any((d) => d.namaProduk.toLowerCase().contains(q)) ?? false;
+        final matchItem =
+            p.detail?.any((d) => d.namaProduk.toLowerCase().contains(q)) ??
+            false;
         return matchNomor || matchKurir || matchItem;
       }).toList();
     }
@@ -247,7 +277,9 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
     if (berhasilCount > 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$berhasilCount produk berhasil dimasukkan ke tas belanja!'),
+          content: Text(
+            '$berhasilCount produk berhasil dimasukkan ke tas belanja!',
+          ),
           backgroundColor: TemaAplikasi.primary,
           behavior: SnackBarBehavior.floating,
           action: SnackBarAction(
@@ -295,17 +327,33 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
           children: const [
             Text(
               'Asisten pribadi Atelier ME siap melayani kebutuhan Anda 24/7:',
-              style: TextStyle(fontSize: 13, color: TemaAplikasi.secondary, height: 1.4),
+              style: TextStyle(
+                fontSize: 13,
+                color: TemaAplikasi.secondary,
+                height: 1.4,
+              ),
             ),
             SizedBox(height: 14),
-            Text('• Layanan Pelanggan: +62 812-3456-7890\n• Email: concierge@atelier-me.com\n• Penyesuaian Ukuran & Pengiriman Prioritas',
-                style: TextStyle(fontSize: 12, color: TemaAplikasi.primary, height: 1.6)),
+            Text(
+              '• Layanan Pelanggan: +62 812-3456-7890\n• Email: concierge@atelier-me.com\n• Penyesuaian Ukuran & Pengiriman Prioritas',
+              style: TextStyle(
+                fontSize: 12,
+                color: TemaAplikasi.primary,
+                height: 1.6,
+              ),
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('TUTUP', style: TextStyle(color: TemaAplikasi.primary, fontWeight: FontWeight.w700)),
+            child: const Text(
+              'TUTUP',
+              style: TextStyle(
+                color: TemaAplikasi.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
@@ -318,9 +366,13 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
       valueListenable: StatePengguna.isLoggedInNotifier,
       builder: (context, isLoggedIn, _) {
         // Jika sudah login tetapi pesanan belum pernah dimuat, muat otomatis
-        if (isLoggedIn && _daftarSemuaPesanan.isEmpty && _keadaan != KeadaanMuat.memuat) {
+        if (isLoggedIn &&
+            _daftarSemuaPesanan.isEmpty &&
+            _keadaan != KeadaanMuat.memuat) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted && StatePengguna.isLoggedInNotifier.value && _keadaan != KeadaanMuat.memuat) {
+            if (mounted &&
+                StatePengguna.isLoggedInNotifier.value &&
+                _keadaan != KeadaanMuat.memuat) {
               _muatPesanan();
             }
           });
@@ -351,7 +403,9 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: const BoxDecoration(
         color: TemaAplikasi.surfaceWhite,
-        border: Border(bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8)),
+        border: Border(
+          bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -361,7 +415,11 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
               if (Navigator.canPop(context))
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back, size: 20, color: TemaAplikasi.primary),
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    size: 20,
+                    color: TemaAplikasi.primary,
+                  ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   tooltip: 'Kembali',
@@ -392,7 +450,11 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
             children: [
               IconButton(
                 onPressed: _keadaan == KeadaanMuat.memuat ? null : _muatPesanan,
-                icon: const Icon(Icons.refresh, size: 20, color: TemaAplikasi.primary),
+                icon: const Icon(
+                  Icons.refresh,
+                  size: 20,
+                  color: TemaAplikasi.primary,
+                ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 tooltip: 'Segarkan Pesanan',
@@ -408,7 +470,11 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                     }
                   });
                 },
-                icon: Icon(_modeCari ? Icons.close : Icons.search, size: 20, color: TemaAplikasi.primary),
+                icon: Icon(
+                  _modeCari ? Icons.close : Icons.search,
+                  size: 20,
+                  color: TemaAplikasi.primary,
+                ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 tooltip: 'Cari Pesanan',
@@ -419,12 +485,19 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                 builder: (context, jumlah, _) {
                   return InkWell(
                     onTap: () {
-                      Navigator.push(context, ruteGeser(const HalamanKeranjang()));
+                      Navigator.push(
+                        context,
+                        ruteGeser(const HalamanKeranjang()),
+                      );
                     },
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        const Icon(Icons.shopping_bag_outlined, size: 20, color: TemaAplikasi.primary),
+                        const Icon(
+                          Icons.shopping_bag_outlined,
+                          size: 20,
+                          color: TemaAplikasi.primary,
+                        ),
                         if (jumlah > 0)
                           Positioned(
                             top: -4,
@@ -468,8 +541,15 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
         style: const TextStyle(fontSize: 13, color: TemaAplikasi.primary),
         decoration: InputDecoration(
           hintText: 'Cari nomor pesanan, produk, atau kurir...',
-          hintStyle: const TextStyle(fontSize: 12, color: TemaAplikasi.secondary),
-          prefixIcon: const Icon(Icons.search, size: 18, color: TemaAplikasi.secondary),
+          hintStyle: const TextStyle(
+            fontSize: 12,
+            color: TemaAplikasi.secondary,
+          ),
+          prefixIcon: const Icon(
+            Icons.search,
+            size: 18,
+            color: TemaAplikasi.secondary,
+          ),
           filled: true,
           fillColor: TemaAplikasi.surfaceContainer,
           contentPadding: const EdgeInsets.symmetric(vertical: 8),
@@ -526,21 +606,39 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: const BoxDecoration(
         color: TemaAplikasi.surfaceWhite,
-        border: Border(bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8)),
+        border: Border(
+          bottom: BorderSide(color: TemaAplikasi.borderGray, width: 0.8),
+        ),
       ),
       child: Row(
         children: [
-          _bangunItemTab(key: 'proses', label: 'DALAM PROSES', count: _pesananProses.length),
+          _bangunItemTab(
+            key: 'proses',
+            label: 'DALAM PROSES',
+            count: _pesananProses.length,
+          ),
           const SizedBox(width: 20),
-          _bangunItemTab(key: 'selesai', label: 'SELESAI', count: _pesananSelesai.length),
+          _bangunItemTab(
+            key: 'selesai',
+            label: 'SELESAI',
+            count: _pesananSelesai.length,
+          ),
           const SizedBox(width: 20),
-          _bangunItemTab(key: 'dibatalkan', label: 'DIBATALKAN', count: _pesananDibatalkan.length),
+          _bangunItemTab(
+            key: 'dibatalkan',
+            label: 'DIBATALKAN',
+            count: _pesananDibatalkan.length,
+          ),
         ],
       ),
     );
   }
 
-  Widget _bangunItemTab({required String key, required String label, required int count}) {
+  Widget _bangunItemTab({
+    required String key,
+    required String label,
+    required int count,
+  }) {
     final aktif = _tabAktif == key;
 
     return InkWell(
@@ -575,7 +673,9 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
-                color: aktif ? TemaAplikasi.primary : TemaAplikasi.surfaceContainer,
+                color: aktif
+                    ? TemaAplikasi.primary
+                    : TemaAplikasi.surfaceContainer,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -598,10 +698,14 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
     if (!StatePengguna.isLoggedInNotifier.value) {
       return WidgetKosong(
         ikon: Icons.lock_outline_rounded,
-        pesan: 'Silakan masuk untuk melihat daftar pesanan dan melacak kiriman Anda.',
+        pesan:
+            'Silakan masuk untuk melihat daftar pesanan dan melacak kiriman Anda.',
         saranAksi: 'MASUK SEKARANG',
         onAksi: () async {
-          final res = await Navigator.push<bool>(context, ruteGeser(const HalamanLogin()));
+          final res = await Navigator.push<bool>(
+            context,
+            ruteGeser(const HalamanLogin()),
+          );
           if (res == true && mounted) _muatPesanan();
         },
       );
@@ -719,10 +823,12 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                         border: Border.all(color: TemaAplikasi.borderGray),
                       ),
                       child: FotoDummy.bangunGambar(
-                        url: firstItem.gambar != null && firstItem.gambar!.isNotEmpty
+                        url:
+                            firstItem.gambar != null &&
+                                firstItem.gambar!.isNotEmpty
                             ? (firstItem.gambar!.startsWith('http')
-                                ? firstItem.gambar!
-                                : '${Konstan.storageUrl}/${firstItem.gambar}')
+                                  ? firstItem.gambar!
+                                  : '${Konstan.storageUrl}/${firstItem.gambar}')
                             : '${Konstan.storageUrl}/1.jpg',
                         fit: BoxFit.cover,
                       ),
@@ -851,7 +957,7 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
         break;
       case 'dibayar':
         warna = const Color(0xFF184E77);
-        teks = 'LUNAS (SIAP PROSES)';
+        teks = 'SUDAH DIBAYAR';
         break;
       case 'selesai':
         warna = const Color(0xFF2D6A4F);
@@ -881,10 +987,7 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
               width: 5,
               height: 5,
               margin: const EdgeInsets.only(right: 5),
-              decoration: BoxDecoration(
-                color: warna,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: warna, shape: BoxShape.circle),
             ),
           Text(
             teks,
@@ -907,7 +1010,8 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
 
     String statusTeks;
     if (status == 'dikirim') {
-      statusTeks = 'Paket dalam perjalanan. Estimasi tiba: Besok (Sebelum 18:00 WIB)';
+      statusTeks =
+          'Paket dalam perjalanan. Estimasi tiba: Besok (Sebelum 18:00 WIB)';
     } else if (status == 'diproses') {
       statusTeks = 'Tahap Quality Inspection & Pengemasan Eksklusif Atelier';
     } else if (status == 'menunggu_pembayaran') {
@@ -924,7 +1028,11 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.local_shipping_outlined, size: 16, color: TemaAplikasi.primary),
+          const Icon(
+            Icons.local_shipping_outlined,
+            size: 16,
+            color: TemaAplikasi.primary,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -970,9 +1078,18 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                 foregroundColor: TemaAplikasi.primary,
                 side: const BorderSide(color: TemaAplikasi.borderGray),
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              child: const Text('DETAIL PESANAN', style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w700)),
+              child: const Text(
+                'DETAIL PESANAN',
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -983,9 +1100,18 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                 backgroundColor: TemaAplikasi.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              child: const Text('BAYAR SEKARANG', style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w700)),
+              child: const Text(
+                'BAYAR SEKARANG',
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
         ],
@@ -1002,9 +1128,18 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                 foregroundColor: TemaAplikasi.primary,
                 side: const BorderSide(color: TemaAplikasi.borderGray),
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              child: const Text('DETAIL PESANAN', style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w700)),
+              child: const Text(
+                'DETAIL PESANAN',
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -1015,9 +1150,18 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                 backgroundColor: TemaAplikasi.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              child: const Text('LACAK PENGIRIMAN', style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w700)),
+              child: const Text(
+                'LACAK PENGIRIMAN',
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
         ],
@@ -1030,15 +1174,27 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
           Expanded(
             child: OutlinedButton(
               onPressed: () {
-                Navigator.push(context, ruteGeser(const HalamanBuktiTransaksi()));
+                Navigator.push(
+                  context,
+                  ruteGeser(const HalamanBuktiTransaksi()),
+                );
               },
               style: OutlinedButton.styleFrom(
                 foregroundColor: TemaAplikasi.primary,
                 side: const BorderSide(color: TemaAplikasi.borderGray),
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              child: const Text('BUKTI TRANSAKSI', style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w700)),
+              child: const Text(
+                'BUKTI TRANSAKSI',
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -1049,9 +1205,18 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                 backgroundColor: TemaAplikasi.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              child: const Text('BELI LAGI', style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w700)),
+              child: const Text(
+                'BELI LAGI',
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
         ],
@@ -1069,7 +1234,14 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
         ),
-        child: const Text('RINCIAN & BANTUAN', style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w700)),
+        child: const Text(
+          'RINCIAN & BANTUAN',
+          style: TextStyle(
+            fontSize: 10,
+            letterSpacing: 1.2,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
     );
   }
@@ -1084,18 +1256,21 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
       case 'selesai':
         ikon = Icons.check_circle_outline;
         judul = 'Belum Ada Pesanan Selesai';
-        deskripsi = 'Pesanan yang telah Anda terima akan tercatat rapi di arsip ini.';
+        deskripsi =
+            'Pesanan yang telah Anda terima akan tercatat rapi di arsip ini.';
         break;
       case 'dibatalkan':
         ikon = Icons.assignment_turned_in_outlined;
         judul = 'Tidak Ada Pesanan Dibatalkan';
-        deskripsi = 'Seluruh pesanan Anda tercatat diproses dengan sempurna oleh Atelier ME tanpa pembatalan.';
+        deskripsi =
+            'Seluruh pesanan Anda tercatat diproses dengan sempurna oleh Atelier ME tanpa pembatalan.';
         break;
       case 'proses':
       default:
         ikon = Icons.shopping_bag_outlined;
         judul = 'Tidak Ada Pesanan Aktif';
-        deskripsi = 'Anda sedang tidak memiliki pesanan yang dalam proses pengiriman.';
+        deskripsi =
+            'Anda sedang tidak memiliki pesanan yang dalam proses pengiriman.';
         break;
     }
 
@@ -1133,7 +1308,11 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                 Text(
                   deskripsi,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12, color: TemaAplikasi.secondary, height: 1.4),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: TemaAplikasi.secondary,
+                    height: 1.4,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 OutlinedButton(
@@ -1149,10 +1328,22 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: TemaAplikasi.primary,
                     side: const BorderSide(color: TemaAplikasi.primary),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                  child: const Text('LIHAT SEMUA PESANAN', style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w700)),
+                  child: const Text(
+                    'LIHAT SEMUA PESANAN',
+                    style: TextStyle(
+                      fontSize: 10,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1186,7 +1377,11 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                       color: TemaAplikasi.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.support_agent, size: 18, color: Colors.white),
+                    child: const Icon(
+                      Icons.support_agent,
+                      size: 18,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(width: 10),
                   const Column(
@@ -1203,7 +1398,10 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                       ),
                       Text(
                         'Layanan Asisten Pelanggan 24/7',
-                        style: TextStyle(fontSize: 10, color: TemaAplikasi.secondary),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: TemaAplikasi.secondary,
+                        ),
                       ),
                     ],
                   ),
@@ -1212,7 +1410,11 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
               const SizedBox(height: 10),
               const Text(
                 'Memerlukan bantuan pengiriman khusus, perubahan alamat pengantaran, atau jadwal penyesuaian ukuran pakaian? Asisten mode pribadi kami siap mendampingi Anda.',
-                style: TextStyle(fontSize: 11, color: TemaAplikasi.secondary, height: 1.4),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: TemaAplikasi.secondary,
+                  height: 1.4,
+                ),
               ),
               const SizedBox(height: 12),
               Row(
@@ -1233,13 +1435,20 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
                           ),
                         ),
                         SizedBox(width: 4),
-                        Icon(Icons.arrow_forward, size: 12, color: TemaAplikasi.primary),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 12,
+                          color: TemaAplikasi.primary,
+                        ),
                       ],
                     ),
                   ),
                   const Text(
                     'Respon < 5 menit',
-                    style: TextStyle(fontSize: 10, color: TemaAplikasi.secondary),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: TemaAplikasi.secondary,
+                    ),
                   ),
                 ],
               ),
@@ -1313,12 +1522,21 @@ class _BangunModalLacak extends StatelessWidget {
                   children: [
                     const Text(
                       'LACAK PENGIRIMAN',
-                      style: TextStyle(fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w700, color: TemaAplikasi.primary),
+                      style: TextStyle(
+                        fontSize: 11,
+                        letterSpacing: 1.5,
+                        fontWeight: FontWeight.w700,
+                        color: TemaAplikasi.primary,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Nomor Resi: $nomorResi',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: TemaAplikasi.secondary),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: TemaAplikasi.secondary,
+                      ),
                     ),
                   ],
                 ),
@@ -1337,14 +1555,31 @@ class _BangunModalLacak extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.local_shipping, size: 22, color: TemaAplikasi.primary),
+                  const Icon(
+                    Icons.local_shipping,
+                    size: 22,
+                    color: TemaAplikasi.primary,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(kurirNama.toUpperCase(), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: TemaAplikasi.primary)),
-                        const Text('Estimasi Kedatangan: Besok (Sebelum 18:00 WIB)', style: TextStyle(fontSize: 11, color: TemaAplikasi.secondary)),
+                        Text(
+                          kurirNama.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: TemaAplikasi.primary,
+                          ),
+                        ),
+                        const Text(
+                          'Estimasi Kedatangan: Besok (Sebelum 18:00 WIB)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: TemaAplikasi.secondary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -1352,12 +1587,40 @@ class _BangunModalLacak extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Text('TIMELINE PERJALANAN PAKET', style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w700, color: TemaAplikasi.secondary)),
+            const Text(
+              'TIMELINE PERJALANAN PAKET',
+              style: TextStyle(
+                fontSize: 10,
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.w700,
+                color: TemaAplikasi.secondary,
+              ),
+            ),
             const SizedBox(height: 12),
-            _stepLacak('Kurir Sedang Menuju Alamat Penerima', 'Paket telah dibawa kurir ke Jakarta Pusat', true, true),
-            _stepLacak('Paket Tiba di Hub Transit Jakarta DC', 'Selesai disortir di Pusat Distribusi RajaOngkir', true, false),
-            _stepLacak('Diserahkan oleh Atelier ME HQ', 'Barang dipaketkan dengan segel garansi eksklusif', true, false),
-            _stepLacak('Pesanan Dibuat & Pembayaran Terverifikasi', pesanan.createdAt ?? 'Terkonfirmasi otomatis', true, false),
+            _stepLacak(
+              'Kurir Sedang Menuju Alamat Penerima',
+              'Paket telah dibawa kurir ke Jakarta Pusat',
+              true,
+              true,
+            ),
+            _stepLacak(
+              'Paket Tiba di Hub Transit Jakarta DC',
+              'Selesai disortir di Pusat Distribusi RajaOngkir',
+              true,
+              false,
+            ),
+            _stepLacak(
+              'Diserahkan oleh Atelier ME HQ',
+              'Barang dipaketkan dengan segel garansi eksklusif',
+              true,
+              false,
+            ),
+            _stepLacak(
+              'Pesanan Dibuat & Pembayaran Terverifikasi',
+              pesanan.createdAt ?? 'Terkonfirmasi otomatis',
+              true,
+              false,
+            ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -1367,9 +1630,18 @@ class _BangunModalLacak extends StatelessWidget {
                   backgroundColor: TemaAplikasi.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-                child: const Text('TUTUP PELACAKAN', style: TextStyle(fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w700)),
+                child: const Text(
+                  'TUTUP PELACAKAN',
+                  style: TextStyle(
+                    fontSize: 11,
+                    letterSpacing: 1.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
           ],
@@ -1389,15 +1661,24 @@ class _BangunModalLacak extends StatelessWidget {
               height: 14,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: aktif ? TemaAplikasi.primary : (selesai ? Colors.black : Colors.grey.shade300),
-                border: aktif ? Border.all(color: Colors.black, width: 2) : null,
+                color: aktif
+                    ? TemaAplikasi.primary
+                    : (selesai ? Colors.black : Colors.grey.shade300),
+                border: aktif
+                    ? Border.all(color: Colors.black, width: 2)
+                    : null,
               ),
               child: aktif
                   ? Container(
                       margin: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
                     )
-                  : (selesai ? const Icon(Icons.check, size: 9, color: Colors.white) : null),
+                  : (selesai
+                        ? const Icon(Icons.check, size: 9, color: Colors.white)
+                        : null),
             ),
             Container(
               width: 1.5,
@@ -1422,7 +1703,10 @@ class _BangunModalLacak extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 deskripsi,
-                style: const TextStyle(fontSize: 10, color: TemaAplikasi.secondary),
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: TemaAplikasi.secondary,
+                ),
               ),
             ],
           ),
