@@ -36,7 +36,7 @@ class HalamanKatalog extends StatefulWidget {
 }
 
 class _HalamanKatalogState extends State<HalamanKatalog>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   KeadaanMuat _keadaan = KeadaanMuat.memuat;
   JenisGalat _jenisGalat = JenisGalat.tidakDiketahui;
   String _pesanGalat = '';
@@ -142,8 +142,16 @@ class _HalamanKatalogState extends State<HalamanKatalog>
     }
 
     _scrollController.addListener(_tanganiScroll);
+    WidgetsBinding.instance.addObserver(this);
     StatePengguna.versiKatalogNotifier.addListener(_muatData);
     _muatData();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _muatHeroBanner();
+    }
   }
 
   @override
@@ -180,6 +188,7 @@ class _HalamanKatalogState extends State<HalamanKatalog>
   @override
   void dispose() {
     _heroBannerTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _heroBannerPageController.dispose();
     StatePengguna.versiKatalogNotifier.removeListener(_muatData);
     _scrollController.removeListener(_tanganiScroll);
@@ -243,19 +252,33 @@ class _HalamanKatalogState extends State<HalamanKatalog>
 
   void _aturTimerHeroBanner() {
     _heroBannerTimer?.cancel();
-    if (_daftarHeroBanner.length <= 1) return;
-    _heroBannerTimer = Timer.periodic(const Duration(milliseconds: 4500), (
-      timer,
-    ) {
-      if (!mounted || !_heroBannerPageController.hasClients) return;
-      final indeksBerikutnya =
-          (_heroBannerIndeks + 1) % _daftarHeroBanner.length;
-      _heroBannerPageController.animateToPage(
+    if (!mounted || _daftarHeroBanner.length <= 1) return;
+    _heroBannerTimer = Timer(
+      const Duration(milliseconds: 4500),
+      _geserHeroBanner,
+    );
+  }
+
+  Future<void> _geserHeroBanner() async {
+    if (!mounted) return;
+    if (!_heroBannerPageController.hasClients) {
+      _aturTimerHeroBanner();
+      return;
+    }
+
+    final halamanSaatIni =
+        _heroBannerPageController.page?.round() ?? _heroBannerIndeks;
+    final indeksBerikutnya = (halamanSaatIni + 1) % _daftarHeroBanner.length;
+
+    try {
+      await _heroBannerPageController.animateToPage(
         indeksBerikutnya,
         duration: const Duration(milliseconds: 650),
         curve: Curves.easeInOut,
       );
-    });
+    } finally {
+      _aturTimerHeroBanner();
+    }
   }
 
   Future<void> _muatProduk() async {
