@@ -411,7 +411,7 @@ class _HalamanMetodePembayaranState extends State<HalamanMetodePembayaran> {
                   ),
                 ],
               ),
-            ),
+            ), 
           ],
         ),
       ),
