@@ -1,8 +1,6 @@
-gradle-wrapper.jar
+# gradle wrapper sengaja di-track agar build Android konsisten di semua laptop tim
 /.gradle
 /captures/
-/gradlew
-/gradlew.bat
 /local.properties
 GeneratedPluginRegistrant.java
 .cxx/

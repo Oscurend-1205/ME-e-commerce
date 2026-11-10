@@ -26,7 +26,6 @@ mobile/ios/Flutter/flutter_export_environment.sh
 
 # Laravel / PHP
 backend/vendor/
-backend/.env
 backend/storage/*.key
 backend/public/storage
 backend/public/hot
