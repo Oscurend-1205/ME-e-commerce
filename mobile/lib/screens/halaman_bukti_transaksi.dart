@@ -184,7 +184,7 @@ class HalamanBuktiTransaksi extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              ...daftarBukti.map((item) => _kartuDokumen(item)).toList(),
+              ...daftarBukti.map((item) => _kartuDokumen(item)),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
