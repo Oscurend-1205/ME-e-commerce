@@ -56,6 +56,59 @@ class CheckoutController extends Controller
     }
 
     /**
+     * POST /api/checkout/estimasi — Hitung ringkasan checkout dari data server.
+     */
+    public function estimate(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'kurir_id' => 'required|exists:kurir,id',
+            'item_keranjang_ids' => 'required|array|min:1',
+            'item_keranjang_ids.*' => 'required|integer|distinct',
+        ], [
+            'kurir_id.required' => 'Kurir pengiriman wajib dipilih.',
+            'kurir_id.exists' => 'Kurir yang dipilih tidak valid.',
+            'item_keranjang_ids.required' => 'Pilih setidaknya satu item untuk checkout.',
+            'item_keranjang_ids.array' => 'Daftar item checkout tidak valid.',
+            'item_keranjang_ids.min' => 'Pilih setidaknya satu item untuk checkout.',
+            'item_keranjang_ids.*.distinct' => 'Item checkout tidak boleh dipilih lebih dari sekali.',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->gagal('Validasi estimasi checkout gagal.', 422, $validator->errors());
+        }
+
+        $pelangganId = $this->getPelangganId($request);
+        $itemIds = $request->input('item_keranjang_ids');
+        $items = Keranjang::with('produk')
+            ->where('pelanggan_id', $pelangganId)
+            ->whereIn('id', $itemIds)
+            ->get();
+
+        if ($items->count() !== count($itemIds)) {
+            return $this->gagal(
+                'Sebagian item terpilih sudah tidak tersedia di keranjang. Muat ulang keranjang Anda.',
+                409
+            );
+        }
+
+        $kurir = Kurir::find($request->input('kurir_id'));
+        if (!$kurir) {
+            return $this->gagal('Kurir yang dipilih tidak ditemukan.', 422);
+        }
+
+        $subtotal = $items->sum(
+            fn (Keranjang $item): int => (int) ($item->produk?->harga ?? 0) * $item->jumlah
+        );
+        $ongkir = (int) $kurir->tarif;
+
+        return $this->sukses([
+            'subtotal' => $subtotal,
+            'ongkir' => $ongkir,
+            'total' => $subtotal + $ongkir,
+        ], 'Estimasi checkout berhasil dihitung', 200);
+    }
+
+    /**
      * POST /api/checkout - Transaksi checkout atomik dengan Idempotency Key
      */
     public function store(Request $request): JsonResponse
@@ -162,19 +215,23 @@ class CheckoutController extends Controller
 
                 $subtotal = 0;
                 $daftarDetail = [];
+                $jumlahPerVarian = [];
 
-                // 5. Siapkan rincian detail pesanan dari isi keranjang
-                // (Stok varian sudah diamankan/dikurangi saat item ditambahkan ke keranjang)
+                // 5. Siapkan rincian pesanan dan agregasi kuantitas per varian.
                 foreach ($itemsKeranjang as $item) {
                     $varian = $varians->get($item->varian_id);
 
                     if (!$varian) {
                         throw new KonflikCheckoutException("Varian produk dengan ID {$item->varian_id} tidak ditemukan.");
                     }
+                    if (!$item->produk || !$item->produk->tersedia) {
+                        throw new KonflikCheckoutException('Produk dalam keranjang sudah tidak tersedia untuk dibeli.');
+                    }
 
                     $hargaSatuan = $item->produk ? (int) $item->produk->harga : 0;
                     $subtotalItem = $hargaSatuan * $item->jumlah;
                     $subtotal += $subtotalItem;
+                    $jumlahPerVarian[$varian->id] = ($jumlahPerVarian[$varian->id] ?? 0) + $item->jumlah;
 
                     $daftarDetail[] = [
                         'produk_id' => $item->produk_id,
@@ -195,6 +252,19 @@ class CheckoutController extends Controller
                 // Batas nominal transaksi Tunai di Tempat (COD)
                 if ($metode->kode === 'tunai_di_tempat' && $total > 2500000) {
                     throw new KonflikCheckoutException('Metode Tunai di Tempat (COD) hanya berlaku untuk total belanja maksimal Rp 2.500.000.');
+                }
+
+                // Kurangi stok hanya saat checkout, setelah seluruh pesanan tervalidasi.
+                // Baris varian sudah dikunci dan seluruh perubahan tetap dalam transaksi ini.
+                foreach ($jumlahPerVarian as $varianId => $jumlahDipesan) {
+                    $varian = $varians->get($varianId);
+                    if ($varian->stok < $jumlahDipesan) {
+                        throw new KonflikCheckoutException(
+                            "Stok ukuran {$varian->ukuran} warna {$varian->warna} tidak mencukupi (tersedia: {$varian->stok}, diminta: {$jumlahDipesan})."
+                        );
+                    }
+
+                    $varian->decrement('stok', $jumlahDipesan);
                 }
 
                 // Buat nomor pesanan unik

@@ -21,6 +21,7 @@ Proyek Tugas Pengganti UTS Berkelompok untuk mata kuliah **Pemrograman Aplikasi 
 Aplikasi e-commerce pakaian & aksesori modern terinspirasi gaya editorial minimalis **ZARA**.
 - **Pembeda Domain (Kelompok 2):** Stok disimpan secara spesifik per **kombinasi varian (ukuran $\times$ warna)** pada tabel `varian_produk`, bukan satu angka per produk.
 - **Aturan Bisnis:** Penambahan ke keranjang dan checkout otomatis ditolak dengan kode status **`409 Conflict`** jika stok varian yang dipilih habis, meskipun varian lain pada produk tersebut masih tersedia.
+- **Konsistensi Stok:** Keranjang tidak mencadangkan stok. Stok diperiksa dan dikurangi server hanya saat checkout berhasil; pengurangan stok, pembuatan pesanan, dan pengosongan keranjang berada dalam satu transaksi.
 - **Server-side Truth:** Server Laravel menjadi satu-satunya sumber kebenaran untuk harga, ketersediaan, subtotal, ongkos kirim, dan total belanja.
 
 ### Objek Produk dan Tabel Basis Data
@@ -163,11 +164,12 @@ Dokumentasi detail endpoint dan koleksi Postman: [api-docs (1).md](api-docs%20(1
 | 9 | `DELETE /api/keranjang/{id}` | Hapus item dari keranjang | `200 OK` |
 | 10 | `GET /api/kurir` | Daftar kurir dan tarif wilayah | `200 OK` |
 | 11 | `GET /api/metode-pembayaran` | Daftar metode pembayaran yang didukung | `200 OK` |
-| 12 | `POST /api/checkout` | Checkout atomik (`X-Kunci-Idempoten`, lockForUpdate) | `201 Created` |
-| 13 | `GET /api/pesanan` | Riwayat pesanan (terbaru dulu) | `200 OK` |
-| 14 | `GET /api/pesanan/{id}` | Rincian pesanan & snapshot harga pembelian | `200 OK` |
-| 15 | `PATCH /api/pesanan/{id}/status` | Ubah status pesanan (409 bila transisi tidak sah) | `200 OK` |
-| 16 | `GET /api/gambar/{filename}` | Ambil gambar produk dari storage | `200 OK` |
+| 12 | `POST /api/checkout/estimasi` | Hitung subtotal, ongkir, dan total di server | `200 OK` |
+| 13 | `POST /api/checkout` | Checkout atomik (`X-Kunci-Idempoten`, lockForUpdate) | `201 Created` |
+| 14 | `GET /api/pesanan` | Riwayat pesanan (terbaru dulu) | `200 OK` |
+| 15 | `GET /api/pesanan/{id}` | Rincian pesanan & snapshot harga pembelian | `200 OK` |
+| 16 | `PATCH /api/pesanan/{id}/status` | Ubah status pesanan (409 bila transisi tidak sah) | `200 OK` |
+| 17 | `GET /api/gambar/{filename}` | Ambil gambar produk dari storage | `200 OK` |
 
 ---
 

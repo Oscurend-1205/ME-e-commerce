@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Keranjang;
-use App\Models\Pelanggan;
 use App\Models\VarianProduk;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -86,25 +85,23 @@ class KeranjangController extends Controller
         }
 
         return DB::transaction(function () use ($pelangganId, $produkId, $varianId, $jumlah) {
-            // Kunci baris varian untuk mencegah race condition
             $varianLocked = VarianProduk::where('id', $varianId)->lockForUpdate()->first();
-
-            if (!$varianLocked || $varianLocked->stok < $jumlah) {
-                $sisa = $varianLocked ? $varianLocked->stok : 0;
-                return $this->gagal(
-                    "Stok ukuran {$varianLocked->ukuran} warna {$varianLocked->warna} tidak mencukupi (tersedia: {$sisa}, diminta: {$jumlah}).",
-                    409
-                );
+            if (!$varianLocked) {
+                return $this->gagal('Varian produk tidak ditemukan.', 404);
             }
 
-            // Kurangi stok varian secara langsung saat masuk keranjang
-            $varianLocked->decrement('stok', $jumlah);
-
-            // Cek apakah item varian sudah ada di keranjang pelanggan
             $itemAda = Keranjang::where('pelanggan_id', $pelangganId)
                 ->where('varian_id', $varianId)
                 ->lockForUpdate()
                 ->first();
+            $jumlahTotal = $jumlah + ($itemAda?->jumlah ?? 0);
+
+            if ($varianLocked->stok < $jumlahTotal) {
+                return $this->gagal(
+                    "Stok ukuran {$varianLocked->ukuran} warna {$varianLocked->warna} tidak mencukupi (tersedia: {$varianLocked->stok}, diminta: {$jumlahTotal}).",
+                    409
+                );
+            }
 
             if ($itemAda) {
                 $itemAda->jumlah += $jumlah;
@@ -121,7 +118,7 @@ class KeranjangController extends Controller
 
             $itemResult->load(['produk', 'varian']);
 
-            return $this->sukses($itemResult->formatItem(), 'Item berhasil ditambahkan ke keranjang dan stok berhasil dikurangi.', 201);
+            return $this->sukses($itemResult->formatItem(), 'Item berhasil ditambahkan ke keranjang.', 201);
         });
     }
 
@@ -159,71 +156,41 @@ class KeranjangController extends Controller
                 return $this->gagal('Item keranjang tidak ditemukan.', 404);
             }
 
-            // Kasus 1: Varian tetap sama, hanya jumlah berubah
-            if ($varianIdBaru === $itemLocked->varian_id) {
-                $selisih = $jumlahBaru - $itemLocked->jumlah;
-                $varianLocked = VarianProduk::where('id', $itemLocked->varian_id)->lockForUpdate()->first();
+            $varianBaru = VarianProduk::where('id', $varianIdBaru)->lockForUpdate()->first();
+            if (!$varianBaru || $varianBaru->produk_id !== $itemLocked->produk_id) {
+                return $this->gagal('Varian tidak sesuai dengan produk ini.', 422);
+            }
 
-                if ($selisih > 0) {
-                    // Tambah kuantitas di keranjang -> kurangi stok varian
-                    if ($varianLocked->stok < $selisih) {
-                        return $this->gagal(
-                            "Stok varian {$varianLocked->ukuran} - {$varianLocked->warna} tidak mencukupi untuk penambahan (tersedia: {$varianLocked->stok}).",
-                            409
-                        );
-                    }
-                    $varianLocked->decrement('stok', $selisih);
-                } elseif ($selisih < 0) {
-                    // Kurangi kuantitas di keranjang -> kembalikan stok varian
-                    $varianLocked->increment('stok', abs($selisih));
-                }
-
-                $itemLocked->jumlah = $jumlahBaru;
-                $itemLocked->save();
-            } else {
-                // Kasus 2: Ganti varian produk
-                $varianLama = VarianProduk::where('id', $itemLocked->varian_id)->lockForUpdate()->first();
-                $varianBaru = VarianProduk::where('id', $varianIdBaru)->lockForUpdate()->first();
-
-                if (!$varianBaru || $varianBaru->produk_id !== $itemLocked->produk_id) {
-                    return $this->gagal('Varian tidak sesuai dengan produk ini.', 422);
-                }
-
-                if ($varianBaru->stok < $jumlahBaru) {
-                    return $this->gagal(
-                        "Stok varian {$varianBaru->ukuran} - {$varianBaru->warna} tidak mencukupi (tersedia: {$varianBaru->stok}).",
-                        409
-                    );
-                }
-
-                // Kembalikan stok varian lama
-                if ($varianLama) {
-                    $varianLama->increment('stok', $itemLocked->jumlah);
-                }
-                // Kurangi stok varian baru
-                $varianBaru->decrement('stok', $jumlahBaru);
-
-                // Cek jika varian tujuan sudah ada di item keranjang lain (merge)
-                $itemLain = Keranjang::where('pelanggan_id', $pelangganId)
+            $itemLain = $varianIdBaru === $itemLocked->varian_id
+                ? null
+                : Keranjang::where('pelanggan_id', $pelangganId)
                     ->where('varian_id', $varianIdBaru)
                     ->where('id', '!=', $itemLocked->id)
                     ->lockForUpdate()
                     ->first();
+            $jumlahTotal = $jumlahBaru + ($itemLain?->jumlah ?? 0);
 
-                if ($itemLain) {
-                    $itemLain->jumlah += $jumlahBaru;
-                    $itemLain->save();
-                    $itemLocked->delete();
-                    $itemLain->load(['produk', 'varian']);
-                    return $this->sukses($itemLain->formatItem(), 'Varian berhasil diperbarui dan digabungkan di keranjang', 200);
-                }
-
-                $itemLocked->jumlah = $jumlahBaru;
-                $itemLocked->varian_id = $varianIdBaru;
-                $itemLocked->save();
+            if ($varianBaru->stok < $jumlahTotal) {
+                return $this->gagal(
+                    "Stok varian {$varianBaru->ukuran} - {$varianBaru->warna} tidak mencukupi (tersedia: {$varianBaru->stok}, diminta: {$jumlahTotal}).",
+                    409
+                );
             }
 
+            if ($itemLain) {
+                $itemLain->jumlah += $jumlahBaru;
+                $itemLain->save();
+                $itemLocked->delete();
+                $itemLain->load(['produk', 'varian']);
+
+                return $this->sukses($itemLain->formatItem(), 'Varian berhasil diperbarui dan digabungkan di keranjang', 200);
+            }
+
+            $itemLocked->jumlah = $jumlahBaru;
+            $itemLocked->varian_id = $varianIdBaru;
+            $itemLocked->save();
             $itemLocked->load(['produk', 'varian']);
+
             return $this->sukses($itemLocked->formatItem(), 'Item keranjang berhasil diperbarui', 200);
         });
     }
@@ -241,15 +208,9 @@ class KeranjangController extends Controller
         }
 
         return DB::transaction(function () use ($item) {
-            // Kembalikan stok varian ke database saat item dihapus dari keranjang
-            if ($item->varian_id) {
-                VarianProduk::where('id', $item->varian_id)->increment('stok', $item->jumlah);
-            }
-
             $item->delete();
 
-            return $this->sukses(null, 'Item berhasil dihapus dari keranjang dan stok dikembalikan', 200);
+            return $this->sukses(null, 'Item berhasil dihapus dari keranjang', 200);
         });
     }
 }
-

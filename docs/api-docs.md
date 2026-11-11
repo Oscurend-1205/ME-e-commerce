@@ -64,11 +64,12 @@ Sumber: `backend/routes/api.php`. Seluruh respons memakai pembungkus seragam:
 | 9 | DELETE `/api/keranjang/{id}` | Hapus satu item | path `id` | 200, 404 |
 | 10 | GET `/api/kurir` | Daftar kurir dan tarif wilayah | tidak ada | 200 |
 | 11 | GET `/api/metode-pembayaran` | Daftar metode pembayaran | tidak ada | 200 |
-| 12 | POST `/api/checkout` | Buat pesanan dari isi atau item terpilih di keranjang | header `X-Kunci-Idempoten` (wajib); body: `nama`, `alamat`, `kurir_id`, `metode_pembayaran_id`, opsional `item_keranjang_ids` (array ID dari `GET /api/keranjang`) | 201 (baru), 200 (ulangan dengan kunci sama), 409 (stok kurang, keranjang kosong, atau item terpilih berubah), 422 |
-| 13 | GET `/api/pesanan` | Riwayat pesanan, terbaru dulu | header `X-Pelanggan-Id` | 200 |
-| 14 | GET `/api/pesanan/{id}` | Rincian pesanan beserta item | path `id` | 200, 404 |
-| 15 | PATCH `/api/pesanan/{id}/status` | Ubah status pesanan | path `id`; body `status` | 200, 404, 409 (perpindahan tidak sah), 422 |
-| 16 | GET `/api/gambar/{filename}` | Berkas gambar produk dari penyimpanan server | path `filename` | 200, 404 |
+| 12 | POST `/api/checkout/estimasi` | Menghitung subtotal, ongkir, dan total untuk item terpilih tanpa mengubah data | header `X-Pelanggan-Id`; body: `kurir_id`, `item_keranjang_ids` | 200, 409 (item tidak lagi ada), 422 |
+| 13 | POST `/api/checkout` | Buat pesanan dari isi atau item terpilih di keranjang | header `X-Kunci-Idempoten` (wajib); body: `nama`, `alamat`, `kurir_id`, `metode_pembayaran_id`, opsional `item_keranjang_ids` (array ID dari `GET /api/keranjang`) | 201 (baru), 200 (ulangan dengan kunci sama), 409 (stok kurang, keranjang kosong, atau item terpilih berubah), 422 |
+| 14 | GET `/api/pesanan` | Riwayat pesanan, terbaru dulu | header `X-Pelanggan-Id` | 200 |
+| 15 | GET `/api/pesanan/{id}` | Rincian pesanan beserta item | path `id` | 200, 404 |
+| 16 | PATCH `/api/pesanan/{id}/status` | Ubah status pesanan | path `id`; body `status` | 200, 404, 409 (perpindahan tidak sah), 422 |
+| 17 | GET `/api/gambar/{filename}` | Berkas gambar produk dari penyimpanan server | path `filename` | 200, 404 |
 
 Soal mewajibkan 14 endpoint. Endpoint nomor 11 (`metode-pembayaran`) dan nomor 16 (`gambar`) adalah tambahan kelompok; keduanya ada di kode dan karena itu didokumentasikan di sini.
 
@@ -102,7 +103,7 @@ Kode status: **200**
       "nama": "Kaos Polos Oversize Cotton Combed",
       "harga": 89000,
       "kategori": "Pakaian",
-      "stok": 55,
+      "stok": 66,
       "tersedia": true,
       "deskripsi": "Kaos potongan oversize berbahan 100% katun combed 24s yang sejuk, tebal, dan menyerap keringat dengan baik.",
       "bahan": "Katun Combed 24s",
@@ -114,7 +115,7 @@ Kode status: **200**
 }
 ```
 
-`stok` = jumlah stok seluruh varian produk (15 + 8 + 0 + 12 + 20 = 55). `deskripsi` boleh `null`.
+`stok` = jumlah stok seluruh varian produk setelah pengurangan pesanan contoh (13 + 20 + 0 + 12 + 8 + 13 = 66). Item keranjang contoh tidak mengurangi stok. `deskripsi` boleh `null`.
 
 ### 3.2 Tambah ke keranjang — `POST /api/keranjang`
 
@@ -132,7 +133,7 @@ Kode status: **201**
 {
   "status": "sukses",
   "code": "201",
-  "message": "Item berhasil ditambahkan ke keranjang",
+  "message": "Item berhasil ditambahkan ke keranjang.",
   "data": {
     "id": 2,
     "produk_id": 1,
@@ -147,6 +148,8 @@ Kode status: **201**
   }
 }
 ```
+
+Menambahkan, mengubah, atau menghapus item keranjang tidak mengurangi atau mengembalikan stok. Server hanya menolak jumlah keranjang yang sudah melebihi stok tersedia; stok baru dikurangi saat checkout berhasil.
 
 Permintaan untuk varian yang stoknya nol (varian id 2 = ukuran M, warna Hitam), padahal varian lain pada produk yang sama masih tersedia:
 
@@ -209,6 +212,34 @@ Kode status: **200**
 `subtotal` dihitung server dari `harga_satuan` × `jumlah` setiap item (89.000 × 1 + 89.000 × 2 = 267.000).
 
 ### 3.4 Checkout — `POST /api/checkout`
+
+Sebelum melanjutkan pembayaran, aplikasi meminta estimasi dari server untuk item terpilih dan kurir yang dipilih. Endpoint ini hanya membaca data dan membalas `subtotal`, `ongkir`, serta `total`; Flutter tidak menjumlahkan nilai-nilai tersebut.
+
+Permintaan `POST /api/checkout/estimasi` dengan header `X-Pelanggan-Id: 1`:
+
+```json
+{
+  "kurir_id": 1,
+  "item_keranjang_ids": [3, 5]
+}
+```
+
+Contoh balasan `200`:
+
+```json
+{
+  "status": "sukses",
+  "code": "200",
+  "message": "Estimasi checkout berhasil dihitung",
+  "data": {
+    "subtotal": 267000,
+    "ongkir": 10000,
+    "total": 277000
+  }
+}
+```
+
+Angka di atas berasal dari data pesanan contoh; nilai aktual mengikuti harga terkini, item terpilih, dan tarif kurir.
 
 Permintaan, dengan header tambahan `X-Kunci-Idempoten: 5b1d3c1e-7a42-4a8e-9d11-0c6f2f6a9b10`:
 
@@ -342,9 +373,9 @@ Ketiga nilai disimpan pada kolom `subtotal`, `ongkir`, dan `total` tabel `pesana
 
 Penolakan dilakukan server di tiga titik:
 
-1. `KeranjangController::store` (POST `/api/keranjang`) — menolak produk yang tidak aktif (`tersedia = false`), varian yang stoknya nol, dan jumlah (termasuk yang sudah ada di keranjang) melebihi stok varian.
-2. `KeranjangController::update` (PUT `/api/keranjang/{id}`) — menolak jumlah baru yang melebihi stok varian.
-3. `CheckoutController::store` (POST `/api/checkout`) — memeriksa ulang stok setiap varian di dalam transaksi basis data setelah barisnya dikunci; jika kurang, transaksi dibatalkan penuh dan server membalas 409.
+1. `KeranjangController::store` (POST `/api/keranjang`) — menolak produk yang tidak aktif (`tersedia = false`), varian yang stoknya nol, dan jumlah gabungan item varian yang melebihi stok. Validasi ini tidak mengurangi stok.
+2. `KeranjangController::update` (PUT `/api/keranjang/{id}`) — menolak jumlah gabungan baru yang melebihi stok, tanpa mengubah stok.
+3. `CheckoutController::store` (POST `/api/checkout`) — mengunci baris varian, menghitung jumlah pesanan per varian, memeriksa stok, lalu mengurangi stok bersama penyimpanan pesanan dan pengosongan keranjang di dalam satu transaksi. Jika stok kurang, transaksi dibatalkan penuh dan server membalas 409.
 
 Pembatalan pesanan (`dibatalkan`) mengembalikan stok varian di dalam transaksi yang sama.
 
@@ -355,7 +386,7 @@ Pembatalan pesanan (`dibatalkan`) mengembalikan stok varian di dalam transaksi y
 1. Flutter membuat satu nilai acak (UUID v4) untuk percobaan checkout dan mengirimnya pada header `X-Kunci-Idempoten`. Nilai yang sama dipakai ulang bila pengguna menekan tombol coba lagi.
 2. Server menolak permintaan tanpa header ini dengan 422.
 3. Server mencari pesanan milik pelanggan tersebut dengan kunci yang sama. Jika ada, server membalas pesanan itu dengan kode 200 dan **tidak** membuat pesanan baru maupun mengurangi stok lagi.
-4. Jika belum ada, server menjalankan seluruh proses dalam satu transaksi basis data: mengunci item keranjang yang dipilih dan baris varian (`lockForUpdate`, diurutkan menurut id untuk mencegah deadlock), memeriksa stok, menyimpan pesanan beserta kunci idempoten, menyimpan detail pesanan, dan menghapus hanya item terpilih dari keranjang. Tanpa ID terpilih, API memproses seluruh isi keranjang. Kegagalan di langkah mana pun membatalkan seluruh perubahan.
+4. Jika belum ada, server menjalankan seluruh proses dalam satu transaksi basis data: mengunci item keranjang yang dipilih dan baris varian (`lockForUpdate`, diurutkan menurut id untuk mencegah deadlock), memeriksa dan mengurangi stok, menyimpan pesanan beserta kunci idempoten dan detailnya, lalu menghapus hanya item terpilih dari keranjang. Tanpa ID terpilih, API memproses seluruh isi keranjang. Kegagalan di langkah mana pun membatalkan seluruh perubahan. Menaruh barang di keranjang tidak mencadangkan atau mengurangi stok.
 5. Kunci unik `(pelanggan_id, kunci_idempoten)` pada tabel `pesanan` menjadi pagar terakhir di tingkat basis data.
 
 Skenario yang dilindungi: balasan 201 tidak sampai karena jaringan putus, lalu klien mengulang permintaan dengan kunci yang sama dan memperoleh pesanan yang sama.

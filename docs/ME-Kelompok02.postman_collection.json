@@ -373,6 +373,45 @@
       "name": "4. Checkout & Pesanan",
       "item": [
         {
+          "name": "12. POST Estimasi Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kurir_id\": 1,\n  \"item_keranjang_ids\": [1]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/checkout/estimasi",
+              "host": ["{{base_url}}"],
+              "path": ["checkout", "estimasi"]
+            },
+            "description": "POST /api/checkout/estimasi — 200, 409, 422. Mengembalikan subtotal, ongkir, dan total hasil hitung server tanpa mengubah keranjang."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 409, atau 422', function () { pm.expect([200, 409, 422]).to.include(pm.response.code); });",
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json().data;",
+                  "  pm.expect(data).to.have.property('subtotal');",
+                  "  pm.expect(data).to.have.property('ongkir');",
+                  "  pm.expect(data).to.have.property('total');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "12. POST Checkout (Idempoten)",
           "request": {
             "method": "POST",

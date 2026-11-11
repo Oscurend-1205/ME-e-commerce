@@ -60,6 +60,7 @@ Route::get('/kecamatan', [OngkirController::class, 'getKecamatan']);
 
 // 4. Endpoint Checkout (Transaksi atomik, lockForUpdate, idempotensi) — butuh login
 Route::middleware('auth.pelanggan')->group(function () {
+    Route::post('/checkout/estimasi', [CheckoutController::class, 'estimate']);
     Route::post('/checkout', [CheckoutController::class, 'store']);
     Route::post('/checkout/cod', [CheckoutController::class, 'storeCod']);
     Route::post('/pesanan/{id}/fallback-cod', [CheckoutController::class, 'fallbackCod']);
@@ -100,5 +101,4 @@ Route::get('/gambar/{filename}', function ($filename) {
         'Cache-Control' => 'public, max-age=86400',
     ]);
 })->where('filename', '.*');
-
 

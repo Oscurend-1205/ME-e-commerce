@@ -126,6 +126,15 @@ class PesananController extends Controller
             );
         }
 
+        // 3c. Aturan pembatalan pesanan oleh pengguna (termasuk pesanan COD):
+        // Pengguna hanya boleh membatalkan pesanan SEBELUM diproses oleh admin (status: 'menunggu_pembayaran' atau 'menunggu_verifikasi').
+        if ($statusBaru === 'dibatalkan' && !in_array($statusSaatIni, ['menunggu_pembayaran', 'menunggu_verifikasi'])) {
+            return $this->gagal(
+                "Pesanan tidak dapat dibatalkan karena saat ini sudah berstatus '{$statusSaatIni}'. Pembatalan hanya dapat dilakukan sebelum pesanan diverifikasi atau diproses oleh admin.",
+                409
+            );
+        }
+
         // 4. Validasi apakah status saat ini memiliki transisi sah
         $pilihanSah = $pesanan->pilihanStatusBerikutnya();
 

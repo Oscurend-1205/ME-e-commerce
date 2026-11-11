@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../enums.dart';
 import '../models/alamat.dart';
+import '../models/estimasi_checkout.dart';
 import '../models/keranjang.dart';
 import '../models/kurir.dart';
 import '../models/metode_pembayaran.dart';
+import '../services/layanan_api.dart';
 import '../theme.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/transisi_geser.dart';
@@ -39,7 +42,8 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
       id: '1',
       nama: 'Clarissa Adiwidjaja',
       telepon: '+62 812-3456-7890',
-      alamat: 'Apartemen Keraton At The Plaza, Lt. 28 Unit B, Jl. M.H. Thamrin No. 9, Menteng, Jakarta Pusat, DKI Jakarta 10350',
+      alamat:
+          'Apartemen Keraton At The Plaza, Lt. 28 Unit B, Jl. M.H. Thamrin No. 9, Menteng, Jakarta Pusat, DKI Jakarta 10350',
       label: 'Rumah',
       utama: true,
     ),
@@ -47,15 +51,37 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
       id: '2',
       nama: 'Clarissa Adiwidjaja (ME Atelier HQ)',
       telepon: '+62 812-9876-5432',
-      alamat: 'Sequis Center Lantai 12, Jl. Jend. Sudirman Kav 71, SCBD, Senayan, Kebayoran Baru, Jakarta Selatan 12190',
+      alamat:
+          'Sequis Center Lantai 12, Jl. Jend. Sudirman Kav 71, SCBD, Senayan, Kebayoran Baru, Jakarta Selatan 12190',
       label: 'Kantor',
     ),
   ];
 
   Alamat? _alamatTerpilih;
   Kurir? _kurirTerpilih;
+  EstimasiCheckout? _estimasiCheckout;
+  KeadaanMuat _keadaanEstimasi = KeadaanMuat.memuat;
+  JenisGalat _jenisGalatEstimasi = JenisGalat.tidakDiketahui;
+  String? _pesanGalatEstimasi;
+  int _nomorPermintaanEstimasi = 0;
   bool _kemasHadiah = false;
   final TextEditingController _kartuUcapanController = TextEditingController();
+
+  String get _pesanTampilanGalatEstimasi {
+    switch (_jenisGalatEstimasi) {
+      case JenisGalat.tidakAdaSambungan:
+        return 'Tidak dapat terhubung ke server. Periksa koneksi Anda.';
+      case JenisGalat.batasWaktu:
+        return 'Server tidak merespons. Silakan coba lagi.';
+      case JenisGalat.validasi422:
+      case JenisGalat.bentrok409:
+        return _pesanGalatEstimasi ?? 'Estimasi belum tersedia.';
+      case JenisGalat.server500:
+        return 'Terjadi kesalahan pada server. Silakan coba lagi.';
+      case JenisGalat.tidakDiketahui:
+        return 'Estimasi tidak dapat dimuat. Silakan coba lagi.';
+    }
+  }
 
   @override
   void initState() {
@@ -64,7 +90,10 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
       (a) => a.utama,
       orElse: () => _daftarAlamat.first,
     );
-    _kurirTerpilih = widget.daftarKurir.isNotEmpty ? widget.daftarKurir.first : null;
+    _kurirTerpilih = widget.daftarKurir.isNotEmpty
+        ? widget.daftarKurir.first
+        : null;
+    _muatEstimasiCheckout();
   }
 
   @override
@@ -73,8 +102,42 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
     super.dispose();
   }
 
-  int get _ongkir => _kurirTerpilih?.tarif ?? 0;
-  int get _total => widget.dataKeranjang.subtotal + _ongkir;
+  Future<void> _muatEstimasiCheckout() async {
+    final kurir = _kurirTerpilih;
+    if (kurir == null) {
+      setState(() {
+        _keadaanEstimasi = KeadaanMuat.kosong;
+        _estimasiCheckout = null;
+        _pesanGalatEstimasi = null;
+      });
+      return;
+    }
+
+    final nomorPermintaan = ++_nomorPermintaanEstimasi;
+    setState(() {
+      _keadaanEstimasi = KeadaanMuat.memuat;
+      _pesanGalatEstimasi = null;
+      _estimasiCheckout = null;
+    });
+
+    final respon = await LayananApi.estimasiCheckout(
+      kurirId: kurir.id,
+      itemKeranjangIds: widget.selectedItemIds,
+    );
+
+    if (!mounted || nomorPermintaan != _nomorPermintaanEstimasi) return;
+
+    setState(() {
+      if (respon.berhasil && respon.data != null) {
+        _estimasiCheckout = respon.data;
+        _keadaanEstimasi = KeadaanMuat.berhasil;
+      } else {
+        _jenisGalatEstimasi = tentukanJenisGalat(respon.code);
+        _pesanGalatEstimasi = respon.message;
+        _keadaanEstimasi = KeadaanMuat.galat;
+      }
+    });
+  }
 
   Future<void> _tambahAlamat() async {
     final alamatBaru = await Navigator.push<Alamat>(
@@ -117,11 +180,18 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
       return;
     }
 
+    final estimasi = _estimasiCheckout;
+    if (estimasi == null) {
+      _muatEstimasiCheckout();
+      return;
+    }
+
     Navigator.push(
       context,
       ruteGeser(
         HalamanCheckoutAlurTiga(
           dataKeranjang: widget.dataKeranjang,
+          estimasiCheckout: estimasi,
           selectedItemIds: widget.selectedItemIds,
           kurirTerpilih: _kurirTerpilih,
           alamatTerpilih: _alamatTerpilih!,
@@ -289,7 +359,9 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
-        color: terpilih ? TemaAplikasi.surfaceLight : TemaAplikasi.surfaceContainerLow,
+        color: terpilih
+            ? TemaAplikasi.surfaceLight
+            : TemaAplikasi.surfaceContainerLow,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -299,9 +371,13 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
               height: 16,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: terpilih ? TemaAplikasi.primary : TemaAplikasi.surfaceWhite,
+                color: terpilih
+                    ? TemaAplikasi.primary
+                    : TemaAplikasi.surfaceWhite,
                 border: Border.all(
-                  color: terpilih ? TemaAplikasi.primary : TemaAplikasi.surfaceContainerHigh,
+                  color: terpilih
+                      ? TemaAplikasi.primary
+                      : TemaAplikasi.surfaceContainerHigh,
                   width: 2,
                 ),
               ),
@@ -452,11 +528,14 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
         setState(() {
           _kurirTerpilih = kurir;
         });
+        _muatEstimasiCheckout();
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
-        color: terpilih ? TemaAplikasi.surfaceLight : TemaAplikasi.surfaceContainerLow,
+        color: terpilih
+            ? TemaAplikasi.surfaceLight
+            : TemaAplikasi.surfaceContainerLow,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -466,9 +545,13 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
               height: 16,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: terpilih ? TemaAplikasi.primary : TemaAplikasi.surfaceWhite,
+                color: terpilih
+                    ? TemaAplikasi.primary
+                    : TemaAplikasi.surfaceWhite,
                 border: Border.all(
-                  color: terpilih ? TemaAplikasi.primary : TemaAplikasi.surfaceContainerHigh,
+                  color: terpilih
+                      ? TemaAplikasi.primary
+                      : TemaAplikasi.surfaceContainerHigh,
                   width: 2,
                 ),
               ),
@@ -616,10 +699,7 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
           const SizedBox(height: 4),
           const Text(
             'Kotak pita sutra hitam ME Signature dan kertas tisu atelier (Bebas Biaya)',
-            style: TextStyle(
-              fontSize: 11,
-              color: TemaAplikasi.secondary,
-            ),
+            style: TextStyle(fontSize: 11, color: TemaAplikasi.secondary),
           ),
           if (_kemasHadiah) ...[
             const SizedBox(height: 12),
@@ -636,18 +716,19 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
                 fillColor: TemaAplikasi.surfaceLight,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(2),
-                  borderSide: const BorderSide(color: TemaAplikasi.surfaceContainerHigh),
+                  borderSide: const BorderSide(
+                    color: TemaAplikasi.surfaceContainerHigh,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(2),
-                  borderSide: const BorderSide(color: TemaAplikasi.surfaceContainerHigh),
+                  borderSide: const BorderSide(
+                    color: TemaAplikasi.surfaceContainerHigh,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.all(12),
               ),
-              style: const TextStyle(
-                fontSize: 12,
-                color: TemaAplikasi.primary,
-              ),
+              style: const TextStyle(fontSize: 12, color: TemaAplikasi.primary),
             ),
           ],
         ],
@@ -708,34 +789,70 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          formatRupiah(_total),
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: -0.3,
-                            color: TemaAplikasi.primary,
-                            height: 1.2,
-                          ),
+                    if (_keadaanEstimasi == KeadaanMuat.memuat)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         ),
-                        if (_ongkir == 0) ...[
-                          const SizedBox(width: 8),
-                          const Text(
-                            '(BEBAS ONGKIR)',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
+                      )
+                    else if (_keadaanEstimasi == KeadaanMuat.berhasil &&
+                        _estimasiCheckout != null)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            formatRupiah(_estimasiCheckout!.total),
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: -0.3,
                               color: TemaAplikasi.primary,
-                              letterSpacing: 1.0,
+                              height: 1.2,
                             ),
                           ),
+                          if (_estimasiCheckout!.ongkir == 0) ...[
+                            const SizedBox(width: 8),
+                            const Text(
+                              '(BEBAS ONGKIR)',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: TemaAplikasi.primary,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
+                      )
+                    else if (_keadaanEstimasi == KeadaanMuat.kosong)
+                      const Text(
+                        'Pilih kurir untuk melihat estimasi.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: TemaAplikasi.mutedGray,
+                        ),
+                      )
+                    else
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _pesanTampilanGalatEstimasi,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: TemaAplikasi.errorColor,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: _muatEstimasiCheckout,
+                            child: const Text('Coba hitung ulang'),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
                 Column(
@@ -751,7 +868,9 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _kurirTerpilih?.tarif == 0 ? 'Besok Sore (Concierge)' : '2-3 Hari Kerja',
+                      _kurirTerpilih?.tarif == 0
+                          ? 'Besok Sore (Concierge)'
+                          : '2-3 Hari Kerja',
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -767,7 +886,11 @@ class _HalamanCheckoutAlurDuaState extends State<HalamanCheckoutAlurDua> {
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: _lanjutKePembayaran,
+                onPressed:
+                    _keadaanEstimasi != KeadaanMuat.berhasil ||
+                        _estimasiCheckout == null
+                    ? null
+                    : _lanjutKePembayaran,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: TemaAplikasi.primary,
                   foregroundColor: TemaAplikasi.onPrimary,

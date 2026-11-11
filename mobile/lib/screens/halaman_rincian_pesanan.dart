@@ -10,7 +10,9 @@ import '../widgets/dialog_konfirmasi.dart';
 import '../widgets/format_rupiah.dart';
 import '../widgets/foto_dummy.dart';
 import '../widgets/widget_keadaan.dart';
+import 'halaman_konfirmasi_cod.dart';
 import 'halaman_login.dart';
+import 'halaman_pembayaran.dart';
 
 class HalamanRincianPesanan extends StatefulWidget {
   final int pesananId;
@@ -162,10 +164,326 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
     }
   }
 
+  void _bukaPembayaranMidtrans(Pesanan pesanan) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HalamanPembayaran(
+          pesananId: pesanan.id,
+          snapToken: pesanan.snapToken ?? '',
+          redirectUrl: pesanan.redirectUrl,
+          qrUrl: pesanan.qrUrl,
+          qrString: pesanan.qrString,
+          nomorPesanan: pesanan.nomorPesanan,
+          total: pesanan.total,
+        ),
+      ),
+    ).then((_) => _muatRincianPesanan());
+  }
+
+  Future<void> _tampilkanDialogUbahMetode(Pesanan pesanan) async {
+    final total = pesanan.total;
+    if (total > 2500000) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'COD hanya tersedia untuk pesanan maksimal ${formatRupiah(2500000)}.',
+          ),
+          backgroundColor: TemaAplikasi.errorColor,
+        ),
+      );
+      return;
+    }
+
+    final TextEditingController alasanController = TextEditingController();
+    String? alasanTerpilih;
+
+    final daftarAlasan = [
+      'Saldo e-wallet / rekening tidak mencukupi',
+      'Midtrans mengalami gangguan teknis',
+      'Lebih nyaman membayar saat barang tiba',
+      'Tidak memiliki metode pembayaran online',
+      'Alasan lainnya (tulis di bawah)',
+    ];
+
+    final hasil = await showModalBottomSheet<Map<String, String>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: TemaAplikasi.surfaceWhite,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: TemaAplikasi.surfaceContainer,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Icon(
+                            Icons.swap_horiz,
+                            color: TemaAplikasi.primary,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'UBAH METODE PEMBAYARAN',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.2,
+                                  color: TemaAplikasi.primary,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Ganti ke Bayar di Tempat (COD)',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: TemaAplikasi.secondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close, size: 20),
+                          color: TemaAplikasi.secondary,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF9F7F5),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: const Color(0xFFE2DDD8)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.info_outline,
+                              size: 16, color: TemaAplikasi.primary),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Anda akan membayar ${formatRupiah(total)} tunai kepada kurir saat pesanan sampai.',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: TemaAplikasi.secondary,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'PILIH ALASAN PERUBAHAN',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.5,
+                        color: TemaAplikasi.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...daftarAlasan.map((alasan) {
+                      final terpilih = alasanTerpilih == alasan;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: InkWell(
+                          onTap: () {
+                            setModalState(() => alasanTerpilih = alasan);
+                          },
+                          borderRadius: BorderRadius.circular(4),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: terpilih
+                                  ? TemaAplikasi.primary.withValues(alpha: 0.05)
+                                  : TemaAplikasi.surfaceWhite,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: terpilih
+                                    ? TemaAplikasi.primary
+                                    : TemaAplikasi.borderGray,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  terpilih
+                                      ? Icons.radio_button_checked
+                                      : Icons.radio_button_off,
+                                  size: 18,
+                                  color: terpilih
+                                      ? TemaAplikasi.primary
+                                      : TemaAplikasi.secondary,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    alasan,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: terpilih
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                      color: terpilih
+                                          ? TemaAplikasi.primary
+                                          : TemaAplikasi.secondary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                    if (alasanTerpilih != null &&
+                        alasanTerpilih!.contains('lainnya')) ...[
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: alasanController,
+                        maxLines: 2,
+                        decoration: InputDecoration(
+                          hintText: 'Tulis alasan Anda...',
+                          hintStyle: const TextStyle(
+                            fontSize: 12,
+                            color: TemaAplikasi.mutedGray,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4),
+                            borderSide:
+                                const BorderSide(color: TemaAplikasi.borderGray),
+                          ),
+                          contentPadding: const EdgeInsets.all(12),
+                        ),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: alasanTerpilih == null
+                            ? null
+                            : () {
+                                final alasanFinal =
+                                    alasanTerpilih!.contains('lainnya') &&
+                                            alasanController.text.isNotEmpty
+                                        ? alasanController.text
+                                        : alasanTerpilih!;
+                                Navigator.pop(
+                                    ctx, {'alasan': alasanFinal});
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: TemaAplikasi.primary,
+                          foregroundColor: TemaAplikasi.onPrimary,
+                          disabledBackgroundColor: TemaAplikasi.borderGray,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        child: const Text(
+                          'KONFIRMASI GANTI KE COD',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (hasil == null || !mounted) return;
+
+    setState(() => _sedangMemperbaruiStatus = true);
+
+    try {
+      final respon = await LayananApi.fallbackCod(
+        pesananId: pesanan.id,
+        alasan: hasil['alasan'] ?? 'Pengguna memilih COD dari rincian pesanan',
+      );
+
+      if (!mounted) return;
+      setState(() => _sedangMemperbaruiStatus = false);
+
+      if (respon.berhasil) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HalamanKonfirmasiCod(
+              pesananId: pesanan.id,
+              dataPesananAwal: respon.data as Map<String, dynamic>?,
+            ),
+          ),
+        ).then((_) => _muatRincianPesanan());
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(respon.message),
+            backgroundColor: TemaAplikasi.errorColor,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _sedangMemperbaruiStatus = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal mengganti ke COD: $e'),
+            backgroundColor: TemaAplikasi.errorColor,
+          ),
+        );
+      }
+    }
+  }
+
   Color _warnaStatus(String status) {
     switch (status.toLowerCase()) {
       case 'menunggu_pembayaran':
         return const Color(0xFFC77700);
+      case 'menunggu_verifikasi':
+        return const Color(0xFFB5651D);
       case 'menunggu_konfirmasi':
         return const Color(0xFF1E6091);
       case 'dibayar':
@@ -187,6 +505,8 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
     switch (status.toLowerCase()) {
       case 'menunggu_pembayaran':
         return 'MENUNGGU PEMBAYARAN';
+      case 'menunggu_verifikasi':
+        return 'MENUNGGU VERIFIKASI COD';
       case 'menunggu_konfirmasi':
         return 'MENUNGGU KONFIRMASI';
       case 'dibayar':
@@ -451,48 +771,63 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
                           ],
                         ),
                       ),
-                    ] else if (pesanan.status == 'menunggu_pembayaran' && pesanan.total <= 2500000) ...[
-                      const SizedBox(height: 8),
-                      OutlinedButton.icon(
-                        onPressed: () async {
-                          final bool? konfirmasi = await showDialog<bool>(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              title: const Text('Ganti ke Tunai di Tempat (COD)?'),
-                              content: const Text(
-                                'Pesanan ini akan dialihkan ke metode Cash on Delivery (COD). Anda dapat membayar tunai kepada kurir saat barang tiba.',
+                    ] else if (pesanan.status == 'menunggu_pembayaran') ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: TemaAplikasi.surfaceBright,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: TemaAplikasi.borderGray),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () => _bukaPembayaranMidtrans(pesanan),
+                              icon: const Icon(Icons.payment, size: 16),
+                              label: const Text(
+                                'BAYAR SEKARANG (MIDTRANS)',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 1.0,
+                                ),
                               ),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('BATAL')),
-                                ElevatedButton(
-                                  onPressed: () => Navigator.pop(ctx, true),
-                                  style: ElevatedButton.styleFrom(backgroundColor: TemaAplikasi.primary),
-                                  child: const Text('GANTI KE COD'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: TemaAplikasi.primary,
+                                foregroundColor: TemaAplikasi.onPrimary,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(2),
                                 ),
-                              ],
+                              ),
                             ),
-                          );
-                          if (konfirmasi == true && mounted) {
-                            final respon = await LayananApi.fallbackCod(
-                              pesananId: pesanan.id,
-                              alasan: 'Pengalihan manual ke COD dari halaman rincian pesanan',
-                            );
-                            if (respon.berhasil && mounted) {
-                              _muatRincianPesanan();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Pesanan berhasil dialihkan ke metode Tunai di Tempat (COD).'),
-                                  backgroundColor: TemaAplikasi.primary,
+                            if (pesanan.total <= 2500000) ...[
+                              const SizedBox(height: 8),
+                              OutlinedButton.icon(
+                                onPressed: () => _tampilkanDialogUbahMetode(pesanan),
+                                icon: const Icon(Icons.local_shipping_outlined, size: 15),
+                                label: const Text(
+                                  'GANTI KE BAYAR DI TEMPAT (COD)',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
-                              );
-                            }
-                          }
-                        },
-                        icon: const Icon(Icons.local_shipping_outlined, size: 14),
-                        label: const Text('GANTI KE BAYAR DI TEMPAT (COD)', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: TemaAplikasi.primary,
-                          side: const BorderSide(color: TemaAplikasi.primary),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: TemaAplikasi.primary,
+                                  side: const BorderSide(color: TemaAplikasi.borderGray),
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     ],
@@ -703,32 +1038,143 @@ class _HalamanRincianPesananState extends State<HalamanRincianPesanan> {
 
     final status = pesanan.status.toLowerCase();
 
+    // Pesanan menunggu pembayaran online — tombol trigger Midtrans & batalkan
     if (status == 'menunggu_pembayaran') {
-      return SizedBox(
-        width: double.infinity,
-        height: 48,
-        child: OutlinedButton(
-          onPressed: () => _ubahStatus(
-            'dibatalkan',
-            dialogPesan:
-                'Apakah Anda yakin ingin membatalkan pesanan ini? Stok varian akan otomatis dikembalikan.',
+      return Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: () => _bukaPembayaranMidtrans(pesanan),
+              icon: const Icon(Icons.payment, size: 18),
+              label: const Text(
+                'BAYAR SEKARANG (MIDTRANS)',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: TemaAplikasi.primary,
+                foregroundColor: TemaAplikasi.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                elevation: 0,
+              ),
+            ),
           ),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: TemaAplikasi.errorColor,
-            side: const BorderSide(color: TemaAplikasi.errorColor),
-            shape: RoundedRectangleBorder(
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 46,
+            child: OutlinedButton.icon(
+              onPressed: () => _ubahStatus(
+                'dibatalkan',
+                dialogPesan:
+                    'Apakah Anda yakin ingin membatalkan pesanan ini? Stok varian akan otomatis dikembalikan ke katalog.',
+              ),
+              icon: const Icon(Icons.cancel_outlined, size: 16),
+              label: const Text(
+                'BATALKAN PESANAN',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: TemaAplikasi.errorColor,
+                side: const BorderSide(color: TemaAplikasi.errorColor),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Pesanan COD menunggu verifikasi admin — bisa batalkan sebelum diproses
+    if (status == 'menunggu_verifikasi') {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF8F0),
+              border: Border.all(color: const Color(0xFFE2DDD8)),
               borderRadius: BorderRadius.circular(2),
             ),
-          ),
-          child: const Text(
-            'BATALKAN PESANAN',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 2.0,
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.hourglass_top,
+                  size: 22,
+                  color: Color(0xFFB5651D),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'MENUNGGU VERIFIKASI ADMIN (COD)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.2,
+                          color: Color(0xFFB5651D),
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        'Pesanan COD Anda sedang ditinjau oleh admin. Anda masih bisa membatalkan sebelum pesanan diproses.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: TemaAplikasi.secondary,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: OutlinedButton(
+              onPressed: () => _ubahStatus(
+                'dibatalkan',
+                dialogPesan:
+                    'Apakah Anda yakin ingin membatalkan pesanan COD ini? Stok varian akan otomatis dikembalikan ke katalog.',
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: TemaAplikasi.errorColor,
+                side: const BorderSide(color: TemaAplikasi.errorColor),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              child: const Text(
+                'BATALKAN PESANAN COD',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2.0,
+                ),
+              ),
+            ),
+          ),
+        ],
       );
     }
 

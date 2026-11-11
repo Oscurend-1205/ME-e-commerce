@@ -155,8 +155,12 @@ class Pesanan extends Model
                     ? "https://app.midtrans.com/snap/v4/redirection/{$this->snap_token}"
                     : "https://app.sandbox.midtrans.com/snap/v4/redirection/{$this->snap_token}")
                 : null,
-            'qr_url' => (isset($this->metodePembayaran) && str_contains(strtolower($this->metodePembayaran->kode ?? ''), 'qris') && !empty($this->snap_token))
-                ? "https://api.sandbox.midtrans.com/v2/qris/{$this->snap_token}/qr-code"
+            'qr_url' => !empty($this->snap_token)
+                ? "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=" . urlencode(
+                    config('services.midtrans.is_production', false)
+                        ? "https://app.midtrans.com/snap/v4/redirection/{$this->snap_token}"
+                        : "https://app.sandbox.midtrans.com/snap/v4/redirection/{$this->snap_token}"
+                )
                 : null,
             'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
             'detail' => $this->detail->map(function ($d) {

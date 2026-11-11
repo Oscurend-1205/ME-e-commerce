@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'constants.dart';
 import 'screens/halaman_akun.dart';
 import 'screens/halaman_katalog.dart';
 import 'screens/halaman_riwayat_pesanan.dart';
@@ -8,6 +9,7 @@ import 'theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Konstan.inisialisasiJaringanOtomatis();
   // Pulihkan sesi login tersimpan agar keranjang & pesanan tetap utuh
   // setelah aplikasi ditutup dan dibuka kembali.
   await StatePengguna.muatSesiTersimpan();
