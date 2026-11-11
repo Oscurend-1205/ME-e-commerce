@@ -69,7 +69,21 @@ Sumber: `backend/routes/api.php`. Seluruh respons memakai pembungkus seragam:
 | 14 | GET `/api/pesanan` | Riwayat pesanan, terbaru dulu | header `X-Pelanggan-Id` | 200 |
 | 15 | GET `/api/pesanan/{id}` | Rincian pesanan beserta item | path `id` | 200, 404 |
 | 16 | PATCH `/api/pesanan/{id}/status` | Ubah status pesanan | path `id`; body `status` | 200, 404, 409 (perpindahan tidak sah), 422 |
-| 17 | GET `/api/gambar/{filename}` | Berkas gambar produk dari penyimpanan server | path `filename` | 200, 404 |
+| 17 | POST `/api/pesanan/{id}/fallback-cod` | Pengalihan pesanan online gagal/batal ke Bayar di Tempat (COD) | path `id`; body: opsional `alasan` | 200, 404, 409, 422 |
+| 18 | GET `/api/gambar/{filename}` | Berkas gambar produk dari penyimpanan server | path `filename` | 200, 404 |
+| 19 | POST `/api/auth/register` | Pendaftaran akun pelanggan baru | body: `nama`, `email`, `password`, opsional `no_telp` | 201, 422 |
+| 20 | POST `/api/auth/login` | Masuk akun dan memperoleh token autentikasi | body: `email`, `password` | 200, 401, 422 |
+| 21 | GET `/api/auth/me` | Profil pelanggan yang sedang terautentikasi | header `Authorization: Bearer <token>` | 200, 401 |
+| 22 | POST `/api/auth/logout` | Keluar dari sesi dan mencabut token aktif | header `Authorization: Bearer <token>` | 200, 401 |
+| 23 | GET `/api/pengaturan-toko` | Informasi asal pengiriman dan konfigurasi toko | tidak ada | 200 |
+| 24 | POST `/api/ongkir` | Cek ongkir multi-kurir real-time RajaOngkir | body: `origin`, `destination`, `weight`, `courier` | 200, 422, 500 |
+| 25 | GET `/api/kota` | Pencarian master wilayah kota/kabupaten | query: `search` (opsional) | 200 |
+| 26 | GET `/api/provinsi` | Daftar seluruh provinsi Indonesia | tidak ada | 200 |
+| 27 | GET `/api/kecamatan` | Daftar kecamatan berdasarkan ID kota | query: `city_id` (wajib) | 200, 422 |
+| 28 | POST `/api/payment/callback` | Webhook notifikasi transaksi resmi Midtrans | body payload JSON dari Midtrans | 200, 400 |
+| 29 | GET `/api/payment/status/{orderId}` | Cek status pembayaran ke gateway & basis data | path `orderId` | 200, 404 |
+| 30 | GET `/api/payment/status-midtrans` | Diagnostik konektivitas Midtrans Gateway | tidak ada | 200 |
+| 31 | GET `/api/hero-banners` | Daftar spanduk promo aktif karosel beranda | tidak ada | 200 |
 
 Soal mewajibkan 14 endpoint. Endpoint nomor 11 (`metode-pembayaran`) dan nomor 16 (`gambar`) adalah tambahan kelompok; keduanya ada di kode dan karena itu didokumentasikan di sini.
 
