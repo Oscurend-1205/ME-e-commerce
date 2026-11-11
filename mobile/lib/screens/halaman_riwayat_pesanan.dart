@@ -15,7 +15,6 @@ import 'halaman_bukti_transaksi.dart';
 import 'halaman_keranjang.dart';
 import 'halaman_login.dart';
 import 'halaman_pembayaran.dart';
-import 'halaman_pembayaran_qris.dart';
 import 'halaman_rincian_pesanan.dart';
 
 /// Halaman Riwayat Pesanan — Desain Editorial Mewah mengikuti cek-daftar-pesanan.html
@@ -206,41 +205,21 @@ class _HalamanRiwayatPesananState extends State<HalamanRiwayatPesanan> {
   }
 
   void _bayarSekarang(Pesanan pesanan) {
-    final metode = (pesanan.metodePembayaran ?? '').toLowerCase();
-    final isQris = metode.contains('qris');
-
-    // Jika memiliki snapToken Midtrans, selalu buka pembayaran resmi Midtrans Snap
-    if (pesanan.snapToken != null && pesanan.snapToken!.isNotEmpty) {
-      Navigator.push(
-        context,
-        ruteGeser(
-          HalamanPembayaran(
-            pesananId: pesanan.id,
-            snapToken: pesanan.snapToken!,
-            redirectUrl: pesanan.redirectUrl,
-            qrUrl: pesanan.qrUrl,
-            qrString: pesanan.qrString,
-            nomorPesanan: pesanan.nomorPesanan,
-            total: pesanan.total,
-          ),
+    // Selalu buka halaman pembayaran resmi Midtrans Snap
+    Navigator.push(
+      context,
+      ruteGeser(
+        HalamanPembayaran(
+          pesananId: pesanan.id,
+          snapToken: pesanan.snapToken ?? '',
+          redirectUrl: pesanan.redirectUrl,
+          qrUrl: pesanan.qrUrl,
+          qrString: pesanan.qrString,
+          nomorPesanan: pesanan.nomorPesanan,
+          total: pesanan.total,
         ),
-      ).then((_) => _muatPesanan());
-    } else if (isQris) {
-      Navigator.push(
-        context,
-        ruteGeser(
-          HalamanPembayaranQris(
-            pesananId: pesanan.id,
-            nomorPesanan: pesanan.nomorPesanan,
-            total: pesanan.total,
-            qrUrl: pesanan.qrUrl,
-            qrString: pesanan.qrString,
-          ),
-        ),
-      ).then((_) => _muatPesanan());
-    } else {
-      _bukaRincian(pesanan);
-    }
+      ),
+    ).then((_) => _muatPesanan());
   }
 
   Future<void> _beliLagi(Pesanan pesanan) async {

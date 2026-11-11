@@ -705,11 +705,17 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        // Sinkronkan stok katalog sebelum membentuk keranjang dan pesanan contoh,
+        // agar pengurangan stok pesanan contoh tetap tercermin di database.
+        if (file_exists(database_path('data/katalog.json'))) {
+            Artisan::call('katalog:import');
+        }
+
         // 6. Data Contoh Keranjang Awal untuk Pelanggan 1
         Keranjang::create([
             'pelanggan_id' => $pelanggan->id,
             'produk_id' => $p1->id,
-            'varian_id' => $vP1LHitam->id, // Varian L Hitam yang ada stoknya
+            'varian_id' => $vP1LHitam->id, // Item keranjang tidak mengurangi stok.
             'jumlah' => 1,
         ]);
 
@@ -728,17 +734,19 @@ class DatabaseSeeder extends Seeder
             'status' => 'menunggu_pembayaran',
             'kunci_idempoten' => 'seed-idempoten-key-001',
         ]);
+        $varianPesanan1 = $p2->varian()->firstOrFail();
         DetailPesanan::create([
             'pesanan_id' => $pesanan1->id,
             'produk_id' => $p2->id,
-            'varian_id' => $p2->varian()->first()->id,
+            'varian_id' => $varianPesanan1->id,
             'nama_produk' => $p2->nama,
-            'ukuran' => 'M',
-            'warna' => 'Merah Navy',
+            'ukuran' => $varianPesanan1->ukuran,
+            'warna' => $varianPesanan1->warna,
             'harga_satuan' => 189000,
             'jumlah' => 1,
             'subtotal' => 189000,
         ]);
+        $varianPesanan1->decrement('stok', 1);
 
         // Pesanan 2: Dibayar
         $pesanan2 = Pesanan::create([
@@ -754,17 +762,19 @@ class DatabaseSeeder extends Seeder
             'status' => 'dibayar',
             'kunci_idempoten' => 'seed-idempoten-key-002',
         ]);
+        $varianPesanan2 = $p3->varian()->firstOrFail();
         DetailPesanan::create([
             'pesanan_id' => $pesanan2->id,
             'produk_id' => $p3->id,
-            'varian_id' => $p3->varian()->first()->id,
+            'varian_id' => $varianPesanan2->id,
             'nama_produk' => $p3->nama,
-            'ukuran' => 'M',
-            'warna' => 'Abu-abu Misty',
+            'ukuran' => $varianPesanan2->ukuran,
+            'warna' => $varianPesanan2->warna,
             'harga_satuan' => 279000,
             'jumlah' => 1,
             'subtotal' => 279000,
         ]);
+        $varianPesanan2->decrement('stok', 1);
 
         // Pesanan 3: Selesai
         $pesanan3 = Pesanan::create([
@@ -791,10 +801,7 @@ class DatabaseSeeder extends Seeder
             'jumlah' => 2,
             'subtotal' => 178000,
         ]);
+        $vP1LHitam->decrement('stok', 2);
 
-        // Sinkronisasi data katalog & foto dari snapshot tim jika ada
-        if (file_exists(database_path('data/katalog.json'))) {
-            Artisan::call('katalog:import');
-        }
     }
 }

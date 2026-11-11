@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 import '../constants.dart';
 import '../models/api_response.dart';
+import '../models/estimasi_checkout.dart';
 import 'state_pengguna.dart';
 
 class LayananApi {
@@ -76,10 +77,7 @@ class LayananApi {
     try {
       final uri = Uri.parse('${Konstan.baseUrl}/auth/login');
 
-      final body = {
-        'email': email,
-        'password': password,
-      };
+      final body = {'email': email, 'password': password};
 
       final respons = await _client
           .post(uri, headers: _headers(), body: jsonEncode(body))
@@ -338,6 +336,66 @@ class LayananApi {
   //  CHECKOUT
   // =====================================================================
 
+  /// POST /api/checkout/estimasi — Ambil ringkasan tagihan hasil hitung server
+  static Future<ApiResponse<EstimasiCheckout>> estimasiCheckout({
+    required int kurirId,
+    required List<int> itemKeranjangIds,
+  }) async {
+    try {
+      final uri = Uri.parse('${Konstan.baseUrl}/checkout/estimasi');
+      final respons = await _client
+          .post(
+            uri,
+            headers: _headers(),
+            body: jsonEncode({
+              'kurir_id': kurirId,
+              'item_keranjang_ids': itemKeranjangIds,
+            }),
+          )
+          .timeout(Konstan.batasWaktu);
+
+      final response = _prosesRespons(respons);
+      if (!response.berhasil) {
+        return ApiResponse<EstimasiCheckout>(
+          status: response.status,
+          code: response.code,
+          message: response.message,
+          errors: response.errors,
+        );
+      }
+
+      if (response.data is! Map<String, dynamic>) {
+        return ApiResponse<EstimasiCheckout>(
+          status: 'gagal',
+          code: '500',
+          message: 'Respons estimasi tidak valid dari server.',
+        );
+      }
+
+      return ApiResponse<EstimasiCheckout>(
+        status: response.status,
+        code: response.code,
+        message: response.message,
+        data: EstimasiCheckout.fromJson(response.data as Map<String, dynamic>),
+        errors: response.errors,
+      );
+    } on FormatException {
+      return ApiResponse<EstimasiCheckout>(
+        status: 'gagal',
+        code: '500',
+        message: 'Respons estimasi tidak valid dari server.',
+      );
+    } catch (e) {
+      final response = _tanganiGalat(e);
+      return ApiResponse<EstimasiCheckout>(
+        status: response.status,
+        code: response.code,
+        message: response.message,
+        errors: response.errors,
+      );
+    }
+  }
+
   /// POST /api/checkout — Proses checkout
   static Future<ApiResponse> checkout({
     required String nama,
@@ -410,11 +468,11 @@ class LayananApi {
     String? alasan,
   }) async {
     try {
-      final uri = Uri.parse('${Konstan.baseUrl}/pesanan/$pesananId/fallback-cod');
+      final uri = Uri.parse(
+        '${Konstan.baseUrl}/pesanan/$pesananId/fallback-cod',
+      );
 
-      final body = {
-        if (alasan != null && alasan.isNotEmpty) 'alasan': alasan,
-      };
+      final body = {if (alasan != null && alasan.isNotEmpty) 'alasan': alasan};
 
       final respons = await _client
           .post(uri, headers: _headers(), body: jsonEncode(body))
@@ -514,9 +572,9 @@ class LayananApi {
   /// GET /api/kota — Ambil daftar kota untuk autocomplete
   static Future<ApiResponse> ambilKota({String? search}) async {
     try {
-      final uri = Uri.parse('${Konstan.baseUrl}/kota').replace(
-        queryParameters: search != null ? {'search': search} : null,
-      );
+      final uri = Uri.parse(
+        '${Konstan.baseUrl}/kota',
+      ).replace(queryParameters: search != null ? {'search': search} : null);
 
       final respons = await _client
           .get(uri, headers: _headers())
@@ -546,9 +604,9 @@ class LayananApi {
   /// GET /api/kecamatan — Ambil daftar kecamatan berdasarkan kota
   static Future<ApiResponse> ambilKecamatan(String cityId) async {
     try {
-      final uri = Uri.parse('${Konstan.baseUrl}/kecamatan').replace(
-        queryParameters: {'city_id': cityId},
-      );
+      final uri = Uri.parse(
+        '${Konstan.baseUrl}/kecamatan',
+      ).replace(queryParameters: {'city_id': cityId});
 
       final respons = await _client
           .get(uri, headers: _headers())

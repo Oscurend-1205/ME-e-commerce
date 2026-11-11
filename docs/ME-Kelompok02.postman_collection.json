@@ -1,962 +1,1379 @@
 {
-  "info": {
-    "_postman_id": "a1b2c3d4-0000-4000-8000-6b1c2f3d4e5f",
-    "name": "PAPB-UTS Kelompok 02 - ME (Toko Online Pakaian & Aksesori)",
-    "description": "Koleksi untuk seluruh 26 route API yang didefinisikan di backend/routes/api.php, termasuk autentikasi, ongkir, pembayaran, dan gambar.\n\nCara pakai:\n1. Jalankan backend: php artisan serve --host=0.0.0.0 --port=8000\n2. Sesuaikan variabel base_url bila perlu (default: http://127.0.0.1:8000/api)\n3. Request checkout/pesanan menerima X-Pelanggan-Id atau Bearer token. Login menyimpan token pada variabel token.\n\nCatatan: ongkir memerlukan konfigurasi RajaOngkir; callback pembayaran harus berasal dari Midtrans dengan signature sah. Variabel kunci_idempoten dipakai ulang untuk menguji idempotent replay; ganti nilainya untuk membuat pesanan baru.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "variable": [
-    { "key": "base_url", "value": "http://127.0.0.1:8000/api" },
-    { "key": "pelanggan_id", "value": "1" },
-    { "key": "produk_id", "value": "1" },
-    { "key": "varian_id", "value": "1" },
-    { "key": "keranjang_id", "value": "1" },
-    { "key": "pesanan_id", "value": "1" },
-    { "key": "kunci_idempoten", "value": "11111111-2222-4333-8444-555555555555" },
-    { "key": "token", "value": "" },
-    { "key": "order_id", "value": "" },
-    { "key": "gambar", "value": "1.jpg" }
-  ],
-  "item": [
-    {
-      "name": "1. Produk",
-      "item": [
-        {
-          "name": "01. GET Daftar Produk (filter & cari)",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/produk?kategori=Pakaian&cari=kaos",
-              "host": ["{{base_url}}"],
-              "path": ["produk"],
-              "query": [
-                { "key": "kategori", "value": "Pakaian", "description": "Opsional. Filter nama kategori." },
-                { "key": "cari", "value": "kaos", "description": "Opsional. Pencarian nama produk." }
-              ]
-            },
-            "description": "GET /api/produk — 200 (juga saat kosong). Membalas daftar kosong bila tidak ada hasil, bukan 404."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
-                  "pm.test('Pembungkus respons lengkap', function () {",
-                  "  const b = pm.response.json();",
-                  "  pm.expect(b).to.have.property('status');",
-                  "  pm.expect(b).to.have.property('code');",
-                  "  pm.expect(b).to.have.property('message');",
-                  "  pm.expect(b).to.have.property('data');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "02. GET Rincian Produk",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/produk/{{produk_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["produk", "{{produk_id}}"]
-            },
-            "description": "GET /api/produk/{id} — 200, 404. Menyertakan array varian (ukuran, warna, stok)."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200 atau 404', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "03. POST Tambah Produk",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nama\": \"Kaos Polos Oversize\",\n  \"harga\": 89000,\n  \"kategori\": \"Pakaian\",\n  \"bahan\": \"Katun Combed 30s\",\n  \"merek\": \"ME\",\n  \"deskripsi\": \"Kaos kasual potongan longgar.\",\n  \"tersedia\": true,\n  \"varian\": [\n    { \"ukuran\": \"M\", \"warna\": \"Hitam\", \"stok\": 10 },\n    { \"ukuran\": \"L\", \"warna\": \"Putih\", \"stok\": 5 }\n  ]\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": {
-              "raw": "{{base_url}}/produk",
-              "host": ["{{base_url}}"],
-              "path": ["produk"]
-            },
-            "description": "POST /api/produk — 201, 422. Menerima daftar varian awal."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 201 atau 422', function () { pm.expect([201, 422]).to.include(pm.response.code); });",
-                  "if (pm.response.code === 201) {",
-                  "  const id = pm.response.json().data.id;",
-                  "  pm.collectionVariables.set('produk_id', String(id));",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "04. PUT Ubah Produk",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nama\": \"Kaos Polos Oversize Edisi Baru\",\n  \"harga\": 95000,\n  \"kategori\": \"Pakaian\",\n  \"bahan\": \"Katun Combed 30s\",\n  \"merek\": \"ME\",\n  \"deskripsi\": \"Kaos kasual potongan longgar, edisi terbaru.\",\n  \"tersedia\": true,\n  \"varian\": [\n    { \"ukuran\": \"M\", \"warna\": \"Hitam\", \"stok\": 12 }\n  ]\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": {
-              "raw": "{{base_url}}/produk/{{produk_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["produk", "{{produk_id}}"]
-            },
-            "description": "PUT /api/produk/{id} — 200, 404, 422. Dapat mengubah stok varian."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 404, atau 422', function () { pm.expect([200, 404, 422]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "05. DELETE Hapus Produk",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/produk/{{produk_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["produk", "{{produk_id}}"]
-            },
-            "description": "DELETE /api/produk/{id} — 200, 404, 409. 409 bila produk terpakai pada pesanan aktif."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 404, atau 409', function () { pm.expect([200, 404, 409]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
-        }
-      ]
+    "info": {
+        "_postman_id": "a1b2c3d4-0000-4000-8000-6b1c2f3d4e5f",
+        "name": "PAPB-UTS Kelompok 02 - ME (Toko Online Pakaian & Aksesori)",
+        "description": "Koleksi untuk seluruh 26 route API yang didefinisikan di backend/routes/api.php, termasuk autentikasi, ongkir, pembayaran, dan gambar.\n\nCara pakai:\n1. Jalankan backend: php artisan serve --host=0.0.0.0 --port=8000\n2. Sesuaikan variabel base_url bila perlu (default: http://127.0.0.1:8000/api)\n3. Request checkout/pesanan menerima X-Pelanggan-Id atau Bearer token. Login menyimpan token pada variabel token.\n\nCatatan: ongkir memerlukan konfigurasi RajaOngkir; callback pembayaran harus berasal dari Midtrans dengan signature sah. Variabel kunci_idempoten dipakai ulang untuk menguji idempotent replay; ganti nilainya untuk membuat pesanan baru.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
-    {
-      "name": "2. Keranjang",
-      "item": [
+    "variable": [
         {
-          "name": "06. GET Isi Keranjang",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/keranjang",
-              "host": ["{{base_url}}"],
-              "path": ["keranjang"]
-            },
-            "description": "GET /api/keranjang — 200. Subtotal dari server; tiap item memuat ukuran dan warna."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
-                ]
-              }
-            }
-          ]
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000/api"
         },
         {
-          "name": "07. POST Tambah Item ke Keranjang",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"produk_id\": {{produk_id}},\n  \"varian_id\": {{varian_id}},\n  \"jumlah\": 2\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": {
-              "raw": "{{base_url}}/keranjang",
-              "host": ["{{base_url}}"],
-              "path": ["keranjang"]
-            },
-            "description": "POST /api/keranjang — 201, 409, 422. 409 bila stok varian kurang; varian yang sama menaikkan jumlah."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 201, 409, atau 422', function () { pm.expect([201, 409, 422]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
+            "key": "pelanggan_id",
+            "value": "1"
         },
         {
-          "name": "08. PUT Ubah Jumlah Item",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"jumlah\": 3\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": {
-              "raw": "{{base_url}}/keranjang/{{keranjang_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["keranjang", "{{keranjang_id}}"]
-            },
-            "description": "PUT /api/keranjang/{id} — 200, 404, 409, 422. Jumlah nol atau negatif ditolak 422."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 404, 409, atau 422', function () { pm.expect([200, 404, 409, 422]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
+            "key": "produk_id",
+            "value": "1"
         },
         {
-          "name": "09. DELETE Hapus Item Keranjang",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/keranjang/{{keranjang_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["keranjang", "{{keranjang_id}}"]
-            },
-            "description": "DELETE /api/keranjang/{id} — 200, 404."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200 atau 404', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
+            "key": "varian_id",
+            "value": "1"
+        },
+        {
+            "key": "keranjang_id",
+            "value": "1"
+        },
+        {
+            "key": "pesanan_id",
+            "value": "1"
+        },
+        {
+            "key": "kunci_idempoten",
+            "value": "11111111-2222-4333-8444-555555555555"
+        },
+        {
+            "key": "token",
+            "value": ""
+        },
+        {
+            "key": "order_id",
+            "value": ""
+        },
+        {
+            "key": "gambar",
+            "value": "1.jpg"
         }
-      ]
-    },
-    {
-      "name": "3. Data Referensi",
-      "item": [
+    ],
+    "item": [
         {
-          "name": "10. GET Daftar Kurir",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/kurir",
-              "host": ["{{base_url}}"],
-              "path": ["kurir"]
-            },
-            "description": "GET /api/kurir — 200. Dipakai checkout untuk memilih pengantaran."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "11. GET Metode Pembayaran",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/metode-pembayaran",
-              "host": ["{{base_url}}"],
-              "path": ["metode-pembayaran"]
-            },
-            "description": "GET /api/metode-pembayaran — 200. Dipakai checkout untuk memilih metode bayar."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "4. Checkout & Pesanan",
-      "item": [
-        {
-          "name": "12. POST Checkout (Idempoten)",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" },
-              { "key": "X-Kunci-Idempoten", "value": "{{kunci_idempoten}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nama\": \"Auril Aditya\",\n  \"alamat\": \"Jalan Merdeka No. 10, Kecamatan Coblong, Bandung\",\n  \"kurir_id\": 1,\n  \"metode_pembayaran_id\": 1,\n  \"item_keranjang_ids\": [1]\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": {
-              "raw": "{{base_url}}/checkout",
-              "host": ["{{base_url}}"],
-              "path": ["checkout"]
-            },
-            "description": "POST /api/checkout — 201, 409, 422. item_keranjang_ids opsional; isi dengan ID item dari GET /api/keranjang untuk checkout hanya item terpilih. Tanpa field ini, semua item keranjang diproses. Wajib header X-Kunci-Idempoten."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 201, 200, 409, atau 422', function () { pm.expect([200, 201, 409, 422]).to.include(pm.response.code); });",
-                  "const b = pm.response.json();",
-                  "if (b && b.data && b.data.id) { pm.collectionVariables.set('pesanan_id', String(b.data.id)); }",
-                  "if (b && b.data && b.data.nomor_pesanan) { pm.collectionVariables.set('order_id', String(b.data.nomor_pesanan)); }"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "13. GET Riwayat Pesanan",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/pesanan",
-              "host": ["{{base_url}}"],
-              "path": ["pesanan"]
-            },
-            "description": "GET /api/pesanan — 200. Terbaru dulu."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "14. GET Rincian Pesanan",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/pesanan/{{pesanan_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["pesanan", "{{pesanan_id}}"]
-            },
-            "description": "GET /api/pesanan/{id} — 200, 404. Harga saat pembelian dari detail_pesanan."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200 atau 404', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "15. PATCH Ubah Status Pesanan",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Pelanggan-Id", "value": "{{pelanggan_id}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"menunggu_konfirmasi\"\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": {
-              "raw": "{{base_url}}/pesanan/{{pesanan_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["pesanan", "{{pesanan_id}}", "status"]
-            },
-            "description": "PATCH /api/pesanan/{id}/status — 200, 404, 409, 422. Hanya perpindahan sah; sisanya 409."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 404, 409, atau 422', function () { pm.expect([200, 404, 409, 422]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "5. Media",
-      "item": [
-        {
-          "name": "16. GET Gambar Produk",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/gambar/{{gambar}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "gambar",
-                "{{gambar}}"
-              ]
-            },
-            "description": "GET /api/gambar/{filename} ? 200, 404. Mengambil gambar produk dari storage; nama file contoh di variabel gambar."
-          }
-        }
-      ]
-    },
-    {
-      "name": "6. Autentikasi",
-      "item": [
-        {
-          "name": "17. POST Daftar Pelanggan",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nama\": \"Pelanggan Baru\",\n  \"email\": \"pelanggan.baru@example.com\",\n  \"password\": \"password123\",\n  \"no_telp\": \"081234567890\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/auth/register",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "register"
-              ]
-            },
-            "description": "POST /api/auth/register ? 201, 422. Email harus unik; respons sukses mengembalikan token."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 201 atau 422', function () { pm.expect([201, 422]).to.include(pm.response.code); });",
-                  "if (pm.response.code === 201) {",
-                  "  const data = pm.response.json().data;",
-                  "  pm.collectionVariables.set('pelanggan_id', String(data.id));",
-                  "  pm.collectionVariables.set('token', data.token);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "18. POST Login",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"pelanggan.baru@example.com\",\n  \"password\": \"password123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/auth/login",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "login"
-              ]
-            },
-            "description": "POST /api/auth/login ? 200, 401, 422. Menyimpan token login pada variabel koleksi."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 401, atau 422', function () { pm.expect([200, 401, 422]).to.include(pm.response.code); });",
-                  "if (pm.response.code === 200) {",
-                  "  const data = pm.response.json().data;",
-                  "  pm.collectionVariables.set('pelanggan_id', String(data.id));",
-                  "  pm.collectionVariables.set('token', data.token);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "19. GET Profil Saya",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/auth/me",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "me"
-              ]
-            },
-            "description": "GET /api/auth/me ? 200, 401. Memerlukan token dari request login atau register."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 401', function () { pm.expect([200, 401]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "20. POST Logout",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/auth/logout",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "logout"
-              ]
-            },
-            "description": "POST /api/auth/logout ? 200, 401. Menghapus token aktif; login kembali sebelum mengakses endpoint bertoken."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 401', function () { pm.expect([200, 401]).to.include(pm.response.code); });",
-                  "if (pm.response.code === 200) { pm.collectionVariables.set('token', ''); }"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "7. Ongkir & Lokasi",
-      "item": [
-        {
-          "name": "21. POST Cek Ongkir",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"origin\": \"501\",\n  \"destination\": \"114\",\n  \"weight\": 1000,\n  \"courier\": \"jne,sicepat,jnt,anteraja\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/ongkir",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "ongkir"
-              ]
-            },
-            "description": "POST /api/ongkir ? 200, 400, 422. Memerlukan konfigurasi RajaOngkir; weight dalam gram (1?30000), courier opsional."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 400, 422', function () { pm.expect([200, 400, 422]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "22. GET Daftar Kota",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/kota?search=bandung",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "kota"
-              ],
-              "query": [
+            "name": "1. Produk",
+            "item": [
                 {
-                  "key": "search",
-                  "value": "bandung",
-                  "description": "Opsional. Kata kunci nama kota."
-                }
-              ]
-            },
-            "description": "GET /api/kota ? 200, 400. Query search opsional; memerlukan konfigurasi RajaOngkir."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 400', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "23. GET Daftar Provinsi",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/provinsi",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "provinsi"
-              ]
-            },
-            "description": "GET /api/provinsi ? 200, 400. Memerlukan konfigurasi RajaOngkir."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 400', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "24. GET Daftar Kecamatan",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/kecamatan?city_id=23",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "kecamatan"
-              ],
-              "query": [
+                    "name": "00. GET Hero Banners",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/hero-banners",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "hero-banners"
+                            ]
+                        },
+                        "description": "Mengambil daftar spanduk promo aktif untuk carousel beranda aplikasi."
+                    }
+                },
                 {
-                  "key": "city_id",
-                  "value": "23",
-                  "description": "Wajib. ID kota tujuan."
+                    "name": "01. GET Daftar Produk (filter & cari)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/produk?kategori=Pakaian&cari=kaos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "produk"
+                            ],
+                            "query": [
+                                {
+                                    "key": "kategori",
+                                    "value": "Pakaian",
+                                    "description": "Opsional. Filter nama kategori."
+                                },
+                                {
+                                    "key": "cari",
+                                    "value": "kaos",
+                                    "description": "Opsional. Pencarian nama produk."
+                                }
+                            ]
+                        },
+                        "description": "GET /api/produk — 200 (juga saat kosong). Membalas daftar kosong bila tidak ada hasil, bukan 404."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                                    "pm.test('Pembungkus respons lengkap', function () {",
+                                    "  const b = pm.response.json();",
+                                    "  pm.expect(b).to.have.property('status');",
+                                    "  pm.expect(b).to.have.property('code');",
+                                    "  pm.expect(b).to.have.property('message');",
+                                    "  pm.expect(b).to.have.property('data');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "02. GET Rincian Produk",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/produk/{{produk_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "produk",
+                                "{{produk_id}}"
+                            ]
+                        },
+                        "description": "GET /api/produk/{id} — 200, 404. Menyertakan array varian (ukuran, warna, stok)."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200 atau 404', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "03. POST Tambah Produk",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nama\": \"Kaos Polos Oversize\",\n  \"harga\": 89000,\n  \"kategori\": \"Pakaian\",\n  \"bahan\": \"Katun Combed 30s\",\n  \"merek\": \"ME\",\n  \"deskripsi\": \"Kaos kasual potongan longgar.\",\n  \"tersedia\": true,\n  \"varian\": [\n    { \"ukuran\": \"M\", \"warna\": \"Hitam\", \"stok\": 10 },\n    { \"ukuran\": \"L\", \"warna\": \"Putih\", \"stok\": 5 }\n  ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/produk",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "produk"
+                            ]
+                        },
+                        "description": "POST /api/produk — 201, 422. Menerima daftar varian awal."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 201 atau 422', function () { pm.expect([201, 422]).to.include(pm.response.code); });",
+                                    "if (pm.response.code === 201) {",
+                                    "  const id = pm.response.json().data.id;",
+                                    "  pm.collectionVariables.set('produk_id', String(id));",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "04. PUT Ubah Produk",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nama\": \"Kaos Polos Oversize Edisi Baru\",\n  \"harga\": 95000,\n  \"kategori\": \"Pakaian\",\n  \"bahan\": \"Katun Combed 30s\",\n  \"merek\": \"ME\",\n  \"deskripsi\": \"Kaos kasual potongan longgar, edisi terbaru.\",\n  \"tersedia\": true,\n  \"varian\": [\n    { \"ukuran\": \"M\", \"warna\": \"Hitam\", \"stok\": 12 }\n  ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/produk/{{produk_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "produk",
+                                "{{produk_id}}"
+                            ]
+                        },
+                        "description": "PUT /api/produk/{id} — 200, 404, 422. Dapat mengubah stok varian."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 404, atau 422', function () { pm.expect([200, 404, 422]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "05. DELETE Hapus Produk",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/produk/{{produk_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "produk",
+                                "{{produk_id}}"
+                            ]
+                        },
+                        "description": "DELETE /api/produk/{id} — 200, 404, 409. 409 bila produk terpakai pada pesanan aktif."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 404, atau 409', function () { pm.expect([200, 404, 409]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
                 }
-              ]
-            },
-            "description": "GET /api/kecamatan ? 200, 400, 422. city_id wajib; memerlukan konfigurasi RajaOngkir."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 400, 422', function () { pm.expect([200, 400, 422]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "8. Pembayaran",
-      "item": [
-        {
-          "name": "25. POST Callback Midtrans",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"order_id\": \"{{order_id}}\",\n  \"status_code\": \"200\",\n  \"gross_amount\": \"178000.00\",\n  \"signature_key\": \"<signature-dari-midtrans>\",\n  \"transaction_status\": \"settlement\",\n  \"fraud_status\": \"accept\",\n  \"payment_type\": \"bank_transfer\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/payment/callback",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "payment",
-                "callback"
-              ]
-            },
-            "description": "POST /api/payment/callback ? 200, 400, 404. Endpoint publik untuk webhook Midtrans; request manual ditolak tanpa signature_key valid. Jangan masukkan server key ke koleksi."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 400, 404', function () { pm.expect([200, 400, 404]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
+            ]
         },
         {
-          "name": "26. GET Status Pembayaran",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/payment/status/{{order_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "payment",
-                "status",
-                "{{order_id}}"
-              ]
-            },
-            "description": "GET /api/payment/status/{orderId} ? 200, 404. orderId adalah nomor_pesanan dari respons checkout; jika status menunggu pembayaran, server dapat meminta status terbaru ke Midtrans."
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200, 404', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
-                ]
-              }
-            }
-          ]
+            "name": "2. Keranjang",
+            "item": [
+                {
+                    "name": "06. GET Isi Keranjang",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/keranjang",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "keranjang"
+                            ]
+                        },
+                        "description": "GET /api/keranjang — 200. Subtotal dari server; tiap item memuat ukuran dan warna."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "07. POST Tambah Item ke Keranjang",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"produk_id\": {{produk_id}},\n  \"varian_id\": {{varian_id}},\n  \"jumlah\": 2\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/keranjang",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "keranjang"
+                            ]
+                        },
+                        "description": "POST /api/keranjang — 201, 409, 422. 409 bila stok varian kurang; varian yang sama menaikkan jumlah."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 201, 409, atau 422', function () { pm.expect([201, 409, 422]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "08. PUT Ubah Jumlah Item",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"jumlah\": 3\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/keranjang/{{keranjang_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "keranjang",
+                                "{{keranjang_id}}"
+                            ]
+                        },
+                        "description": "PUT /api/keranjang/{id} — 200, 404, 409, 422. Jumlah nol atau negatif ditolak 422."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 404, 409, atau 422', function () { pm.expect([200, 404, 409, 422]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "09. DELETE Hapus Item Keranjang",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/keranjang/{{keranjang_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "keranjang",
+                                "{{keranjang_id}}"
+                            ]
+                        },
+                        "description": "DELETE /api/keranjang/{id} — 200, 404."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200 atau 404', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "3. Data Referensi",
+            "item": [
+                {
+                    "name": "10. GET Daftar Kurir",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/kurir",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "kurir"
+                            ]
+                        },
+                        "description": "GET /api/kurir — 200. Dipakai checkout untuk memilih pengantaran."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "11. GET Metode Pembayaran",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/metode-pembayaran",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "metode-pembayaran"
+                            ]
+                        },
+                        "description": "GET /api/metode-pembayaran — 200. Dipakai checkout untuk memilih metode bayar."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "4. Checkout & Pesanan",
+            "item": [
+                {
+                    "name": "12. POST Estimasi Checkout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"kurir_id\": 1,\n  \"item_keranjang_ids\": [1]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/checkout/estimasi",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "checkout",
+                                "estimasi"
+                            ]
+                        },
+                        "description": "POST /api/checkout/estimasi — 200, 409, 422. Mengembalikan subtotal, ongkir, dan total hasil hitung server tanpa mengubah keranjang."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 409, atau 422', function () { pm.expect([200, 409, 422]).to.include(pm.response.code); });",
+                                    "if (pm.response.code === 200) {",
+                                    "  const data = pm.response.json().data;",
+                                    "  pm.expect(data).to.have.property('subtotal');",
+                                    "  pm.expect(data).to.have.property('ongkir');",
+                                    "  pm.expect(data).to.have.property('total');",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "12. POST Checkout (Idempoten)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            },
+                            {
+                                "key": "X-Kunci-Idempoten",
+                                "value": "{{kunci_idempoten}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nama\": \"Auril Aditya\",\n  \"alamat\": \"Jalan Merdeka No. 10, Kecamatan Coblong, Bandung\",\n  \"kurir_id\": 1,\n  \"metode_pembayaran_id\": 1,\n  \"item_keranjang_ids\": [1]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/checkout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "checkout"
+                            ]
+                        },
+                        "description": "POST /api/checkout — 201, 409, 422. item_keranjang_ids opsional; isi dengan ID item dari GET /api/keranjang untuk checkout hanya item terpilih. Tanpa field ini, semua item keranjang diproses. Wajib header X-Kunci-Idempoten."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 201, 200, 409, atau 422', function () { pm.expect([200, 201, 409, 422]).to.include(pm.response.code); });",
+                                    "const b = pm.response.json();",
+                                    "if (b && b.data && b.data.id) { pm.collectionVariables.set('pesanan_id', String(b.data.id)); }",
+                                    "if (b && b.data && b.data.nomor_pesanan) { pm.collectionVariables.set('order_id', String(b.data.nomor_pesanan)); }"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "13. GET Riwayat Pesanan",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/pesanan",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pesanan"
+                            ]
+                        },
+                        "description": "GET /api/pesanan — 200. Terbaru dulu."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "14. GET Rincian Pesanan",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/pesanan/{{pesanan_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pesanan",
+                                "{{pesanan_id}}"
+                            ]
+                        },
+                        "description": "GET /api/pesanan/{id} — 200, 404. Harga saat pembelian dari detail_pesanan."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200 atau 404', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "15. PATCH Ubah Status Pesanan",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"menunggu_konfirmasi\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/pesanan/{{pesanan_id}}/status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pesanan",
+                                "{{pesanan_id}}",
+                                "status"
+                            ]
+                        },
+                        "description": "PATCH /api/pesanan/{id}/status — 200, 404, 409, 422. Hanya perpindahan sah; sisanya 409."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 404, 409, atau 422', function () { pm.expect([200, 404, 409, 422]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "15b. POST Pengalihan ke COD (Fallback COD)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "X-Pelanggan-Id",
+                                "value": "{{pelanggan_id}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"alasan\": \"Pengalihan ke metode COD karena pembayaran online gagal/dibatalkan\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/pesanan/{{pesanan_id}}/fallback-cod",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pesanan",
+                                "{{pesanan_id}}",
+                                "fallback-cod"
+                            ]
+                        },
+                        "description": "Mengalihkan pesanan menunggu_pembayaran menjadi menunggu_verifikasi (COD) jika pembayaran online gagal atau pembeli memilih COD."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5. Media",
+            "item": [
+                {
+                    "name": "16. GET Gambar Produk",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/gambar/{{gambar}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "gambar",
+                                "{{gambar}}"
+                            ]
+                        },
+                        "description": "GET /api/gambar/{filename} ? 200, 404. Mengambil gambar produk dari storage; nama file contoh di variabel gambar."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "6. Autentikasi",
+            "item": [
+                {
+                    "name": "17. POST Daftar Pelanggan",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nama\": \"Pelanggan Baru\",\n  \"email\": \"pelanggan.baru@example.com\",\n  \"password\": \"password123\",\n  \"no_telp\": \"081234567890\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "POST /api/auth/register ? 201, 422. Email harus unik; respons sukses mengembalikan token."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 201 atau 422', function () { pm.expect([201, 422]).to.include(pm.response.code); });",
+                                    "if (pm.response.code === 201) {",
+                                    "  const data = pm.response.json().data;",
+                                    "  pm.collectionVariables.set('pelanggan_id', String(data.id));",
+                                    "  pm.collectionVariables.set('token', data.token);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "18. POST Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"pelanggan.baru@example.com\",\n  \"password\": \"password123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "POST /api/auth/login ? 200, 401, 422. Menyimpan token login pada variabel koleksi."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 401, atau 422', function () { pm.expect([200, 401, 422]).to.include(pm.response.code); });",
+                                    "if (pm.response.code === 200) {",
+                                    "  const data = pm.response.json().data;",
+                                    "  pm.collectionVariables.set('pelanggan_id', String(data.id));",
+                                    "  pm.collectionVariables.set('token', data.token);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "19. GET Profil Saya",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "GET /api/auth/me ? 200, 401. Memerlukan token dari request login atau register."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 401', function () { pm.expect([200, 401]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "20. POST Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/auth/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "description": "POST /api/auth/logout ? 200, 401. Menghapus token aktif; login kembali sebelum mengakses endpoint bertoken."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 401', function () { pm.expect([200, 401]).to.include(pm.response.code); });",
+                                    "if (pm.response.code === 200) { pm.collectionVariables.set('token', ''); }"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "7. Ongkir & Lokasi",
+            "item": [
+                {
+                    "name": "21b. GET Profil Toko & Asal Pengiriman",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/pengaturan-toko",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pengaturan-toko"
+                            ]
+                        },
+                        "description": "Mengambil kota asal pengiriman dan konfigurasi toko untuk perhitungan ongkir RajaOngkir."
+                    }
+                },
+                {
+                    "name": "21. POST Cek Ongkir",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"origin\": \"501\",\n  \"destination\": \"114\",\n  \"weight\": 1000,\n  \"courier\": \"jne,sicepat,jnt,anteraja\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/ongkir",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ongkir"
+                            ]
+                        },
+                        "description": "POST /api/ongkir ? 200, 400, 422. Memerlukan konfigurasi RajaOngkir; weight dalam gram (1?30000), courier opsional."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 400, 422', function () { pm.expect([200, 400, 422]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "22. GET Daftar Kota",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/kota?search=bandung",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "kota"
+                            ],
+                            "query": [
+                                {
+                                    "key": "search",
+                                    "value": "bandung",
+                                    "description": "Opsional. Kata kunci nama kota."
+                                }
+                            ]
+                        },
+                        "description": "GET /api/kota ? 200, 400. Query search opsional; memerlukan konfigurasi RajaOngkir."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 400', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "23. GET Daftar Provinsi",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/provinsi",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "provinsi"
+                            ]
+                        },
+                        "description": "GET /api/provinsi ? 200, 400. Memerlukan konfigurasi RajaOngkir."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 400', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "24. GET Daftar Kecamatan",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/kecamatan?city_id=23",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "kecamatan"
+                            ],
+                            "query": [
+                                {
+                                    "key": "city_id",
+                                    "value": "23",
+                                    "description": "Wajib. ID kota tujuan."
+                                }
+                            ]
+                        },
+                        "description": "GET /api/kecamatan ? 200, 400, 422. city_id wajib; memerlukan konfigurasi RajaOngkir."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 400, 422', function () { pm.expect([200, 400, 422]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "8. Pembayaran",
+            "item": [
+                {
+                    "name": "25. POST Callback Midtrans",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"order_id\": \"{{order_id}}\",\n  \"status_code\": \"200\",\n  \"gross_amount\": \"178000.00\",\n  \"signature_key\": \"<signature-dari-midtrans>\",\n  \"transaction_status\": \"settlement\",\n  \"fraud_status\": \"accept\",\n  \"payment_type\": \"bank_transfer\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/payment/callback",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "payment",
+                                "callback"
+                            ]
+                        },
+                        "description": "POST /api/payment/callback ? 200, 400, 404. Endpoint publik untuk webhook Midtrans; request manual ditolak tanpa signature_key valid. Jangan masukkan server key ke koleksi."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 400, 404', function () { pm.expect([200, 400, 404]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "26. GET Status Pembayaran",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/payment/status/{{order_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "payment",
+                                "status",
+                                "{{order_id}}"
+                            ]
+                        },
+                        "description": "GET /api/payment/status/{orderId} ? 200, 404. orderId adalah nomor_pesanan dari respons checkout; jika status menunggu pembayaran, server dapat meminta status terbaru ke Midtrans."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status 200, 404', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "27. GET Status Koneksi Midtrans",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/payment/status-midtrans",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "payment",
+                                "status-midtrans"
+                            ]
+                        },
+                        "description": "Mengecek ketersediaan server key, client key, dan mode (sandbox/production) Midtrans."
+                    }
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }

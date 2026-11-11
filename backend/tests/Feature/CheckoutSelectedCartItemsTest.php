@@ -6,6 +6,7 @@ use App\Models\DetailPesanan;
 use App\Models\Keranjang;
 use App\Models\Kurir;
 use App\Models\MetodePembayaran;
+use App\Models\Pelanggan;
 use App\Models\Produk;
 use App\Models\VarianProduk;
 use Database\Seeders\DatabaseSeeder;
@@ -15,6 +16,59 @@ use Tests\TestCase;
 class CheckoutSelectedCartItemsTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_checkout_estimate_uses_server_values_for_selected_items_and_courier(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $produkDipilih = Produk::findOrFail(1);
+        $itemDipilih = Keranjang::create([
+            'pelanggan_id' => 1,
+            'produk_id' => $produkDipilih->id,
+            'varian_id' => VarianProduk::where('produk_id', $produkDipilih->id)->firstOrFail()->id,
+            'jumlah' => 2,
+        ]);
+        $itemTidakDipilih = Keranjang::create([
+            'pelanggan_id' => 1,
+            'produk_id' => 2,
+            'varian_id' => VarianProduk::where('produk_id', 2)->firstOrFail()->id,
+            'jumlah' => 1,
+        ]);
+        $kurir = Kurir::where('tarif', 20000)->firstOrFail();
+
+        $this->postJson('/api/checkout/estimasi', [
+            'kurir_id' => $kurir->id,
+            'item_keranjang_ids' => [$itemDipilih->id],
+        ], [
+            'X-Pelanggan-Id' => '1',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.subtotal', 178000)
+            ->assertJsonPath('data.ongkir', 20000)
+            ->assertJsonPath('data.total', 198000);
+
+        $this->assertDatabaseHas('keranjang', ['id' => $itemTidakDipilih->id]);
+    }
+
+    public function test_checkout_estimate_rejects_cart_items_owned_by_another_customer(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $item = Keranjang::where('pelanggan_id', 1)->firstOrFail();
+        $pelangganLain = Pelanggan::create([
+            'nama' => 'Pelanggan Lain',
+            'email' => 'pelanggan-lain@example.test',
+        ]);
+
+        $this->postJson('/api/checkout/estimasi', [
+            'kurir_id' => Kurir::firstOrFail()->id,
+            'item_keranjang_ids' => [$item->id],
+        ], [
+            'X-Pelanggan-Id' => (string) $pelangganLain->id,
+        ])
+            ->assertConflict()
+            ->assertJsonPath('status', 'gagal');
+    }
 
     public function test_checkout_processes_only_selected_cart_items(): void
     {

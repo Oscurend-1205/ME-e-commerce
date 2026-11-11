@@ -1,8 +1,25 @@
+import 'dart:io' show Socket;
 import 'package:flutter/foundation.dart';
 
 class Konstan {
   /// URL host kustom jika pengguna ingin mengganti IP host (misal IP Wi-Fi)
   static String? customHost;
+
+  /// Deteksi koneksi otomatis:
+  /// Jika dijalankan di HP fisik dengan ADB reverse aktif, otomatis arahkan ke 127.0.0.1:8000.
+  static Future<void> inisialisasiJaringanOtomatis() async {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android && customHost == null) {
+      const envApi = String.fromEnvironment('API_URL');
+      if (envApi.isEmpty) {
+        try {
+          final socket = await Socket.connect('127.0.0.1', 8000,
+              timeout: const Duration(milliseconds: 600));
+          socket.destroy();
+          customHost = 'http://127.0.0.1:8000';
+        } catch (_) {}
+      }
+    }
+  }
 
   static String _normalisasiHost(String value) {
     var host = value.trim().replaceAll(RegExp(r'/+$'), '');

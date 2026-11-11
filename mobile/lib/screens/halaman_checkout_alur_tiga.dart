@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import '../enums.dart';
 import '../models/alamat.dart';
+import '../models/estimasi_checkout.dart';
 import '../models/keranjang.dart';
 import '../models/kurir.dart';
 import '../models/metode_pembayaran.dart';
@@ -12,7 +14,6 @@ import '../widgets/widget_stepper_checkout.dart';
 import 'halaman_konfirmasi_cod.dart';
 import 'halaman_pembayaran.dart';
 import 'halaman_pembayaran_berhasil.dart';
-import 'halaman_pembayaran_qris.dart';
 import 'halaman_riwayat_pesanan.dart';
 
 /// Halaman Checkout Alur 03 — Metode Pembayaran & Submit.
@@ -22,6 +23,7 @@ import 'halaman_riwayat_pesanan.dart';
 /// langsung tampil tanpa loading.
 class HalamanCheckoutAlurTiga extends StatefulWidget {
   final DataKeranjang dataKeranjang;
+  final EstimasiCheckout estimasiCheckout;
   final List<int> selectedItemIds;
   final Kurir? kurirTerpilih;
   final Alamat alamatTerpilih;
@@ -32,6 +34,7 @@ class HalamanCheckoutAlurTiga extends StatefulWidget {
   const HalamanCheckoutAlurTiga({
     super.key,
     required this.dataKeranjang,
+    required this.estimasiCheckout,
     required this.selectedItemIds,
     this.kurirTerpilih,
     required this.alamatTerpilih,
@@ -41,12 +44,16 @@ class HalamanCheckoutAlurTiga extends StatefulWidget {
   });
 
   @override
-  State<HalamanCheckoutAlurTiga> createState() => _HalamanCheckoutAlurTigaState();
+  State<HalamanCheckoutAlurTiga> createState() =>
+      _HalamanCheckoutAlurTigaState();
 }
 
 class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
   MetodePembayaran? _metodeTerpilihFinal;
-  bool _sedangMemproses = false;
+  KeadaanMuat _keadaanCheckout = KeadaanMuat.berhasil;
+  String _kodeGalatCheckout = '';
+  String _pesanGalatCheckout = '';
+  Map<String, String> _errorsValidasiCheckout = {};
   String? _kunciIdempotenSaatIni;
   bool _midtransGangguan = false;
   String? _pesanGangguanMidtrans;
@@ -67,8 +74,12 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
   void initState() {
     super.initState();
     _kunciIdempotenSaatIni = const Uuid().v4();
-    _metodeTerpilihFinal =
-        _metodeTersedia.isNotEmpty ? _metodeTersedia.first : null;
+    _metodeTerpilihFinal = _metodeTersedia.isNotEmpty
+        ? _metodeTersedia.first
+        : null;
+    if (_metodeTersedia.isEmpty) {
+      _keadaanCheckout = KeadaanMuat.kosong;
+    }
     _cekKesehatanMidtrans();
   }
 
@@ -97,9 +108,142 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
     } catch (_) {}
   }
 
-  int get _ongkir => widget.kurirTerpilih?.tarif ?? 0;
-  int get _subtotal => widget.dataKeranjang.subtotal;
-  int get _total => _subtotal + _ongkir;
+  int get _ongkir => widget.estimasiCheckout.ongkir;
+  int get _subtotal => widget.estimasiCheckout.subtotal;
+  int get _total => widget.estimasiCheckout.total;
+
+  Map<String, String> _petakanErrorsValidasi(Map<String, dynamic>? errors) {
+    if (errors == null) return {};
+
+    final hasil = <String, String>{};
+    for (final entry in errors.entries) {
+      final field = entry.key.startsWith('item_keranjang_ids.')
+          ? 'item_keranjang_ids'
+          : entry.key;
+      final value = entry.value;
+      final message = value is List
+          ? value.map((item) => item.toString()).join('\n')
+          : value.toString();
+      if (message.isNotEmpty) {
+        hasil.update(
+          field,
+          (existing) => '$existing\n$message',
+          ifAbsent: () => message,
+        );
+      }
+    }
+    return hasil;
+  }
+
+  String? _pesanErrorUntuk(Set<String> fields) {
+    final messages = _errorsValidasiCheckout.entries
+        .where((entry) => fields.contains(entry.key))
+        .map((entry) => entry.value)
+        .toList();
+    return messages.isEmpty ? null : messages.join('\n');
+  }
+
+  String _labelFieldValidasi(String field) {
+    switch (field) {
+      case 'nama':
+        return 'Nama penerima';
+      case 'alamat':
+        return 'Alamat pengiriman';
+      case 'catatan':
+        return 'Catatan pesanan';
+      case 'kurir_id':
+        return 'Kurir pengiriman';
+      case 'metode_pembayaran_id':
+        return 'Metode pembayaran';
+      case 'item_keranjang_ids':
+        return 'Item pesanan';
+      default:
+        return field;
+    }
+  }
+
+  Widget _bangunPesanValidasiCheckout() {
+    if (_kodeGalatCheckout != '422') return const SizedBox.shrink();
+
+    const fieldsTampilInline = {
+      'nama',
+      'alamat',
+      'catatan',
+      'kurir_id',
+      'metode_pembayaran_id',
+    };
+    final errorsLain = _errorsValidasiCheckout.entries
+        .where((entry) => !fieldsTampilInline.contains(entry.key))
+        .toList();
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Periksa kembali data checkout',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: TemaAplikasi.errorColor,
+            ),
+          ),
+          if (_pesanGalatCheckout.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              _pesanGalatCheckout,
+              style: const TextStyle(
+                fontSize: 12,
+                color: TemaAplikasi.secondary,
+              ),
+            ),
+          ],
+          for (final entry in errorsLain) ...[
+            const SizedBox(height: 4),
+            Text(
+              '${_labelFieldValidasi(entry.key)}: ${entry.value}',
+              style: const TextStyle(
+                fontSize: 12,
+                color: TemaAplikasi.errorColor,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _bangunErrorField(String field, String label) {
+    final message = _pesanErrorUntuk({field});
+    if (message == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Text(
+        '$label: $message',
+        style: const TextStyle(
+          fontSize: 12,
+          color: TemaAplikasi.errorColor,
+          height: 1.4,
+        ),
+      ),
+    );
+  }
+
+  void _bersihkanGalatValidasiCheckout() {
+    if (_kodeGalatCheckout != '422') return;
+    _kodeGalatCheckout = '';
+    _pesanGalatCheckout = '';
+    _errorsValidasiCheckout = {};
+    _keadaanCheckout = KeadaanMuat.berhasil;
+  }
 
   Future<void> _bayarSekarang() async {
     if (_metodeTerpilihFinal == null) {
@@ -112,15 +256,20 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
       return;
     }
 
-    setState(() => _sedangMemproses = true);
+    if (_keadaanCheckout == KeadaanMuat.memuat) return;
+    setState(() {
+      _keadaanCheckout = KeadaanMuat.memuat;
+      _kodeGalatCheckout = '';
+      _pesanGalatCheckout = '';
+      _errorsValidasiCheckout = {};
+    });
 
     final alamatLengkap = widget.alamatTerpilih.alamat;
     final catatan = [
       if (widget.alamatTerpilih.catatan.isNotEmpty)
         'Catatan alamat: ${widget.alamatTerpilih.catatan}',
       if (widget.kemasHadiah) 'Kemas sebagai hadiah',
-      if (widget.kartuUcapan.isNotEmpty)
-        'Kartu ucapan: ${widget.kartuUcapan}',
+      if (widget.kartuUcapan.isNotEmpty) 'Kartu ucapan: ${widget.kartuUcapan}',
     ].join('\n');
 
     final respon = await LayananApi.checkout(
@@ -134,9 +283,8 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
     );
 
     if (!mounted) return;
-    setState(() => _sedangMemproses = false);
-
     if (respon.berhasil && respon.data != null) {
+      setState(() => _keadaanCheckout = KeadaanMuat.berhasil);
       final pesananMap = respon.data as Map<String, dynamic>;
       final int pesananId = pesananMap['id'] is int
           ? pesananMap['id'] as int
@@ -152,7 +300,8 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
 
       final qrUrl = pesananMap['qr_url'] as String?;
       final qrString = pesananMap['qr_string'] as String?;
-      final bool isCod = kodeMetode == 'tunai_di_tempat' ||
+      final bool isCod =
+          kodeMetode == 'tunai_di_tempat' ||
           kodeMetode == 'cod' ||
           kodeMetode == 'cash_on_delivery' ||
           kodeMetode == 'cash-on-delivery';
@@ -160,10 +309,12 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
       if (isCod) {
         Navigator.pushReplacement(
           context,
-          ruteGeser(HalamanKonfirmasiCod(
-            pesananId: pesananId,
-            dataPesananAwal: pesananMap,
-          )),
+          ruteGeser(
+            HalamanKonfirmasiCod(
+              pesananId: pesananId,
+              dataPesananAwal: pesananMap,
+            ),
+          ),
         );
         return;
       }
@@ -176,14 +327,17 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
         _tampilkanModalFallbackMidtrans(
           pesananId: pesananId,
           nomorPesanan: nomorPesanan,
-          pesanError: pesananMap['error_midtrans']?.toString() ??
+          pesanError:
+              pesananMap['error_midtrans']?.toString() ??
               'Gateway Midtrans sedang tidak dapat dihubungi.',
           total: total,
         );
         return;
       }
 
-      if (kodeMetode == 'midtrans' && snapToken != null && snapToken.isNotEmpty) {
+      if (kodeMetode == 'midtrans' &&
+          snapToken != null &&
+          snapToken.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Pesanan berhasil dibuat. Membuka Midtrans...'),
@@ -210,7 +364,7 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
               (qrString != null && qrString.isNotEmpty))) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Pesanan berhasil dibuat. Silakan scan QRIS.'),
+            content: Text('Pesanan berhasil dibuat. Membuka pembayaran...'),
             backgroundColor: TemaAplikasi.primary,
             behavior: SnackBarBehavior.floating,
           ),
@@ -218,13 +372,14 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HalamanPembayaranQris(
+            builder: (context) => HalamanPembayaran(
               pesananId: pesananId,
-              nomorPesanan: nomorPesanan,
-              total: total,
+              snapToken: snapToken ?? '',
+              redirectUrl: redirectUrl,
               qrUrl: qrUrl,
               qrString: qrString,
-              expiredAt: pesananMap['expired_at'] as String?,
+              nomorPesanan: nomorPesanan,
+              total: total,
             ),
           ),
         );
@@ -237,20 +392,36 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-                'Respons pembayaran tidak dikenali. Periksa konfigurasi metode pembayaran di backend.'),
+              'Respons pembayaran tidak dikenali. Periksa konfigurasi metode pembayaran di backend.',
+            ),
             backgroundColor: TemaAplikasi.errorColor,
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
     } else {
+      if (respon.code == '422') {
+        setState(() {
+          _keadaanCheckout = KeadaanMuat.galat;
+          _kodeGalatCheckout = respon.code;
+          _pesanGalatCheckout = respon.message;
+          _errorsValidasiCheckout = _petakanErrorsValidasi(respon.errors);
+        });
+        return;
+      }
+      setState(() {
+        _keadaanCheckout = KeadaanMuat.galat;
+        _kodeGalatCheckout = respon.code;
+      });
       if (respon.code == '409') {
         final bool isStokIssue = respon.message.toLowerCase().contains('stok');
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
             backgroundColor: TemaAplikasi.surfaceWhite,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(2),
+            ),
             title: Text(
               isStokIssue ? 'Stok Tidak Mencukupi' : 'Pemberitahuan Transaksi',
               style: const TextStyle(
@@ -261,7 +432,10 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
             ),
             content: Text(
               respon.message,
-              style: const TextStyle(color: TemaAplikasi.secondary, height: 1.5),
+              style: const TextStyle(
+                color: TemaAplikasi.secondary,
+                height: 1.5,
+              ),
             ),
             actions: [
               TextButton(
@@ -291,7 +465,7 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
 
   @override
   Widget build(BuildContext context) {
-    final tanpaMetode = _metodeTersedia.isEmpty;
+    final tanpaMetode = _keadaanCheckout == KeadaanMuat.kosong;
     return Scaffold(
       backgroundColor: TemaAplikasi.surfaceBright,
       body: tanpaMetode ? _bangunErrorTanpaMetode() : _bangunKonten(),
@@ -307,8 +481,11 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline,
-                size: 48, color: TemaAplikasi.secondary),
+            const Icon(
+              Icons.error_outline,
+              size: 48,
+              color: TemaAplikasi.secondary,
+            ),
             const SizedBox(height: 16),
             const Text(
               'Metode pembayaran belum tersedia',
@@ -366,8 +543,11 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.arrow_back,
-                              size: 18, color: TemaAplikasi.secondary),
+                          Icon(
+                            Icons.arrow_back,
+                            size: 18,
+                            color: TemaAplikasi.secondary,
+                          ),
                           SizedBox(width: 6),
                           Text(
                             'Kembali ke Pengiriman',
@@ -475,25 +655,28 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
               color: TemaAplikasi.primary,
             ),
           ),
+          _bangunErrorField('nama', 'Nama penerima'),
           const SizedBox(height: 4),
           Text(
             widget.alamatTerpilih.alamat,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 12,
-              color: TemaAplikasi.secondary,
-            ),
+            style: const TextStyle(fontSize: 12, color: TemaAplikasi.secondary),
           ),
+          _bangunErrorField('alamat', 'Alamat pengiriman'),
+          _bangunErrorField('catatan', 'Catatan pesanan'),
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.local_shipping_outlined,
-                  size: 16, color: TemaAplikasi.primary),
+              const Icon(
+                Icons.local_shipping_outlined,
+                size: 16,
+                color: TemaAplikasi.primary,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  '${widget.kurirTerpilih?.nama ?? 'Kurir'} • ${widget.kurirTerpilih?.tarif == 0 ? 'Gratis' : formatRupiah(widget.kurirTerpilih?.tarif ?? 0)}',
+                  '${widget.kurirTerpilih?.nama ?? 'Kurir'} • ${_ongkir == 0 ? 'Gratis' : formatRupiah(_ongkir)}',
                   style: const TextStyle(
                     fontSize: 10,
                     letterSpacing: 1.2,
@@ -504,12 +687,16 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
               ),
             ],
           ),
+          _bangunErrorField('kurir_id', 'Kurir pengiriman'),
           if (widget.kemasHadiah) ...[
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.card_giftcard_outlined,
-                    size: 16, color: TemaAplikasi.primary),
+                const Icon(
+                  Icons.card_giftcard_outlined,
+                  size: 16,
+                  color: TemaAplikasi.primary,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -549,13 +736,20 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, color: Color(0xFFF57F17), size: 18),
+                  const Icon(
+                    Icons.info_outline,
+                    color: Color(0xFFF57F17),
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _pesanGangguanMidtrans ??
                           'Gateway Midtrans sedang mengalami gangguan. Kami menyarankan menggunakan metode Tunai di Tempat (COD).',
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF5D4037)),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF5D4037),
+                      ),
                     ),
                   ),
                 ],
@@ -585,6 +779,7 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
           ),
           const SizedBox(height: 12),
           ..._metodeTersedia.map((metode) => _bangunKartuMetode(metode)),
+          _bangunErrorField('metode_pembayaran_id', 'Metode pembayaran'),
         ],
       ),
     );
@@ -604,7 +799,11 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         title: const Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: TemaAplikasi.warningColor, size: 24),
+            Icon(
+              Icons.warning_amber_rounded,
+              color: TemaAplikasi.warningColor,
+              size: 24,
+            ),
             SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -625,7 +824,11 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
           children: [
             Text(
               'Pesanan #$nomorPesanan berhasil tersimpan, namun gateway pembayaran online Midtrans saat ini mengalami gangguan koneksi.',
-              style: const TextStyle(fontSize: 13, color: TemaAplikasi.secondary, height: 1.4),
+              style: const TextStyle(
+                fontSize: 13,
+                color: TemaAplikasi.secondary,
+                height: 1.4,
+              ),
             ),
             const SizedBox(height: 12),
             Container(
@@ -640,12 +843,20 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
                 children: [
                   const Text(
                     'Solusi Cepat (Fallback COD):',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: TemaAplikasi.primary),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: TemaAplikasi.primary,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Anda dapat langsung mengalihkan pesanan ini ke metode Tunai di Tempat (COD) sebesar ${formatRupiah(total)} agar pesanan segera diverifikasi dan dikemas oleh atelier.',
-                    style: const TextStyle(fontSize: 12, color: TemaAplikasi.secondary, height: 1.3),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: TemaAplikasi.secondary,
+                      height: 1.3,
+                    ),
                   ),
                 ],
               ),
@@ -658,30 +869,39 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
               Navigator.pop(ctx);
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const HalamanRiwayatPesanan()),
+                MaterialPageRoute(
+                  builder: (context) => const HalamanRiwayatPesanan(),
+                ),
               );
             },
-            child: const Text('LIHAT PESANAN', style: TextStyle(color: TemaAplikasi.secondary)),
+            child: const Text(
+              'LIHAT PESANAN',
+              style: TextStyle(color: TemaAplikasi.secondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              setState(() => _sedangMemproses = true);
+              setState(() => _keadaanCheckout = KeadaanMuat.memuat);
               final responFallback = await LayananApi.fallbackCod(
                 pesananId: pesananId,
                 alasan: 'Fallback otomatis dari gangguan Midtrans di checkout',
               );
               if (mounted) {
-                setState(() => _sedangMemproses = false);
                 if (responFallback.berhasil) {
+                  setState(() => _keadaanCheckout = KeadaanMuat.berhasil);
                   Navigator.pushReplacement(
                     context,
-                    ruteGeser(HalamanKonfirmasiCod(
-                      pesananId: pesananId,
-                      dataPesananAwal: responFallback.data as Map<String, dynamic>?,
-                    )),
+                    ruteGeser(
+                      HalamanKonfirmasiCod(
+                        pesananId: pesananId,
+                        dataPesananAwal:
+                            responFallback.data as Map<String, dynamic>?,
+                      ),
+                    ),
                   );
                 } else {
+                  setState(() => _keadaanCheckout = KeadaanMuat.galat);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(responFallback.message),
@@ -705,7 +925,8 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
 
   Widget _bangunKartuMetode(MetodePembayaran metode) {
     final terpilih = _metodeTerpilihFinal?.id == metode.id;
-    final isCod = metode.kode == 'tunai_di_tempat' ||
+    final isCod =
+        metode.kode == 'tunai_di_tempat' ||
         metode.kode.contains('cod') ||
         metode.kode.contains('tunai');
     final isCodExceeded = isCod && _total > 2500000;
@@ -713,13 +934,15 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isCodExceeded ? const Color(0xFFFAFAFA) : TemaAplikasi.surfaceWhite,
+        color: isCodExceeded
+            ? const Color(0xFFFAFAFA)
+            : TemaAplikasi.surfaceWhite,
         border: Border.all(
           color: isCodExceeded
               ? TemaAplikasi.borderGray
               : (terpilih
-                  ? TemaAplikasi.primary
-                  : TemaAplikasi.surfaceContainerHigh),
+                    ? TemaAplikasi.primary
+                    : TemaAplikasi.surfaceContainerHigh),
           width: terpilih ? 1.5 : 1.0,
         ),
       ),
@@ -735,7 +958,10 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
                   ),
                 );
               }
-            : () => setState(() => _metodeTerpilihFinal = metode),
+            : () => setState(() {
+                _metodeTerpilihFinal = metode;
+                _bersihkanGalatValidasiCheckout();
+              }),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
@@ -751,8 +977,8 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
                     color: isCodExceeded
                         ? TemaAplikasi.borderGray
                         : (terpilih
-                            ? TemaAplikasi.primary
-                            : TemaAplikasi.surfaceContainerHigh),
+                              ? TemaAplikasi.primary
+                              : TemaAplikasi.surfaceContainerHigh),
                     width: 2,
                   ),
                 ),
@@ -792,14 +1018,18 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
                         if (isCod)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFF0FDF4),
-                              border: Border.all(color: const Color(0xFFBBF7D0)),
+                              border: Border.all(
+                                color: const Color(0xFFBBF7D0),
+                              ),
                               borderRadius: BorderRadius.circular(2),
                             ),
                             child: const Text(
-                              'Cadangan / COD',
+                              'Tunai',
                               style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w700,
@@ -813,7 +1043,9 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
                             !_midtransGangguan)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             color: TemaAplikasi.surfaceContainer,
                             child: const Text(
                               'Rekomendasi',
@@ -831,10 +1063,10 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
                       metode.kode == 'midtrans'
                           ? 'QRIS, Virtual Account (BCA, Mandiri, BNI, BRI), Kartu Kredit & E-Wallet'
                           : isCod
-                              ? (isCodExceeded
-                                  ? 'Tidak tersedia: Total pesanan (${formatRupiah(_total)}) melebihi batas maksimal COD (Rp 2.500.000).'
-                                  : 'Bayar tunai kepada kurir saat pesanan tiba di alamat Anda. Maksimal Rp 2.500.000.')
-                              : 'Bayar tunai kepada kurir saat pesanan tiba di alamat Anda',
+                          ? (isCodExceeded
+                                ? 'Tidak tersedia: Total pesanan (${formatRupiah(_total)}) melebihi batas maksimal COD (Rp 2.500.000).'
+                                : 'Bayar tunai kepada kurir saat pesanan tiba di alamat Anda. Maksimal Rp 2.500.000.')
+                          : 'Bayar tunai kepada kurir saat pesanan tiba di alamat Anda',
                       style: TextStyle(
                         fontSize: 12,
                         color: isCodExceeded
@@ -934,10 +1166,7 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: TemaAplikasi.secondary,
-          ),
+          style: const TextStyle(fontSize: 12, color: TemaAplikasi.secondary),
         ),
         Text(
           nilai,
@@ -955,6 +1184,7 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
     return ListView(
       padding: EdgeInsets.zero,
       children: [
+        _bangunPesanValidasiCheckout(),
         _bangunHeader(),
         _bangunJaminanKeamanan(),
         _bangunRingkasanPengiriman(),
@@ -1017,7 +1247,9 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: _sedangMemproses ? null : _bayarSekarang,
+                onPressed: _keadaanCheckout == KeadaanMuat.memuat
+                    ? null
+                    : _bayarSekarang,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: TemaAplikasi.primary,
                   foregroundColor: TemaAplikasi.onPrimary,
@@ -1026,7 +1258,7 @@ class _HalamanCheckoutAlurTigaState extends State<HalamanCheckoutAlurTiga> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                child: _sedangMemproses
+                child: _keadaanCheckout == KeadaanMuat.memuat
                     ? const SizedBox(
                         width: 20,
                         height: 20,

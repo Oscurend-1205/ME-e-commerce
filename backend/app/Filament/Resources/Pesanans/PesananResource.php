@@ -187,6 +187,7 @@ class PesananResource extends Resource
                     ->formatStateUsing(fn (?string $state): string => self::STATUS[$state] ?? (string) $state)
                     ->color(fn (?string $state): string => match ($state) {
                         'menunggu_pembayaran' => 'warning',
+                        'menunggu_verifikasi' => 'warning',
                         'menunggu_konfirmasi' => 'info',
                         'dibayar' => 'primary',
                         'diproses' => 'info',
